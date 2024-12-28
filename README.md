@@ -1,6 +1,6 @@
 # BSplineX
 
-The B-Spline library you have always dreamed of were performance and easy-to-use interfaces live in harmony.
+The B-Spline library you have always dreamed of where performance and easy-to-use interfaces live in harmony.
 
 ## Features
 
