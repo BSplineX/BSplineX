@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
 include(version)
 get_version_from_git()
 
@@ -10,8 +11,10 @@ project(BSplineX
   HOMEPAGE_URL "https://github.com/BSplineX/BSplineX"
   LANGUAGES CXX
 )
+
 if(NOT BSPLINEX_VERSION_PRERELEASE)
   set(BSPLINEX_FULL_VERSION "${BSPLINEX_VERSION}")
+  write_version_file()
 else()
   set(BSPLINEX_FULL_VERSION "${BSPLINEX_VERSION}-${BSPLINEX_VERSION_PRERELEASE}")
 endif()

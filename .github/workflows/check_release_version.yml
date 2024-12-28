@@ -1,0 +1,38 @@
+name: Version Check
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Get content of VERSION file
+        run: |
+          VERSION=$(cat VERSION)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Get latest Git tag
+        run: |
+          LATEST_TAG=$(git describe --tags --abbrev=0)
+          echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_ENV
+
+      - name: Compare VERSION with latest tag
+        run: |
+          if [ "v$VERSION" != "$LATEST_TAG" ]; then
+            echo "VERSION file does not match the latest Git tag ($LATEST_TAG)."
+            exit 1
+          else
+            echo "VERSION file matches the latest Git tag ($LATEST_TAG)."
+          fi
