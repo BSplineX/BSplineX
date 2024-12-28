@@ -2,7 +2,7 @@ name: Create Release
 
 on:
   workflow_run:
-    workflows: [ 'Test BSplineX CMake Inclusion Methods', 'Run C++ tests' ]
+    workflows: [ 'Test BSplineX CMake Inclusion Methods', 'Run Cpp tests' ]
     types:
       - completed
     branches:
