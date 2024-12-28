@@ -1,8 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
 
-set(BSPLINEX_CMAKE_MODULES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-set(BSPLINEX_THIRD_PARTY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third_party")
-include("${BSPLINEX_CMAKE_MODULES_DIR}/version.cmake")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+include(version)
 
 project(BSplineX
   VERSION ${BSPLINEX_VERSION_FULL}
@@ -11,6 +10,7 @@ project(BSplineX
   LANGUAGES CXX
 )
 
+set(BSPLINEX_THIRD_PARTY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third_party")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 
@@ -24,7 +24,7 @@ if(NOT CMAKE_INSTALL_PREFIX)
 endif()
 
 # Dependencies
-include("${BSPLINEX_CMAKE_MODULES_DIR}/eigen.cmake")
+include(eigen)
 
 # Library definition
 add_library(BSplineX INTERFACE)
