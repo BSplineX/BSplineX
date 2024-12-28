@@ -2,30 +2,34 @@ name: Version Check
 
 on:
   push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   check-version:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Get version from VERSION file
-        id: get_version
+      - name: Get content of VERSION file
         run: |
           VERSION=$(cat VERSION)
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-      - name: Get tag name
-        id: get_tag
-        run: echo "TAG_NAME=$(basename $GITHUB_REF)" >> $GITHUB_ENV
-
-      - name: Check if VERSION matches tag
+      - name: Get latest Git tag
         run: |
-          if [[ "v$VERSION" != "$TAG_NAME" ]]; then
-            echo "Error: VERSION in the file ($VERSION) does not match the tag name ($TAG_NAME)."
+          LATEST_TAG=$(git describe --tags --abbrev=0)
+          echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_ENV
+
+      - name: Compare VERSION with latest tag
+        run: |
+          if [ "v$VERSION" != "$LATEST_TAG" ]; then
+            echo "VERSION file does not match the latest Git tag ($LATEST_TAG)."
             exit 1
           else
-            echo "Success: VERSION matches the tag name."
+            echo "VERSION file matches the latest Git tag ($LATEST_TAG)."
           fi
