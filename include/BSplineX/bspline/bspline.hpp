@@ -186,7 +186,18 @@ public:
     return;
   }
 
-  control_points::ControlPoints<T, BC> const &get_control_points() { return this->control_points; }
+  std::vector<T> get_control_points()
+  {
+    std::vector<T> ctrl_pts{};
+    ctrl_pts.reserve(this->control_points.size());
+
+    for (size_t i{0}; i < this->control_points.size(); i++)
+    {
+      ctrl_pts.push_back(this->control_points.at(i));
+    }
+
+    return ctrl_pts;
+  }
 
 private:
   void check_sizes()

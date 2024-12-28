@@ -106,7 +106,7 @@ TEST_CASE(
     );
 
     big_bspline.fit(big_x, big_y);
-    auto const &control_points = big_bspline.get_control_points();
+    auto control_points = big_bspline.get_control_points();
     for (size_t i{0}; i < big_ctrl_pts.size(); i++)
     {
       REQUIRE_THAT(control_points.at(i), WithinRel(big_ctrl_pts.at(i), 1e-6));
@@ -147,7 +147,7 @@ TEST_CASE(
     );
 
     big_bspline.fit(big_x, big_y);
-    auto const &control_points = big_bspline.get_control_points();
+    auto control_points = big_bspline.get_control_points();
     for (size_t i{0}; i < big_ctrl_pts.size(); i++)
     {
       REQUIRE_THAT(control_points.at(i), WithinRel(big_ctrl_pts.at(i), 1e-6));
