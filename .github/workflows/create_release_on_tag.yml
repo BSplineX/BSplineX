@@ -1,18 +1,17 @@
 name: Create Release
 
 on:
-  workflow_run:
-    workflows: [ 'Test BSplineX CMake Inclusion Methods', 'Run Cpp tests' ]
-    types:
-      - completed
-    branches:
-      - main
-
+  push:
+    tags:
+      - 'v*'
 jobs:
+  cpp-tests:
+    uses: ./.github/workflows/run_cpp_tests.yml
+  cmake-inclusion-tests:
+    uses: ./.github/workflows/run_cmake_inclusion_tests.yml
   release:
-    if: |
-      github.event.workflow_run.conclusion == 'success' &&
-      startsWith(github.ref, 'refs/tags/v')
+    name: Create Release
+    needs: [cpp-tests, cmake-inclusion-tests]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
