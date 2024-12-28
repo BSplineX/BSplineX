@@ -36,7 +36,7 @@ include(FetchContent)
 set(FETCHCONTENT_BASE_DIR "path/to/your/dependencies")
 fetchcontent_declare(
   BSplineX
-  GIT_REPOSITORY https://github.com/SebastianoTaddei/BSplineX.git
+  GIT_REPOSITORY https://github.com/BSplineX/BSplineX.git
   GIT_TAG        main
 )
 fetchcontent_makeavailable(BSplineX)
@@ -75,7 +75,7 @@ if(NOT TARGET BSplineX::BSplineX)
   set(FETCHCONTENT_BASE_DIR "path/to/your/dependencies")
   fetchcontent_declare(
       BSplineX
-      GIT_REPOSITORY https://github.com/SebastianoTaddei/BSplineX.git
+      GIT_REPOSITORY https://github.com/BSplineX/BSplineX.git
       GIT_TAG        main
   )
 

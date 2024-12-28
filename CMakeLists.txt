@@ -7,7 +7,7 @@ include("${BSPLINEX_CMAKE_MODULES_DIR}/version.cmake")
 project(BSplineX
   VERSION ${BSPLINEX_VERSION_FULL}
   DESCRIPTION "A header-only library to harness the power of BSplines"
-  HOMEPAGE_URL "https://github.com/SebastianoTaddei/BSplineX"
+  HOMEPAGE_URL "https://github.com/BSplineX/BSplineX"
   LANGUAGES CXX
 )
 

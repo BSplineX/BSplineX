@@ -32,7 +32,7 @@ if(FETCH_CONTENT_METHOD)
   set(FETCHCONTENT_BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third_party")
   fetchcontent_declare(
       BSplineX
-      GIT_REPOSITORY https://github.com/SebastianoTaddei/BSplineX.git
+      GIT_REPOSITORY https://github.com/BSplineX/BSplineX.git
       GIT_TAG        cmake_tests
   )
 
