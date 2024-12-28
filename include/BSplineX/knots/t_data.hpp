@@ -2,7 +2,9 @@
 #define T_DATA_HPP
 
 // Standard includes
+#include <algorithm>
 #include <cstddef>
+#include <functional>
 #include <vector>
 
 // BSplineX includes
@@ -131,7 +133,17 @@ private:
 public:
   Data() { DEBUG_LOG_CALL(); }
 
-  Data(std::vector<T> const &data) : raw_data(data) { DEBUG_LOG_CALL(); }
+  Data(std::vector<T> const &data) : raw_data(data)
+  {
+    DEBUG_LOG_CALL();
+    // NOTE: this assert is built backwards to what one may think due to std::is_sorted wierd
+    // behaviour thanks to the strict_weak_ordering. This is still somewhat foggy to me, but I
+    // somewhat understand their reasoning and this is my solution to check for <=.
+    assertm(
+        !std::is_sorted(data.begin(), data.end(), std::greater<T>{}),
+        "The given data must be sorted respecting the operator <=."
+    );
+  }
 
   Data(Data const &other) : raw_data(other.raw_data) { DEBUG_LOG_CALL(); }
 
