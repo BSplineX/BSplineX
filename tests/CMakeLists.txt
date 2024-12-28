@@ -1,4 +1,4 @@
-include(catch)
+include(BSplineXCatch2)
 
 file(GLOB_RECURSE KNOTS_TESTS "${CMAKE_CURRENT_SOURCE_DIR}/knots/test_*.cpp")
 add_executable(test_knots ${KNOTS_TESTS})

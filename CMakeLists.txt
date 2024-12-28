@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.14)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-include(version)
+include(BSplineXVersion)
 get_version_from_git()
 
 project(BSplineX
@@ -34,7 +34,7 @@ if(NOT CMAKE_INSTALL_PREFIX)
 endif()
 
 # Dependencies
-include(eigen)
+include(BSplineXEigen3)
 
 # Library definition
 add_library(BSplineX INTERFACE)
