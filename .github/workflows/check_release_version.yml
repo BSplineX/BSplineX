@@ -1,0 +1,31 @@
+name: Version Check
+
+on:
+  push:
+
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get version from VERSION file
+        id: get_version
+        run: |
+          VERSION=$(cat VERSION)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Get tag name
+        id: get_tag
+        run: echo "TAG_NAME=$(basename $GITHUB_REF)" >> $GITHUB_ENV
+
+      - name: Check if VERSION matches tag
+        run: |
+          if [[ "v$VERSION" != "$TAG_NAME" ]]; then
+            echo "Error: VERSION in the file ($VERSION) does not match the tag name ($TAG_NAME)."
+            exit 1
+          else
+            echo "Success: VERSION matches the tag name."
+          fi

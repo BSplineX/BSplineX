@@ -56,3 +56,16 @@ function(get_version_from_git)
   set(BSPLINEX_VERSION "0.0.0" CACHE INTERNAL "")
   set(BSPLINEX_VERSION_PRERELEASE "" CACHE INTERNAL "")
 endfunction()
+
+function(write_version_file)
+  if(NOT BSPLINEX_VERSION)
+    message(FATAL_ERROR "BSPLINEX_VERSION is not set")
+  endif()
+
+  set(VERSION_STRING "${BSPLINEX_VERSION}")
+  if(BSPLINEX_VERSION_PRERELEASE)
+    set(VERSION_STRING "${VERSION_STRING}-${BSPLINEX_VERSION_PRERELEASE}")
+  endif()
+
+  file(WRITE "${CMAKE_CURRENT_SOURCE_DIR}/VERSION" "${VERSION_STRING}")
+endfunction()
