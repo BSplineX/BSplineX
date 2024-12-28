@@ -1,7 +1,11 @@
 cmake_minimum_required(VERSION 3.14)
 
+set(BSPLINEX_CMAKE_MODULES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+set(BSPLINEX_THIRD_PARTY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third_party")
+include("${BSPLINEX_CMAKE_MODULES_DIR}/version.cmake")
+
 project(BSplineX
-  VERSION 0.1.0
+  VERSION ${BSPLINEX_VERSION_FULL}
   DESCRIPTION "A header-only library to harness the power of BSplines"
   HOMEPAGE_URL "https://github.com/SebastianoTaddei/BSplineX"
   LANGUAGES CXX
@@ -9,8 +13,6 @@ project(BSplineX
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
-set(BSPLINEX_THIRD_PARTY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third_party")
-set(BSPLINEX_CMAKE_MODULES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 if(NOT CMAKE_INSTALL_PREFIX)
   set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/lib")
@@ -98,8 +100,8 @@ install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/ DESTINATION include)
 include(CMakePackageConfigHelpers)
 
 export(EXPORT BSplineXTargets
-    FILE ${CMAKE_CURRENT_BINARY_DIR}/BSplineXTargets.cmake
-    NAMESPACE BSplineX::
+  FILE ${CMAKE_CURRENT_BINARY_DIR}/BSplineXTargets.cmake
+  NAMESPACE BSplineX::
 )
 
 install(EXPORT BSplineXTargets
