@@ -13,8 +13,8 @@ if(NOT TARGET Catch2::Catch2WithMain)
   # We have to do this manually since the install process of
   # Catch2 does not make the target directly discoverable by find_package
   if(EXISTS "${BSPLINEX_THIRD_PARTY_DIR}/catch2-src")
-    message(
-      "-- BSplineX: "
+    message(STATUS
+      "BSplineX: "
       "Found Catch2 installed in ${BSPLINEX_THIRD_PARTY_DIR}/catch2-src"
     )
     add_subdirectory(
@@ -22,8 +22,7 @@ if(NOT TARGET Catch2::Catch2WithMain)
       "${BSPLINEX_THIRD_PARTY_DIR}/catch2-build"
     )
   else()
-    message(
-      "-- BSplineX: "
+    message(STATUS "BSplineX: "
       "Did not find Catch2 ${CATCH2_REQUIRED_VERSION} installed, "
       "downloading to ${BSPLINEX_THIRD_PARTY_DIR}"
     )
@@ -40,12 +39,12 @@ if(NOT TARGET Catch2::Catch2WithMain)
 endif()
 
 get_target_property(CATCH2_SOURCE_DIR
-    Catch2::Catch2
-    SOURCE_DIR
+  Catch2::Catch2
+  SOURCE_DIR
 )
 
 if(NOT DEFINED CATCH2_SOURCE_DIR)
-   message(FATAL_ERROR "-- BSplineX: Could not find Catch2 source directory")
+  message(FATAL_ERROR "BSplineX: Could not find Catch2 source directory")
 endif()
 
 list(APPEND CMAKE_MODULE_PATH ${CATCH2_SOURCE_DIR}/../extras)

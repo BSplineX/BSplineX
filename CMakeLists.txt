@@ -2,13 +2,20 @@ cmake_minimum_required(VERSION 3.14)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(version)
+get_version_from_git()
 
 project(BSplineX
-  VERSION ${BSPLINEX_VERSION_FULL}
+  VERSION ${BSPLINEX_VERSION}
   DESCRIPTION "A header-only library to harness the power of BSplines"
   HOMEPAGE_URL "https://github.com/BSplineX/BSplineX"
   LANGUAGES CXX
 )
+if(NOT BSPLINEX_VERSION_PRERELEASE)
+  set(BSPLINEX_FULL_VERSION "${BSPLINEX_VERSION}")
+else()
+  set(BSPLINEX_FULL_VERSION "${BSPLINEX_VERSION}-${BSPLINEX_VERSION_PRERELEASE}")
+endif()
+message(STATUS "BSplineX: version ${BSPLINEX_FULL_VERSION}")
 
 set(BSPLINEX_THIRD_PARTY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third_party")
 set(CMAKE_CXX_STANDARD 17)
@@ -16,8 +23,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 
 if(NOT CMAKE_INSTALL_PREFIX)
   set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/lib")
-  message(
-    "-- BSplineX: "
+  message(STATUS
+    "BSplineX: "
     "CMAKE_INSTALL_PREFIX not specified, "
     "defaulting to ${CMAKE_CURRENT_SOURCE_DIR}"
   )
@@ -47,8 +54,8 @@ target_include_directories(BSplineX INTERFACE
 if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
   if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Debug")
-    message(
-      "-- BSplineX: "
+    message(STATUS
+      "BSplineX: "
       "CMAKE_BUILD_TYPE not specified, defaulting to ${CMAKE_BUILD_TYPE}"
     )
   endif()

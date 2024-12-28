@@ -10,8 +10,8 @@ find_package(
 )
 
 if(NOT TARGET Eigen3::Eigen)
-  message(
-    "-- BSplineX: "
+  message(STATUS
+    "BSplineX: "
     "Did not find Eigen ${EIGEN_REQUIRED_VERSION} installed, "
     "downloading to ${BSPLINEX_THIRD_PARTY_DIR}"
   )
@@ -29,6 +29,6 @@ else()
     Eigen3::Eigen
     INTERFACE_INCLUDE_DIRECTORIES
   )
-  message("-- BSplineX: Found Eigen installed in ${EIGEN_INCLUDE_DIRS}")
+  message(STATUS "BSplineX: Found Eigen installed in ${EIGEN_INCLUDE_DIRS}")
 endif()
 

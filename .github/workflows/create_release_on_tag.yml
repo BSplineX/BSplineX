@@ -1,0 +1,44 @@
+name: Create Release
+
+on:
+  workflow_run:
+    workflows: [ 'Test BSplineX CMake Inclusion Methods', 'Run C++ tests' ]
+    types:
+      - completed
+    branches:
+      - main
+
+jobs:
+  release:
+    if: |
+      github.event.workflow_run.conclusion == 'success' &&
+      startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-tags: true
+
+      - name: Determine if this is a pre-release
+        id: prerelease_check
+        run: |
+          if [[ ${{ github.ref_name }} =~ ^v[0-9]+\.[0-9]+\.[0-9]+-(alpha|beta|rc)\.[0-9]+$ ]]; then
+            echo "is_prerelease=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_prerelease=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create and commit VERSION file
+        run: |
+          echo "${{ github.ref_name }}" > VERSION
+          git add VERSION
+          git commit -m "Update VERSION file for release ${{ github.ref_name }}"
+          git tag -a "${{ github.ref_name }}" -m "Release ${{ github.ref_name }}"
+          git push --follow-tags
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: false
+          prerelease: ${{ steps.prerelease_check.outputs.is_prerelease }}
+          generate_release_notes: true
