@@ -32,9 +32,9 @@ public:
 
   Padder(Data<T, C> const &, size_t) { DEBUG_LOG_CALL(); }
 
-  Padder([[maybe_unused]] Padder const &other) { DEBUG_LOG_CALL(); }
+  Padder(Padder const &) { DEBUG_LOG_CALL(); }
 
-  Padder([[maybe_unused]] Padder &&other) noexcept { DEBUG_LOG_CALL(); }
+  Padder(Padder &&) noexcept { DEBUG_LOG_CALL(); }
 
   ~Padder() noexcept { DEBUG_LOG_CALL(); }
 

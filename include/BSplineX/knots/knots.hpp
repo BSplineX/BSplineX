@@ -41,9 +41,9 @@ template <typename T, Curve C, BoundaryCondition BC, Extrapolation EXT>
 class Knots
 {
 private:
-  Atter<T, C, BC> atter;
-  Extrapolator<T, C, BC, EXT> extrapolator;
-  Finder<T, C, BC, EXT> finder;
+  Atter<T, C, BC> atter{};
+  Extrapolator<T, C, BC, EXT> extrapolator{};
+  Finder<T, C, BC, EXT> finder{};
   T value_left{};
   T value_right{};
   size_t degree{};
@@ -120,23 +120,6 @@ public:
 
   [[nodiscard]] size_t size() const { return this->atter.size(); }
 };
-
-/*
-
-Knots
-  - Finder
-    - Atter
-    - Extrapolator
-  - Atter
-    - Data
-    - Padder
-  - Padder
-    - Data
-  - Extrapolator
-    - Atter
-  - Data
-
-*/
 
 } // namespace bsplinex::knots
 
