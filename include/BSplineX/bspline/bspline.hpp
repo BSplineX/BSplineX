@@ -182,11 +182,9 @@ public:
     }
 
     this->control_points.set_data({res.data(), res.data() + res.rows() * res.cols()});
-
-    return;
   }
 
-  control_points::ControlPoints<T, BC> const &get_control_points() { return this->control_points; }
+  std::vector<T> get_control_points() { return this->control_points.get_values(); }
 
 private:
   void check_sizes()
