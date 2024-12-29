@@ -17,9 +17,29 @@ template <typename T, BoundaryCondition BC>
 class Padder
 {
 public:
-  Padder() = default;
+  Padder() { DEBUG_LOG_CALL(); }
 
-  Padder(Data<T> &, size_t) {}
+  Padder(Data<T> &, size_t) { DEBUG_LOG_CALL(); }
+
+  Padder(const Padder &) { DEBUG_LOG_CALL(); }
+
+  Padder(Padder &&) noexcept { DEBUG_LOG_CALL(); }
+
+  ~Padder() noexcept { DEBUG_LOG_CALL(); }
+
+  Padder &operator=(const Padder &other)
+  {
+    if (this == &other)
+      return *this;
+    return *this;
+  }
+
+  Padder &operator=(Padder &&other) noexcept
+  {
+    if (this == &other)
+      return *this;
+    return *this;
+  }
 
   T right(size_t) const
   {
@@ -41,9 +61,31 @@ private:
   std::vector<T> pad_right{};
 
 public:
-  Padder() = default;
+  Padder() { DEBUG_LOG_CALL(); }
 
-  Padder(Data<T> &data, size_t degree) { this->pad_right = data.slice(0, degree); }
+  Padder(Data<T> &data, size_t degree) : pad_right{data.slice(0, degree)} { DEBUG_LOG_CALL(); }
+
+  Padder(const Padder &other) : pad_right(other.pad_right) { DEBUG_LOG_CALL(); }
+
+  Padder(Padder &&other) noexcept : pad_right(std::move(other.pad_right)) { DEBUG_LOG_CALL(); }
+
+  ~Padder() noexcept { DEBUG_LOG_CALL(); }
+
+  Padder &operator=(const Padder &other)
+  {
+    if (this == &other)
+      return *this;
+    pad_right = other.pad_right;
+    return *this;
+  }
+
+  Padder &operator=(Padder &&other) noexcept
+  {
+    if (this == &other)
+      return *this;
+    pad_right = std::move(other.pad_right);
+    return *this;
+  }
 
   T right(size_t index) const
   {

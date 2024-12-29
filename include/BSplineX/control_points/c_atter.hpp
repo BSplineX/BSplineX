@@ -14,13 +14,40 @@ template <typename T, BoundaryCondition BC>
 class Atter
 {
 private:
-  Data<T> data;
-  Padder<T, BC> padder;
+  Data<T> data{};
+  Padder<T, BC> padder{};
 
 public:
-  Atter() = default;
+  Atter() { DEBUG_LOG_CALL(); }
 
-  Atter(Data<T> data, size_t degree) : data{data}, padder{this->data, degree} {}
+  Atter(Data<T> data, size_t degree) : data{data}, padder{this->data, degree} { DEBUG_LOG_CALL(); }
+
+  Atter(const Atter &other) : data(other.data), padder(other.padder) { DEBUG_LOG_CALL(); }
+
+  Atter(Atter &&other) noexcept : data(std::move(other.data)), padder(std::move(other.padder))
+  {
+    DEBUG_LOG_CALL();
+  }
+
+  ~Atter() noexcept { DEBUG_LOG_CALL(); }
+
+  Atter &operator=(const Atter &other)
+  {
+    if (this == &other)
+      return *this;
+    data   = other.data;
+    padder = other.padder;
+    return *this;
+  }
+
+  Atter &operator=(Atter &&other) noexcept
+  {
+    if (this == &other)
+      return *this;
+    data   = std::move(other.data);
+    padder = std::move(other.padder);
+    return *this;
+  }
 
   T at(size_t index) const
   {

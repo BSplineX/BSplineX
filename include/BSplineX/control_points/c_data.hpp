@@ -18,9 +18,31 @@ private:
   std::vector<T> raw_data{};
 
 public:
-  Data() = default;
+  Data() { DEBUG_LOG_CALL(); }
 
-  Data(std::vector<T> const &data) : raw_data(data) {}
+  Data(std::vector<T> const &data) : raw_data{data} { DEBUG_LOG_CALL(); }
+
+  Data(const Data &other) : raw_data(other.raw_data) { DEBUG_LOG_CALL(); }
+
+  Data(Data &&other) noexcept : raw_data(std::move(other.raw_data)) { DEBUG_LOG_CALL(); }
+
+  ~Data() { DEBUG_LOG_CALL(); }
+
+  Data &operator=(const Data &other)
+  {
+    if (this == &other)
+      return *this;
+    raw_data = other.raw_data;
+    return *this;
+  }
+
+  Data &operator=(Data &&other) noexcept
+  {
+    if (this == &other)
+      return *this;
+    raw_data = std::move(other.raw_data);
+    return *this;
+  }
 
   T at(size_t index) const
   {
