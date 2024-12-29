@@ -12,8 +12,7 @@ using namespace bsplinex;
 using namespace bsplinex::bspline;
 
 /**
- * Rerefence data can be generated using the `reference_sbpline.py` file in the
- * tests folder
+ * Rerefence data can be generated using the script in the python bindings repo.
  */
 
 TEST_CASE(
