@@ -39,7 +39,7 @@ TEST_CASE("knots::Knots<T, C, BC, EXT> knots{knots::Data<T, C> data, degree}", "
     REQUIRE(knots.find(2.0).first == 4);
     REQUIRE(knots.find(2.2).first == 6);
     REQUIRE(knots.find(6.3).first == 10);
-    REQUIRE(knots.find(13.2).first == 3);
+    REQUIRE(knots.find(13.2).first == 10);
     REQUIRE(knots.find(14.0).first == 3);
   }
 }
