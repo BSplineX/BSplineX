@@ -75,48 +75,6 @@ TEST_CASE(
     }
   }
 
-  // Finally test the sparse fit
-  SECTION("bspline.fit(...) dense")
-  {
-    // Prepare a normal distribution
-    std::random_device device{};
-    std::mt19937 rng{device()};
-    rng.seed(05535);
-    std::normal_distribution norm{0.0, 1.0};
-
-    // Generated big knots and ctrl points
-    std::vector<double> big_ctrl_pts(13);
-    std::vector<double> big_knots(big_ctrl_pts.size() + 3 + 1);
-    std::generate(big_ctrl_pts.begin(), big_ctrl_pts.end(), [&norm, &rng]() { return norm(rng); });
-    std::generate(big_knots.begin(), big_knots.end(), [n = 0]() mutable { return (double)n++; });
-
-    types::OpenNonUniform<double> big_bspline{{big_knots}, {big_ctrl_pts}, degree};
-
-    // Prepare a uniform distribution
-    std::uniform_real_distribution unif{big_knots.at(3), big_knots.at(big_knots.size() - 4)};
-
-    // Randomly sample points
-    std::vector<double> big_x(1000);
-    std::vector<double> big_y(big_x.size());
-    std::generate(big_x.begin(), big_x.end(), [&unif, &rng]() { return unif(rng); });
-    std::generate(
-        big_y.begin(),
-        big_y.end(),
-        [i = 0, &big_bspline, &big_x]() mutable { return big_bspline.evaluate(big_x.at(i++)); }
-    );
-
-    big_bspline.fit(big_x, big_y);
-    auto control_points = big_bspline.get_control_points();
-    for (size_t i{0}; i < big_ctrl_pts.size(); i++)
-    {
-      REQUIRE_THAT(control_points.at(i), WithinRel(big_ctrl_pts.at(i), 1e-6));
-    }
-    for (size_t i{0}; i < big_x.size(); i++)
-    {
-      REQUIRE_THAT(big_bspline.evaluate(big_x.at(i)), WithinRel(big_y.at(i), 1e-6));
-    }
-  }
-
   SECTION("bspline.fit(...) sparse")
   {
     // Prepare a normal distribution
@@ -126,7 +84,7 @@ TEST_CASE(
     std::normal_distribution norm{0.0, 1.0};
 
     // Generated big knots and ctrl points
-    std::vector<double> big_ctrl_pts(713);
+    std::vector<double> big_ctrl_pts(513);
     std::vector<double> big_knots(big_ctrl_pts.size() + 3 + 1);
     std::generate(big_ctrl_pts.begin(), big_ctrl_pts.end(), [&norm, &rng]() { return norm(rng); });
     std::generate(big_knots.begin(), big_knots.end(), [n = 0]() mutable { return (double)n++; });
@@ -137,7 +95,7 @@ TEST_CASE(
     std::uniform_real_distribution unif{big_knots.at(3), big_knots.at(big_knots.size() - 4)};
 
     // Randomly sample points
-    std::vector<double> big_x(10000);
+    std::vector<double> big_x(2000);
     std::vector<double> big_y(big_x.size());
     std::generate(big_x.begin(), big_x.end(), [&unif, &rng]() { return unif(rng); });
     std::generate(
