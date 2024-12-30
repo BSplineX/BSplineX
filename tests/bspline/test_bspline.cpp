@@ -92,7 +92,7 @@ TEST_CASE(
     types::OpenNonUniform<double> big_bspline{{big_knots}, {big_ctrl_pts}, degree};
 
     // Prepare a uniform distribution
-    std::uniform_real_distribution unif{big_knots.at(3), big_knots.at(big_knots.size() - degree - 1)};
+    std::uniform_real_distribution unif{big_knots.at(degree), big_knots.at(big_knots.size() - degree - 1)};
 
     // Randomly sample points
     std::vector<double> big_x(1000);
@@ -133,7 +133,7 @@ TEST_CASE(
     types::OpenNonUniform<double> big_bspline{big_knots, big_ctrl_pts, degree};
 
     // Prepare a uniform distribution
-    std::uniform_real_distribution unif{big_knots.at(3), big_knots.at(big_knots.size() - degree - 1)};
+    std::uniform_real_distribution unif{big_knots.at(degree), big_knots.at(big_knots.size() - degree - 1)};
 
     // Randomly sample points
     std::vector<double> big_x(10000);
