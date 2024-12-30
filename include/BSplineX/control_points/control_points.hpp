@@ -45,6 +45,8 @@ public:
   [[nodiscard]] size_t size() const { return this->atter.size(); }
 
   void set_data(std::vector<T> const &data) { this->atter = Atter<T, BC>{{data}, this->degree}; }
+
+  std::vector<T> get_values() const { return this->atter.get_values(); }
 };
 
 } // namespace bsplinex::control_points

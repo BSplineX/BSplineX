@@ -12,8 +12,7 @@ using namespace bsplinex;
 using namespace bsplinex::bspline;
 
 /**
- * Rerefence data can be generated using the `reference_sbpline.py` file in the
- * tests folder
+ * Rerefence data can be generated using the script in the python bindings repo.
  */
 
 TEST_CASE(
@@ -86,14 +85,14 @@ TEST_CASE(
 
     // Generated big knots and ctrl points
     std::vector<double> big_ctrl_pts(13);
-    std::vector<double> big_knots(big_ctrl_pts.size() + 3 + 1);
+    std::vector<double> big_knots(big_ctrl_pts.size() + degree + 1);
     std::generate(big_ctrl_pts.begin(), big_ctrl_pts.end(), [&norm, &rng]() { return norm(rng); });
     std::generate(big_knots.begin(), big_knots.end(), [n = 0]() mutable { return (double)n++; });
 
     types::OpenNonUniform<double> big_bspline{{big_knots}, {big_ctrl_pts}, degree};
 
     // Prepare a uniform distribution
-    std::uniform_real_distribution unif{big_knots.at(3), big_knots.at(big_knots.size() - 4)};
+    std::uniform_real_distribution unif{big_knots.at(degree), big_knots.at(big_knots.size() - degree - 1)};
 
     // Randomly sample points
     std::vector<double> big_x(1000);
@@ -127,14 +126,14 @@ TEST_CASE(
 
     // Generated big knots and ctrl points
     std::vector<double> big_ctrl_pts(713);
-    std::vector<double> big_knots(big_ctrl_pts.size() + 3 + 1);
+    std::vector<double> big_knots(big_ctrl_pts.size() + degree + 1);
     std::generate(big_ctrl_pts.begin(), big_ctrl_pts.end(), [&norm, &rng]() { return norm(rng); });
     std::generate(big_knots.begin(), big_knots.end(), [n = 0]() mutable { return (double)n++; });
 
     types::OpenNonUniform<double> big_bspline{big_knots, big_ctrl_pts, degree};
 
     // Prepare a uniform distribution
-    std::uniform_real_distribution unif{big_knots.at(3), big_knots.at(big_knots.size() - 4)};
+    std::uniform_real_distribution unif{big_knots.at(degree), big_knots.at(big_knots.size() - degree - 1)};
 
     // Randomly sample points
     std::vector<double> big_x(10000);
