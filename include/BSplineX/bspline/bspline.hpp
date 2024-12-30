@@ -2,7 +2,9 @@
 #define BSPLINE_HPP
 
 // Standard includes
+#include <algorithm>
 #include <sstream>
+#include <type_traits>
 #include <vector>
 
 // Third-party includes
@@ -42,7 +44,7 @@ class BSpline
 private:
   knots::Knots<T, C, BC, EXT> knots{};
   control_points::ControlPoints<T, BC> control_points{};
-  size_t degree{0};
+  size_t degree{};
   std::vector<T> support{};
 
 public:
@@ -136,7 +138,7 @@ public:
     Eigen::Map<Eigen::VectorX<T> const> b(y.data(), y.size());
     Eigen::VectorX<T> res;
     size_t num_cols{this->control_points.size()};
-    if constexpr (BC == BoundaryCondition::PERIODIC)
+    if constexpr (BoundaryCondition::PERIODIC == BC)
     {
       num_cols -= this->degree;
     }
@@ -181,9 +183,108 @@ public:
       res = solver.solve(b);
     }
 
-    this->control_points.set_data({res.data(), res.data() + res.rows() * res.cols()});
+    this->control_points = std::move(control_points::ControlPoints<T, BC>{
+        {{res.data(), res.data() + res.rows() * res.cols()}}, this->degree
+    });
+  }
 
-    return;
+  void interpolate(
+      std::vector<T> const &x,
+      std::vector<T> const &y,
+      [[maybe_unused]] std::vector<T> const &padding
+  )
+  {
+    if constexpr (Curve::UNIFORM == C)
+    {
+      return;
+    }
+    else
+    {
+      if (x.size() != y.size())
+      {
+        throw std::runtime_error("x and y must have the same size");
+      }
+      if (!std::is_sorted(x.begin(), x.end()))
+      {
+        throw std::runtime_error("x must be sorted w.r.t. operator <");
+      }
+
+      if constexpr (BoundaryCondition::OPEN == BC)
+      {
+        if (padding.size() != 2 * this->degree)
+        {
+          throw std::runtime_error("padding must be = 2 * degree");
+        }
+        size_t open_knots_size = x.size() + 2 * this->degree;
+        std::vector<T> open_knots{};
+        open_knots.reserve(open_knots_size);
+        for (size_t i{0}; i < this->degree; i++)
+        {
+          open_knots.push_back(padding.at(i));
+        }
+        for (auto const &elem : x)
+        {
+          open_knots.push_back(elem);
+        }
+        for (size_t i{0}; i < this->degree; i++)
+        {
+          open_knots.push_back(padding.at(i + this->degree));
+        }
+
+        this->knots = std::move(knots::Knots<T, C, BC, EXT>{{open_knots}, this->degree});
+      }
+      else
+      {
+        this->knots = std::move(knots::Knots<T, C, BC, EXT>{{x}, this->degree});
+      }
+
+      size_t num_cols = x.size() + this->degree - 1;
+      size_t eq_aft   = (this->degree - 1) / 2;
+      size_t eq_bef   = (this->degree - 1) - eq_aft;
+      if constexpr (BoundaryCondition::PERIODIC == BC)
+      {
+        num_cols -= this->degree - 1;
+        eq_aft    = 0;
+        eq_bef    = 0;
+      }
+      std::vector<T> nnz_basis(this->degree + 1, (T)0);
+      Eigen::MatrixX<T> A = Eigen::MatrixX<T>::Zero(num_cols, num_cols);
+      Eigen::VectorX<T> b(num_cols);
+      Eigen::VectorX<T> res;
+
+      size_t index{0};
+      size_t i{0};
+
+      for (; i < eq_bef; i++)
+      {
+        A(i, i) += (T)1;
+        b(i)     = y.front();
+      }
+
+      for (; i < num_cols - eq_aft; i++)
+      {
+        index = this->compute_basis(x.at(i - eq_bef), nnz_basis.begin(), nnz_basis.end());
+        for (size_t j{0}; j <= this->degree; j++)
+        {
+          A(i, (j + index) % num_cols) += nnz_basis.at(j);
+        }
+        std::fill(nnz_basis.begin(), nnz_basis.end(), (T)0);
+
+        b(i) = y.at(i - eq_bef);
+      }
+
+      for (; i < num_cols; i++)
+      {
+        A(i, i) += (T)1;
+        b(i)     = y.back();
+      }
+
+      res = A.colPivHouseholderQr().solve(b);
+
+      this->control_points = std::move(control_points::ControlPoints<T, BC>{
+          {{res.data(), res.data() + res.rows() * res.cols()}}, this->degree
+      });
+    }
   }
 
   std::vector<T> get_control_points()
