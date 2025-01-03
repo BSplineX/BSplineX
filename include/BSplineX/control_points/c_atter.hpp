@@ -22,7 +22,7 @@ public:
 
   Atter(Data<T> data, size_t degree) : data{data}, padder{this->data, degree} { DEBUG_LOG_CALL(); }
 
-  Atter(const Atter &other) : data(other.data), padder(other.padder) { DEBUG_LOG_CALL(); }
+  Atter(Atter const &other) : data(other.data), padder(other.padder) { DEBUG_LOG_CALL(); }
 
   Atter(Atter &&other) noexcept : data(std::move(other.data)), padder(std::move(other.padder))
   {
@@ -31,8 +31,9 @@ public:
 
   ~Atter() noexcept { DEBUG_LOG_CALL(); }
 
-  Atter &operator=(const Atter &other)
+  Atter &operator=(Atter const &other)
   {
+    DEBUG_LOG_CALL();
     if (this == &other)
       return *this;
     data   = other.data;
@@ -42,6 +43,7 @@ public:
 
   Atter &operator=(Atter &&other) noexcept
   {
+    DEBUG_LOG_CALL();
     if (this == &other)
       return *this;
     data   = std::move(other.data);

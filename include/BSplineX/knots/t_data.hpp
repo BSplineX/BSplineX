@@ -136,11 +136,10 @@ public:
   Data(std::vector<T> const &data) : raw_data(data)
   {
     DEBUG_LOG_CALL();
-    // NOTE: this assert is built backwards to what one may think due to std::is_sorted wierd
-    // behaviour thanks to the strict_weak_ordering. This is still somewhat foggy to me, but I
-    // somewhat understand their reasoning and this is my solution to check for <=.
+    // NOTE: thank the STL for this wonderful backwards built sort check. Think it as if std::less
+    // is <= and std::less_equal is <.
     assertm(
-        !std::is_sorted(data.begin(), data.end(), std::greater<T>{}),
+        std::is_sorted(data.begin(), data.end(), std::less<T>{}),
         "The given data must be sorted respecting the operator <=."
     );
   }

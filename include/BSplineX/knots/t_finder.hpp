@@ -42,8 +42,6 @@ public:
 
   size_t find(T value) const
   {
-    // TODO: we have to decide if we want to include the right value of the
-    // domain or not
     assertm(
         value >= this->atter->at(this->index_left) && value <= this->atter->at(this->index_right),
         "Value outside of the domain"

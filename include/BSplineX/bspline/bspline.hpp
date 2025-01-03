@@ -3,8 +3,8 @@
 
 // Standard includes
 #include <algorithm>
+#include <functional>
 #include <sstream>
-#include <type_traits>
 #include <vector>
 
 // Third-party includes
@@ -183,9 +183,9 @@ public:
       res = solver.solve(b);
     }
 
-    this->control_points = std::move(control_points::ControlPoints<T, BC>{
+    new (&this->control_points) control_points::ControlPoints<T, BC>{
         {{res.data(), res.data() + res.rows() * res.cols()}}, this->degree
-    });
+    };
   }
 
   void interpolate(
@@ -204,7 +204,9 @@ public:
       {
         throw std::runtime_error("x and y must have the same size");
       }
-      if (!std::is_sorted(x.begin(), x.end()))
+      // NOTE: thank the STL for this wonderful backwards built sort check. Think it as if std::less
+      // is <= and std::less_equal is <.
+      if (!std::is_sorted(x.begin(), x.end(), std::less_equal<T>{}))
       {
         throw std::runtime_error("x must be sorted w.r.t. operator <");
       }
@@ -231,11 +233,11 @@ public:
           open_knots.push_back(padding.at(i + this->degree));
         }
 
-        this->knots = std::move(knots::Knots<T, C, BC, EXT>{{open_knots}, this->degree});
+        new (&this->knots) knots::Knots<T, C, BC, EXT>{{open_knots}, this->degree};
       }
       else
       {
-        this->knots = std::move(knots::Knots<T, C, BC, EXT>{{x}, this->degree});
+        new (&this->knots) knots::Knots<T, C, BC, EXT>{{x}, this->degree};
       }
 
       size_t num_cols = x.size() + this->degree - 1;
@@ -281,9 +283,9 @@ public:
 
       res = A.colPivHouseholderQr().solve(b);
 
-      this->control_points = std::move(control_points::ControlPoints<T, BC>{
+      new (&this->control_points) control_points::ControlPoints<T, BC>{
           {{res.data(), res.data() + res.rows() * res.cols()}}, this->degree
-      });
+      };
     }
   }
 

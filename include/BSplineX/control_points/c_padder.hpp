@@ -21,14 +21,15 @@ public:
 
   Padder(Data<T> &, size_t) { DEBUG_LOG_CALL(); }
 
-  Padder(const Padder &) { DEBUG_LOG_CALL(); }
+  Padder(Padder const &) { DEBUG_LOG_CALL(); }
 
   Padder(Padder &&) noexcept { DEBUG_LOG_CALL(); }
 
   ~Padder() noexcept { DEBUG_LOG_CALL(); }
 
-  Padder &operator=(const Padder &other)
+  Padder &operator=(Padder const &other)
   {
+    DEBUG_LOG_CALL();
     if (this == &other)
       return *this;
     return *this;
@@ -36,6 +37,7 @@ public:
 
   Padder &operator=(Padder &&other) noexcept
   {
+    DEBUG_LOG_CALL();
     if (this == &other)
       return *this;
     return *this;
@@ -65,14 +67,15 @@ public:
 
   Padder(Data<T> &data, size_t degree) : pad_right{data.slice(0, degree)} { DEBUG_LOG_CALL(); }
 
-  Padder(const Padder &other) : pad_right(other.pad_right) { DEBUG_LOG_CALL(); }
+  Padder(Padder const &other) : pad_right(other.pad_right) { DEBUG_LOG_CALL(); }
 
   Padder(Padder &&other) noexcept : pad_right(std::move(other.pad_right)) { DEBUG_LOG_CALL(); }
 
   ~Padder() noexcept { DEBUG_LOG_CALL(); }
 
-  Padder &operator=(const Padder &other)
+  Padder &operator=(Padder const &other)
   {
+    DEBUG_LOG_CALL();
     if (this == &other)
       return *this;
     pad_right = other.pad_right;
@@ -81,6 +84,7 @@ public:
 
   Padder &operator=(Padder &&other) noexcept
   {
+    DEBUG_LOG_CALL();
     if (this == &other)
       return *this;
     pad_right = std::move(other.pad_right);

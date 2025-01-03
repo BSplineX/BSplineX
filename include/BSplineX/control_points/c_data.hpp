@@ -22,14 +22,15 @@ public:
 
   Data(std::vector<T> const &data) : raw_data{data} { DEBUG_LOG_CALL(); }
 
-  Data(const Data &other) : raw_data(other.raw_data) { DEBUG_LOG_CALL(); }
+  Data(Data const &other) : raw_data(other.raw_data) { DEBUG_LOG_CALL(); }
 
   Data(Data &&other) noexcept : raw_data(std::move(other.raw_data)) { DEBUG_LOG_CALL(); }
 
   ~Data() { DEBUG_LOG_CALL(); }
 
-  Data &operator=(const Data &other)
+  Data &operator=(Data const &other)
   {
+    DEBUG_LOG_CALL();
     if (this == &other)
       return *this;
     raw_data = other.raw_data;
@@ -38,6 +39,7 @@ public:
 
   Data &operator=(Data &&other) noexcept
   {
+    DEBUG_LOG_CALL();
     if (this == &other)
       return *this;
     raw_data = std::move(other.raw_data);

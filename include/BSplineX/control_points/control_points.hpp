@@ -44,7 +44,7 @@ public:
     DEBUG_LOG_CALL();
   }
 
-  ControlPoints(const ControlPoints &other) : atter(other.atter), degree(other.degree)
+  ControlPoints(ControlPoints const &other) : atter(other.atter), degree(other.degree)
   {
     DEBUG_LOG_CALL();
   }
@@ -57,8 +57,9 @@ public:
 
   ~ControlPoints() noexcept { DEBUG_LOG_CALL(); }
 
-  ControlPoints &operator=(const ControlPoints &other)
+  ControlPoints &operator=(ControlPoints const &other)
   {
+    DEBUG_LOG_CALL();
     if (this == &other)
       return *this;
     atter  = other.atter;
@@ -68,6 +69,7 @@ public:
 
   ControlPoints &operator=(ControlPoints &&other) noexcept
   {
+    DEBUG_LOG_CALL();
     if (this == &other)
       return *this;
     atter  = std::move(other.atter);
