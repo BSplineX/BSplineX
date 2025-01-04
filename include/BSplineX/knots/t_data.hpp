@@ -50,7 +50,6 @@ public:
 
   // Specifying the num-elems means the domain will be [begin, end]
   Data(T begin, T end, size_t num_elems)
-      : begin{begin}, end{end}, num_elems{num_elems}, step_size{(end - begin) / num_elems}
   {
     DEBUG_LOG_CALL();
     assertm(begin < end, "Wrong interval");
