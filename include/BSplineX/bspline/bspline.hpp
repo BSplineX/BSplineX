@@ -33,8 +33,6 @@
 #include "BSplineX/knots/knots.hpp"
 #include "BSplineX/types.hpp"
 
-constexpr size_t DENSE_MAX_COL = 512;
-
 namespace bsplinex::bspline
 {
 

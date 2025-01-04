@@ -12,4 +12,6 @@
 #define DEBUG_LOG_CALL() ;
 #endif
 
+#define DENSE_MAX_COL 512
+
 #endif
