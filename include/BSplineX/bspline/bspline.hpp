@@ -112,7 +112,9 @@ public:
   {
     std::vector<T> basis_functions(this->degree + 1, (T)0);
 
-    size_t index = this->compute_basis(value, basis_functions.begin(), basis_functions.end());
+    size_t index = this->nnz_basis(
+        this->degree, this->knots, value, basis_functions.begin(), basis_functions.end()
+    );
 
     basis_functions.insert(basis_functions.begin(), index, (T)0);
     basis_functions.insert(
@@ -120,6 +122,45 @@ public:
     );
 
     return basis_functions;
+  }
+
+  template <typename It>
+  static size_t nnz_basis(
+      size_t degree,
+      knots::Knots<T, C, BC, EXT> const &knots,
+      T value,
+      [[maybe_unused]] It begin,
+      It end
+  )
+  {
+    assertm(
+        (end - begin) == (long long)(degree + 1),
+        "Unexpected number of basis asked, exactly degree + 1 basis can be asked"
+    );
+
+    assertm(
+        std::all_of(begin, end, [](T i) { return (T)0 == i; }),
+        "Initial basis must be initialised to zero"
+    );
+
+    auto [index, val] = knots.find(value);
+
+    *(end - 1) = 1.0;
+    for (size_t d{1}; d <= degree; d++)
+    {
+      *(end - 1 - d) = (knots.at(index + 1) - val) /
+                       (knots.at(index + 1) - knots.at(index - d + 1)) * *(end - 1 - d + 1);
+      for (size_t i{index - d + 1}; i < index; i++)
+      {
+        *(end - 1 - index + i) =
+            (val - knots.at(i)) / (knots.at(i + d) - knots.at(i)) * *(end - 1 - index + i) +
+            (knots.at(i + d + 1) - val) / (knots.at(i + d + 1) - knots.at(i + 1)) *
+                *(end - 1 - index + i + 1);
+      }
+      *(end - 1) = (val - knots.at(index)) / (knots.at(index + d) - knots.at(index)) * *(end - 1);
+    }
+
+    return index - degree;
   }
 
   void fit(std::vector<T> const &x, std::vector<T> const &y)
@@ -134,7 +175,7 @@ public:
     // as that may improve performance substantially, especially if we develop a specialised LU band
     // algorithm.
 
-    std::vector<T> nnz_basis(this->degree + 1, (T)0);
+    std::vector<T> nnz_basis_vec(this->degree + 1, (T)0);
     Eigen::Map<Eigen::VectorX<T> const> b(y.data(), y.size());
     Eigen::VectorX<T> res;
     size_t num_cols{this->control_points.size()};
@@ -150,13 +191,15 @@ public:
       size_t index{0};
       for (size_t i{0}; i < x.size(); i++)
       {
-        index = this->compute_basis(x.at(i), nnz_basis.begin(), nnz_basis.end());
+        index = this->nnz_basis(
+            this->degree, this->knots, x.at(i), nnz_basis_vec.begin(), nnz_basis_vec.end()
+        );
         for (size_t j{0}; j <= this->degree; j++)
         {
           // TODO: avoid modulo
-          A(i, (j + index) % num_cols) += nnz_basis.at(j);
+          A(i, (j + index) % num_cols) += nnz_basis_vec.at(j);
         }
-        std::fill(nnz_basis.begin(), nnz_basis.end(), (T)0);
+        std::fill(nnz_basis_vec.begin(), nnz_basis_vec.end(), (T)0);
       }
 
       res = A.colPivHouseholderQr().solve(b);
@@ -169,12 +212,14 @@ public:
       size_t index{0};
       for (size_t i{0}; i < x.size(); i++)
       {
-        index = this->compute_basis(x.at(i), nnz_basis.begin(), nnz_basis.end());
+        index = this->nnz_basis(
+            this->degree, this->knots, x.at(i), nnz_basis_vec.begin(), nnz_basis_vec.end()
+        );
         for (size_t j{0}; j <= this->degree; j++)
         {
-          A.coeffRef(i, (j + index) % num_cols) += nnz_basis.at(j);
+          A.coeffRef(i, (j + index) % num_cols) += nnz_basis_vec.at(j);
         }
-        std::fill(nnz_basis.begin(), nnz_basis.end(), (T)0);
+        std::fill(nnz_basis_vec.begin(), nnz_basis_vec.end(), (T)0);
       }
       A.makeCompressed();
 
@@ -249,7 +294,7 @@ public:
         eq_aft    = 0;
         eq_bef    = 0;
       }
-      std::vector<T> nnz_basis(this->degree + 1, (T)0);
+      std::vector<T> nnz_basis_vec(this->degree + 1, (T)0);
       Eigen::MatrixX<T> A = Eigen::MatrixX<T>::Zero(num_cols, num_cols);
       Eigen::VectorX<T> b(num_cols);
       Eigen::VectorX<T> res;
@@ -265,12 +310,14 @@ public:
 
       for (; i < num_cols - eq_aft; i++)
       {
-        index = this->compute_basis(x.at(i - eq_bef), nnz_basis.begin(), nnz_basis.end());
+        index = this->nnz_basis(
+            this->degree, this->knots, x.at(i - eq_bef), nnz_basis_vec.begin(), nnz_basis_vec.end()
+        );
         for (size_t j{0}; j <= this->degree; j++)
         {
-          A(i, (j + index) % num_cols) += nnz_basis.at(j);
+          A(i, (j + index) % num_cols) += nnz_basis_vec.at(j);
         }
-        std::fill(nnz_basis.begin(), nnz_basis.end(), (T)0);
+        std::fill(nnz_basis_vec.begin(), nnz_basis_vec.end(), (T)0);
 
         b(i) = y.at(i - eq_bef);
       }
@@ -356,38 +403,6 @@ private:
     }
 
     return this->support[this->degree];
-  }
-
-  template <typename It>
-  size_t compute_basis(T value, [[maybe_unused]] It begin, It end)
-  {
-    assertm((end - begin) == (long long)(this->degree + 1), "Unexpected number of basis asked");
-
-    assertm(
-        std::all_of(begin, end, [](T i) { return (T)0 == i; }),
-        "Initial basis must be initialised to zero"
-    );
-
-    auto [index, val] = this->knots.find(value);
-
-    // assertm(begin + index < end, "Index outside of boundaries");
-
-    *(end - 1) = 1.0;
-    for (size_t d{1}; d <= this->degree; d++)
-    {
-      *(end - 1 - d) = (knots.at(index + 1) - val) /
-                       (knots.at(index + 1) - knots.at(index - d + 1)) * *(end - 1 - d + 1);
-      for (size_t i{index - d + 1}; i < index; i++)
-      {
-        *(end - 1 - index + i) =
-            (val - knots.at(i)) / (knots.at(i + d) - knots.at(i)) * *(end - 1 - index + i) +
-            (knots.at(i + d + 1) - val) / (knots.at(i + d + 1) - knots.at(i + 1)) *
-                *(end - 1 - index + i + 1);
-      }
-      *(end - 1) = (val - knots.at(index)) / (knots.at(index + d) - knots.at(index)) * *(end - 1);
-    }
-
-    return index - this->degree;
   }
 };
 
