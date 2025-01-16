@@ -122,7 +122,7 @@ void fill(
 {
   assertm(x.size() == y.size(), "x and y must have the same size.");
   assertm(
-      lsq_matrix.num_rows() == x.size() + additional_conditions.size(),
+      A.num_rows() == x.size() + additional_conditions.size(),
       "lsq_matrix must have the same size as x + additional_conditions."
   );
 
