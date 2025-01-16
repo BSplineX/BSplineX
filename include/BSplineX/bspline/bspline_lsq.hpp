@@ -179,7 +179,8 @@ control_points::ControlPoints<T, BC>
 lsq(size_t degree,
     knots::Knots<T, C, BC, EXT> const &knots,
     std::vector<T> const &x,
-    std::vector<T> const &y)
+    std::vector<T> const &y,
+    std::vector<Condition<T>> const &additional_conditions)
 {
   if (x.size() != y.size())
   {
@@ -199,7 +200,7 @@ lsq(size_t degree,
   if (num_cols > DENSE_MAX_COL)
   {
     LSQMatrix<T, Eigen::SparseMatrix<T>> A(num_rows, num_cols, num_cols * (degree + 1));
-    fill(A, b, degree, knots, x, y, {});
+    fill(A, b, degree, knots, x, y, additional_conditions);
     Eigen::VectorX<T> res = A.solve(b);
 
     return control_points::ControlPoints<T, BC>{
@@ -209,7 +210,7 @@ lsq(size_t degree,
   else
   {
     LSQMatrix<T, Eigen::MatrixX<T>> A(num_rows, num_cols);
-    fill(A, b, degree, knots, x, y, {});
+    fill(A, b, degree, knots, x, y, additional_conditions);
     Eigen::VectorX<T> res = A.solve(b);
 
     return control_points::ControlPoints<T, BC>{

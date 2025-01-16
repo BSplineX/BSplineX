@@ -20,7 +20,7 @@ fit(size_t degree,
     std::vector<T> const &x,
     std::vector<T> const &y)
 {
-  return lsq::lsq(degree, knots, x, y);
+  return lsq::lsq(degree, knots, x, y, {});
 }
 
 } // namespace bsplinex::fit
