@@ -63,9 +63,9 @@ public:
 
   Eigen::VectorX<T> solve(Eigen::VectorX<T> const &b) { return A.colPivHouseholderQr().solve(b); }
 
-  size_t num_rows() const { return A.num_rows(); }
+  size_t num_rows() const { return A.rows(); }
 
-  size_t num_cols() const { return A.num_cols(); }
+  size_t num_cols() const { return A.cols(); }
 };
 
 template <typename T>
@@ -91,9 +91,9 @@ public:
     return solver.solve(b);
   }
 
-  size_t num_rows() const { return A.num_rows(); }
+  size_t num_rows() const { return A.rows(); }
 
-  size_t num_cols() const { return A.num_cols(); }
+  size_t num_cols() const { return A.cols(); }
 };
 
 template <typename T>
@@ -161,11 +161,11 @@ void fill(
       if constexpr (BoundaryCondition::PERIODIC == BC)
       {
         // TODO: avoid modulo
-        A.coeffRef(i, (j + index) % num_cols) += nnz.at(j);
+        A(i, (j + index) % num_cols) += nnz.at(j);
       }
       else
       {
-        A.coeffRef(i, j + index) = nnz.at(j);
+        A(i, j + index) = nnz.at(j);
       }
     }
     b(i) = condition.y_value;
@@ -194,8 +194,7 @@ lsq(size_t degree,
     num_cols -= degree;
   }
 
-  Eigen::VectorX<T> b;
-  b.reserve(num_rows);
+  Eigen::VectorX<T> b(num_rows);
 
   if (num_cols > DENSE_MAX_COL)
   {
