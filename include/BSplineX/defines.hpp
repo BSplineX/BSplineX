@@ -4,6 +4,9 @@
 #include <cassert>
 
 #define assertm(exp, msg) assert(((void)msg, exp))
+#define runtimeassert(exp, msg)                                                                    \
+  if (!(exp))                                                                                      \
+    throw std::runtime_error(msg);
 
 #ifdef BSPLINEX_DEBUG_LOG_CALL
 #include <cstdio>

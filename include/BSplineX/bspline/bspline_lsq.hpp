@@ -2,6 +2,7 @@
 #define BSPLINE_LSQ_HPP
 
 // Standard includes
+#include <functional>
 #include <vector>
 
 // Third-party includes
@@ -25,10 +26,8 @@
 #endif
 
 // BSplineX includes
-#include "BSplineX/bspline/bspline.hpp"
 #include "BSplineX/control_points/control_points.hpp"
 #include "BSplineX/defines.hpp"
-#include "BSplineX/knots/knots.hpp"
 #include "BSplineX/types.hpp"
 
 namespace bsplinex::lsq
@@ -109,12 +108,12 @@ struct Condition
   }
 };
 
-template <class LSQMatrix, typename T, Curve C, BoundaryCondition BC, Extrapolation EXT>
+template <class LSQMatrix, typename T, BoundaryCondition BC>
 void fill(
     LSQMatrix &A,
     Eigen::VectorX<T> &b,
     size_t degree,
-    knots::Knots<T, C, BC, EXT> const &knots,
+    std::function<size_t(T, std::vector<T> &)> nnz_basis,
     std::vector<T> const &x,
     std::vector<T> const &y,
     std::vector<Condition<T>> const &additional_conditions
@@ -153,9 +152,7 @@ void fill(
   {
     Condition<T> const &condition = conditions.at(i);
 
-    size_t index = bspline::BSpline<T, C, BC, EXT>::nnz_basis(
-        degree, knots, condition.x_value, nnz.begin(), nnz.end()
-    );
+    size_t index = nnz_basis(condition.x_value, nnz);
     for (size_t j{0}; j <= degree; j++)
     {
       if constexpr (BoundaryCondition::PERIODIC == BC)
@@ -174,10 +171,11 @@ void fill(
   }
 }
 
-template <typename T, Curve C, BoundaryCondition BC, Extrapolation EXT>
+template <typename T, BoundaryCondition BC>
 control_points::ControlPoints<T, BC>
 lsq(size_t degree,
-    knots::Knots<T, C, BC, EXT> const &knots,
+    size_t knots_size,
+    std::function<size_t(T, std::vector<T> &)> nnz_basis,
     std::vector<T> const &x,
     std::vector<T> const &y,
     std::vector<Condition<T>> const &additional_conditions)
@@ -187,8 +185,8 @@ lsq(size_t degree,
     throw std::runtime_error("x and y must have the same size");
   }
 
-  size_t const &num_rows = x.size();
-  size_t num_cols{knots.size() - degree - 1};
+  size_t const &num_rows = x.size() + additional_conditions.size();
+  size_t num_cols{knots_size - degree - 1};
   if constexpr (BoundaryCondition::PERIODIC == BC)
   {
     num_cols -= degree;
@@ -199,7 +197,9 @@ lsq(size_t degree,
   if (num_cols > DENSE_MAX_COL)
   {
     LSQMatrix<T, Eigen::SparseMatrix<T>> A(num_rows, num_cols, num_cols * (degree + 1));
-    fill(A, b, degree, knots, x, y, additional_conditions);
+    fill<LSQMatrix<T, Eigen::SparseMatrix<T>>, T, BC>(
+        A, b, degree, nnz_basis, x, y, additional_conditions
+    );
     Eigen::VectorX<T> res = A.solve(b);
 
     return control_points::ControlPoints<T, BC>{
@@ -209,7 +209,9 @@ lsq(size_t degree,
   else
   {
     LSQMatrix<T, Eigen::MatrixX<T>> A(num_rows, num_cols);
-    fill(A, b, degree, knots, x, y, additional_conditions);
+    fill<LSQMatrix<T, Eigen::MatrixX<T>>, T, BC>(
+        A, b, degree, nnz_basis, x, y, additional_conditions
+    );
     Eigen::VectorX<T> res = A.solve(b);
 
     return control_points::ControlPoints<T, BC>{

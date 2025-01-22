@@ -3,31 +3,13 @@
 
 // Standard includes
 #include <algorithm>
-#include <functional>
+#include <limits>
 #include <sstream>
+#include <stdexcept>
 #include <vector>
 
-// Third-party includes
-#include <Eigen/Dense>
-
-// For some reason Eigen has a couple of set but unused variables
-#ifdef __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
-#endif
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-but-set-variable"
-#endif
-#include <Eigen/Sparse>
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
-#ifdef __GNUC__
-#pragma GCC diagnostic pop
-#endif
-
 // BSplineX includes
+#include "BSplineX/bspline/bspline_lsq.hpp"
 #include "BSplineX/control_points/control_points.hpp"
 #include "BSplineX/defines.hpp"
 #include "BSplineX/knots/knots.hpp"
@@ -110,9 +92,7 @@ public:
   {
     std::vector<T> basis_functions(this->degree + 1, (T)0);
 
-    size_t index = this->nnz_basis(
-        this->degree, this->knots, value, basis_functions.begin(), basis_functions.end()
-    );
+    size_t index = this->nnz_basis(value, basis_functions.begin(), basis_functions.end());
 
     basis_functions.insert(basis_functions.begin(), index, (T)0);
     basis_functions.insert(
@@ -122,216 +102,68 @@ public:
     return basis_functions;
   }
 
-  template <typename It>
-  static size_t nnz_basis(
-      size_t degree,
-      knots::Knots<T, C, BC, EXT> const &knots,
-      T value,
-      [[maybe_unused]] It begin,
-      It end
-  )
-  {
-    assertm(
-        (end - begin) == (long long)(degree + 1),
-        "Unexpected number of basis asked, exactly degree + 1 basis can be asked"
-    );
-
-    assertm(
-        std::all_of(begin, end, [](T i) { return (T)0 == i; }),
-        "Initial basis must be initialised to zero"
-    );
-
-    auto [index, val] = knots.find(value);
-
-    *(end - 1) = 1.0;
-    for (size_t d{1}; d <= degree; d++)
-    {
-      *(end - 1 - d) = (knots.at(index + 1) - val) /
-                       (knots.at(index + 1) - knots.at(index - d + 1)) * *(end - 1 - d + 1);
-      for (size_t i{index - d + 1}; i < index; i++)
-      {
-        *(end - 1 - index + i) =
-            (val - knots.at(i)) / (knots.at(i + d) - knots.at(i)) * *(end - 1 - index + i) +
-            (knots.at(i + d + 1) - val) / (knots.at(i + d + 1) - knots.at(i + 1)) *
-                *(end - 1 - index + i + 1);
-      }
-      *(end - 1) = (val - knots.at(index)) / (knots.at(index + d) - knots.at(index)) * *(end - 1);
-    }
-
-    return index - degree;
-  }
-
   void fit(std::vector<T> const &x, std::vector<T> const &y)
   {
-    if (x.size() != y.size())
-    {
-      throw std::runtime_error("x and y must have the same size");
-    }
-
-    // NOTE: bertolazzi says that the LU algorithm uses roughly half the computations as QR. it is
-    // less stable, but for a band matrix it may be fine. plus he suggests to sort the input points
-    // as that may improve performance substantially, especially if we develop a specialised LU band
-    // algorithm.
-
-    std::vector<T> nnz_basis_vec(this->degree + 1, (T)0);
-    Eigen::Map<Eigen::VectorX<T> const> b(y.data(), y.size());
-    Eigen::VectorX<T> res;
-    size_t num_cols{this->control_points.size()};
-    if constexpr (BoundaryCondition::PERIODIC == BC)
-    {
-      num_cols -= this->degree;
-    }
-
-    if (num_cols <= DENSE_MAX_COL)
-    {
-      Eigen::MatrixX<T> A = Eigen::MatrixX<T>::Zero(x.size(), num_cols);
-
-      size_t index{0};
-      for (size_t i{0}; i < x.size(); i++)
-      {
-        index = this->nnz_basis(
-            this->degree, this->knots, x.at(i), nnz_basis_vec.begin(), nnz_basis_vec.end()
-        );
-        for (size_t j{0}; j <= this->degree; j++)
-        {
-          // TODO: avoid modulo
-          A(i, (j + index) % num_cols) += nnz_basis_vec.at(j);
-        }
-        std::fill(nnz_basis_vec.begin(), nnz_basis_vec.end(), (T)0);
-      }
-
-      res = A.colPivHouseholderQr().solve(b);
-    }
-    else
-    {
-      Eigen::SparseMatrix<T> A(x.size(), num_cols);
-      A.reserve(num_cols * (this->degree + 1));
-
-      size_t index{0};
-      for (size_t i{0}; i < x.size(); i++)
-      {
-        index = this->nnz_basis(
-            this->degree, this->knots, x.at(i), nnz_basis_vec.begin(), nnz_basis_vec.end()
-        );
-        for (size_t j{0}; j <= this->degree; j++)
-        {
-          A.coeffRef(i, (j + index) % num_cols) += nnz_basis_vec.at(j);
-        }
-        std::fill(nnz_basis_vec.begin(), nnz_basis_vec.end(), (T)0);
-      }
-      A.makeCompressed();
-
-      Eigen::SparseQR<Eigen::SparseMatrix<T>, Eigen::COLAMDOrdering<int>> solver{};
-      solver.compute(A);
-      res = solver.solve(b);
-    }
-
-    new (&this->control_points) control_points::ControlPoints<T, BC>{
-        {{res.data(), res.data() + res.rows() * res.cols()}}, this->degree
-    };
+    this->control_points = std::move(lsq::lsq<T, BC>(
+        degree,
+        knots.size(),
+        [this](T value, std::vector<T> &vec) -> size_t
+        { return this->nnz_basis(value, vec.begin(), vec.end()); },
+        x,
+        y,
+        {}
+    ));
   }
 
   void interpolate(
       std::vector<T> const &x,
       std::vector<T> const &y,
-      [[maybe_unused]] std::vector<T> const &padding
+      std::vector<lsq::Condition<T>> const &additional_conditions
   )
   {
-    if constexpr (Curve::UNIFORM == C)
+    runtimeassert(x.size() == y.size(), "x and y must have the same size");
+
+    if constexpr (BoundaryCondition::PERIODIC == BC)
     {
-      return;
+      runtimeassert(
+          additional_conditions.size() == 0,
+          "For PERIODIC BSplines there must be exactly 0 additional conditions."
+      );
     }
     else
     {
-      if (x.size() != y.size())
-      {
-        throw std::runtime_error("x and y must have the same size");
-      }
-      // NOTE: thank the STL for this wonderful backwards built sort check. Think it as if std::less
-      // is <= and std::less_equal is <.
-      if (!std::is_sorted(x.begin(), x.end(), std::less_equal<T>{}))
-      {
-        throw std::runtime_error("x must be sorted w.r.t. operator <");
-      }
-
-      if constexpr (BoundaryCondition::OPEN == BC)
-      {
-        if (padding.size() != 2 * this->degree)
-        {
-          throw std::runtime_error("padding must be = 2 * degree");
-        }
-        size_t open_knots_size = x.size() + 2 * this->degree;
-        std::vector<T> open_knots{};
-        open_knots.reserve(open_knots_size);
-        for (size_t i{0}; i < this->degree; i++)
-        {
-          open_knots.push_back(padding.at(i));
-        }
-        for (auto const &elem : x)
-        {
-          open_knots.push_back(elem);
-        }
-        for (size_t i{0}; i < this->degree; i++)
-        {
-          open_knots.push_back(padding.at(i + this->degree));
-        }
-
-        new (&this->knots) knots::Knots<T, C, BC, EXT>{{open_knots}, this->degree};
-      }
-      else
-      {
-        new (&this->knots) knots::Knots<T, C, BC, EXT>{{x}, this->degree};
-      }
-
-      size_t num_cols = x.size() + this->degree - 1;
-      size_t eq_aft   = (this->degree - 1) / 2;
-      size_t eq_bef   = (this->degree - 1) - eq_aft;
-      if constexpr (BoundaryCondition::PERIODIC == BC)
-      {
-        num_cols -= this->degree - 1;
-        eq_aft    = 0;
-        eq_bef    = 0;
-      }
-      std::vector<T> nnz_basis_vec(this->degree + 1, (T)0);
-      Eigen::MatrixX<T> A = Eigen::MatrixX<T>::Zero(num_cols, num_cols);
-      Eigen::VectorX<T> b(num_cols);
-      Eigen::VectorX<T> res;
-
-      size_t index{0};
-      size_t i{0};
-
-      for (; i < eq_bef; i++)
-      {
-        A(i, i) += (T)1;
-        b(i)     = y.front();
-      }
-
-      for (; i < num_cols - eq_aft; i++)
-      {
-        index = this->nnz_basis(
-            this->degree, this->knots, x.at(i - eq_bef), nnz_basis_vec.begin(), nnz_basis_vec.end()
-        );
-        for (size_t j{0}; j <= this->degree; j++)
-        {
-          A(i, (j + index) % num_cols) += nnz_basis_vec.at(j);
-        }
-        std::fill(nnz_basis_vec.begin(), nnz_basis_vec.end(), (T)0);
-
-        b(i) = y.at(i - eq_bef);
-      }
-
-      for (; i < num_cols; i++)
-      {
-        A(i, i) += (T)1;
-        b(i)     = y.back();
-      }
-
-      res = A.colPivHouseholderQr().solve(b);
-
-      new (&this->control_points) control_points::ControlPoints<T, BC>{
-          {{res.data(), res.data() + res.rows() * res.cols()}}, this->degree
-      };
+      runtimeassert(
+          additional_conditions.size() == degree - 1,
+          "There must be exactly degree - 1 additional conditions."
+      );
     }
+
+    if constexpr (Curve::UNIFORM == C)
+    {
+      T step = x.at(1) - x.at(0);
+      for (size_t i{0}; i < x.size() - 1; i++)
+      {
+        runtimeassert(
+            std::abs(x.at(i + 1) - x.at(i) - step) <= std::numeric_limits<T>::epsilon(),
+            "x is not uniform."
+        );
+      }
+      this->knots = std::move(knots::Knots<T, C, BC, EXT>{{x.front(), x.back(), x.size()}, degree});
+    }
+    else
+    {
+      this->knots = std::move(knots::Knots<T, C, BC, EXT>{{x}, degree});
+    }
+
+    this->control_points = std::move(lsq::lsq<T, BC>(
+        degree,
+        knots.size(),
+        [this](T value, std::vector<T> &vec) -> size_t
+        { return this->nnz_basis(value, vec.begin(), vec.end()); },
+        x,
+        y,
+        additional_conditions
+    ));
   }
 
   std::vector<T> get_control_points()
@@ -380,6 +212,42 @@ private:
     // clang-format on
 
     throw std::runtime_error(ss.str());
+  }
+
+  template <typename It>
+  size_t nnz_basis(T value, [[maybe_unused]] It begin, It end)
+  {
+    assertm(
+        (end - begin) == (long long)(this->degree + 1),
+        "Unexpected number of basis asked, exactly degree + 1 basis can be asked"
+    );
+
+    assertm(
+        std::all_of(begin, end, [](T i) { return (T)0 == i; }),
+        "Initial basis must be initialised to zero"
+    );
+
+    auto [index, val] = this->knots.find(value);
+
+    *(end - 1) = 1.0;
+    for (size_t d{1}; d <= this->degree; d++)
+    {
+      *(end - 1 - d) = (this->knots.at(index + 1) - val) /
+                       (this->knots.at(index + 1) - this->knots.at(index - d + 1)) *
+                       *(end - 1 - d + 1);
+      for (size_t i{index - d + 1}; i < index; i++)
+      {
+        *(end - 1 - index + i) =
+            (val - this->knots.at(i)) / (this->knots.at(i + d) - this->knots.at(i)) *
+                *(end - 1 - index + i) +
+            (this->knots.at(i + d + 1) - val) /
+                (this->knots.at(i + d + 1) - this->knots.at(i + 1)) * *(end - 1 - index + i + 1);
+      }
+      *(end - 1) = (val - this->knots.at(index)) /
+                   (this->knots.at(index + d) - this->knots.at(index)) * *(end - 1);
+    }
+
+    return index - this->degree;
   }
 
   T deboor(size_t index, T value)
