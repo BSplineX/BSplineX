@@ -33,7 +33,7 @@ if(FETCH_CONTENT_METHOD)
   fetchcontent_declare(
       BSplineX
       GIT_REPOSITORY https://github.com/BSplineX/BSplineX.git
-      GIT_TAG        cmake_tests
+      GIT_TAG        main
   )
 
   fetchcontent_makeavailable(BSplineX)
