@@ -1,5 +1,5 @@
-#ifndef TYPES_HPP
-#define TYPES_HPP
+#ifndef BSPLINEX_TYPES_HPP
+#define BSPLINEX_TYPES_HPP
 
 namespace bsplinex
 {

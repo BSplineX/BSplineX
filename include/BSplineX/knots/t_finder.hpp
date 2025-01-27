@@ -1,5 +1,5 @@
-#ifndef T_FINDER_HPP
-#define T_FINDER_HPP
+#ifndef BSPLINEX_KNOTS_T_FINDER_HPP
+#define BSPLINEX_KNOTS_T_FINDER_HPP
 
 // Standard includes
 #include <algorithm>
@@ -42,7 +42,7 @@ public:
 
   size_t find(T value) const
   {
-    assertm(
+    debugassert(
         value >= this->atter->at(this->index_left) && value <= this->atter->at(this->index_right),
         "Value outside of the domain"
     );
@@ -84,7 +84,7 @@ public:
 
   size_t find(T value) const
   {
-    assertm(value >= this->value_left && value <= this->value_right, "Value outside of the domain");
+    debugassert(value >= this->value_left && value <= this->value_right, "Value outside of the domain");
 
     return static_cast<size_t>((value - this->value_left) * this->step_size_inv) + this->degree;
   }

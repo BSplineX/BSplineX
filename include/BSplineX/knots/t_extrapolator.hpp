@@ -1,5 +1,5 @@
-#ifndef T_EXTRAPOLATOR_HPP
-#define T_EXTRAPOLATOR_HPP
+#ifndef BSPLINEX_KNOTS_T_EXTRAPOLATOR_HPP
+#define BSPLINEX_KNOTS_T_EXTRAPOLATOR_HPP
 
 // Standard includes
 #include <cmath>
@@ -84,7 +84,7 @@ public:
 
   T extrapolate(T value) const
   {
-    assertm(
+    debugassert(
         value < this->value_left || value > this->value_right, "Value not outside of the domain"
     );
     return value < this->value_left ? this->value_left : this->value_right;
@@ -147,7 +147,7 @@ public:
 
   T extrapolate(T value) const
   {
-    assertm(
+    debugassert(
         value < this->value_left || value > this->value_right, "Value not outside of the domain"
     );
 

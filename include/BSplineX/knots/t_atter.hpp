@@ -1,5 +1,5 @@
-#ifndef T_ATTER_HPP
-#define T_ATTER_HPP
+#ifndef BSPLINEX_KNOTS_T_ATTER_HPP
+#define BSPLINEX_KNOTS_T_ATTER_HPP
 
 // BSplineX includes
 #include "BSplineX/defines.hpp"
@@ -56,7 +56,7 @@ public:
 
   T at(size_t index) const
   {
-    assertm(index < this->size(), "Out of bounds");
+    debugassert(index < this->size(), "Out of bounds");
     if (index < this->padder.size_left())
     {
       return this->padder.left(index);

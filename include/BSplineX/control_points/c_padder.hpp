@@ -1,8 +1,7 @@
-#ifndef C_PADDER_HPP
-#define C_PADDER_HPP
+#ifndef BSPLINEX_CONTROL_POINTS_C_PADDER_HPP
+#define BSPLINEX_CONTROL_POINTS_C_PADDER_HPP
 
 // Standard includes
-#include <stdexcept>
 #include <vector>
 
 // BSplineX includes
@@ -45,7 +44,8 @@ public:
 
   T right(size_t) const
   {
-    throw std::runtime_error(
+    releaseassert(
+        false,
         "Generic control points padder has zero length, this function is here only for "
         "compatibility reasons."
     );
@@ -93,7 +93,7 @@ public:
 
   T right(size_t index) const
   {
-    assertm(index < this->pad_right.size(), "Out of bounds");
+    debugassert(index < this->pad_right.size(), "Out of bounds");
     return this->pad_right[index];
   }
 

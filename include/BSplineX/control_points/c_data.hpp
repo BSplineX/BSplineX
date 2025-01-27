@@ -1,5 +1,5 @@
-#ifndef C_DATA_HPP
-#define C_DATA_HPP
+#ifndef BSPLINEX_CONTROL_POINTS_C_DATA_HPP
+#define BSPLINEX_CONTROL_POINTS_C_DATA_HPP
 
 // Standard includes
 #include <cstddef>
@@ -48,7 +48,7 @@ public:
 
   T at(size_t index) const
   {
-    assertm(index < this->raw_data.size(), "Out of bounds");
+    debugassert(index < this->raw_data.size(), "Out of bounds");
     return this->raw_data[index];
   }
 
@@ -56,8 +56,8 @@ public:
 
   std::vector<T> slice(size_t first, size_t last)
   {
-    assertm(first <= last, "Invalid range");
-    assertm(last <= this->raw_data.size(), "Out of bounds");
+    debugassert(first <= last, "Invalid range");
+    debugassert(last <= this->raw_data.size(), "Out of bounds");
 
     return std::vector<T>{this->raw_data.begin() + first, this->raw_data.begin() + last};
   }

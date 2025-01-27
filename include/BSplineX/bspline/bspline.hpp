@@ -1,11 +1,10 @@
-#ifndef BSPLINE_HPP
-#define BSPLINE_HPP
+#ifndef BSPLINEX_BSPLINE_BSPLINE_HPP
+#define BSPLINEX_BSPLINE_BSPLINE_HPP
 
 // Standard includes
 #include <algorithm>
 #include <limits>
 #include <sstream>
-#include <stdexcept>
 #include <vector>
 
 // BSplineX includes
@@ -104,6 +103,8 @@ public:
 
   void fit(std::vector<T> const &x, std::vector<T> const &y)
   {
+    releaseassert(x.size() == y.size(), "x and y must have the same size");
+
     this->control_points = std::move(lsq::lsq<T, BC>(
         degree,
         knots.size(),
@@ -121,18 +122,18 @@ public:
       std::vector<lsq::Condition<T>> const &additional_conditions
   )
   {
-    runtimeassert(x.size() == y.size(), "x and y must have the same size");
+    releaseassert(x.size() == y.size(), "x and y must have the same size");
 
     if constexpr (BoundaryCondition::PERIODIC == BC)
     {
-      runtimeassert(
-          additional_conditions.size() == 0,
+      releaseassert(
+          additional_conditions.empty(),
           "For PERIODIC BSplines there must be exactly 0 additional conditions."
       );
     }
     else
     {
-      runtimeassert(
+      releaseassert(
           additional_conditions.size() == degree - 1,
           "There must be exactly degree - 1 additional conditions."
       );
@@ -143,7 +144,7 @@ public:
       T step = x.at(1) - x.at(0);
       for (size_t i{0}; i < x.size() - 1; i++)
       {
-        runtimeassert(
+        releaseassert(
             std::abs(x.at(i + 1) - x.at(i) - step) <= std::numeric_limits<T>::epsilon(),
             "x is not uniform."
         );
@@ -211,18 +212,18 @@ private:
 
     // clang-format on
 
-    throw std::runtime_error(ss.str());
+    releaseassert(false, ss.str());
   }
 
   template <typename It>
   size_t nnz_basis(T value, [[maybe_unused]] It begin, It end)
   {
-    assertm(
+    debugassert(
         (end - begin) == (long long)(this->degree + 1),
         "Unexpected number of basis asked, exactly degree + 1 basis can be asked"
     );
 
-    assertm(
+    debugassert(
         std::all_of(begin, end, [](T i) { return (T)0 == i; }),
         "Initial basis must be initialised to zero"
     );

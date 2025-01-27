@@ -1,10 +1,10 @@
-#ifndef DEFINES_HPP
-#define DEFINES_HPP
+#ifndef BSPLINEX_DEFINES_HPP
+#define BSPLINEX_DEFINES_HPP
 
 #include <cassert>
 
-#define assertm(exp, msg) assert(((void)msg, exp))
-#define runtimeassert(exp, msg)                                                                    \
+#define debugassert(exp, msg) assert(((void)msg, exp))
+#define releaseassert(exp, msg)                                                                    \
   if (!(exp))                                                                                      \
     throw std::runtime_error(msg);
 
@@ -15,6 +15,6 @@
 #define DEBUG_LOG_CALL() ;
 #endif
 
-#define DENSE_MAX_COL 512
+constexpr size_t DENSE_MAX_COL = 512;
 
 #endif

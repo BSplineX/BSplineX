@@ -1,5 +1,5 @@
-#ifndef KNOTS_HPP
-#define KNOTS_HPP
+#ifndef BSPLINEX_KNOTS_KNOTS_HPP
+#define BSPLINEX_KNOTS_KNOTS_HPP
 
 // Standard includes
 #include <utility>

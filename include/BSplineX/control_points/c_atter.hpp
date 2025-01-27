@@ -1,5 +1,5 @@
-#ifndef C_ATTER_HPP
-#define C_ATTER_HPP
+#ifndef BSPLINEX_CONTROL_POINTS_C_ATTER_HPP
+#define BSPLINEX_CONTROL_POINTS_C_ATTER_HPP
 
 // BSplineX includes
 #include "BSplineX/control_points/c_data.hpp"
@@ -53,7 +53,7 @@ public:
 
   T at(size_t index) const
   {
-    assertm(index < this->size(), "Out of bounds");
+    debugassert(index < this->size(), "Out of bounds");
     if (index < this->data.size())
     {
       return this->data.at(index);

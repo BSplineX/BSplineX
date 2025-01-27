@@ -1,5 +1,5 @@
-#ifndef BSPLINE_LSQ_HPP
-#define BSPLINE_LSQ_HPP
+#ifndef BSPLINEX_BSPLINE_BSPLINE_LSQ_HPP
+#define BSPLINEX_BSPLINE_BSPLINE_LSQ_HPP
 
 // Standard includes
 #include <functional>
@@ -45,8 +45,8 @@ class LSQMatrix
 public:
   virtual T &operator()(size_t row, size_t col)               = 0;
   virtual Eigen::VectorX<T> solve(Eigen::VectorX<T> const &b) = 0;
-  virtual size_t num_rows() const                             = 0;
-  virtual size_t num_cols() const                             = 0;
+  [[nodiscard]] virtual size_t num_rows() const               = 0;
+  [[nodiscard]] virtual size_t num_cols() const               = 0;
 };
 
 template <typename T>
@@ -62,9 +62,9 @@ public:
 
   Eigen::VectorX<T> solve(Eigen::VectorX<T> const &b) { return A.colPivHouseholderQr().solve(b); }
 
-  size_t num_rows() const { return A.rows(); }
+  [[nodiscard]] size_t num_rows() const { return A.rows(); }
 
-  size_t num_cols() const { return A.cols(); }
+  [[nodiscard]] size_t num_cols() const { return A.cols(); }
 };
 
 template <typename T>
@@ -90,9 +90,9 @@ public:
     return solver.solve(b);
   }
 
-  size_t num_rows() const { return A.rows(); }
+  [[nodiscard]] size_t num_rows() const { return A.rows(); }
 
-  size_t num_cols() const { return A.cols(); }
+  [[nodiscard]] size_t num_cols() const { return A.cols(); }
 };
 
 template <typename T>
@@ -108,6 +108,33 @@ struct Condition
   }
 };
 
+template <typename T>
+std::vector<Condition<T>> create_sorted_conditions(
+    std::vector<T> const &x,
+    std::vector<T> const &y,
+    std::vector<Condition<T>> const &additional_conditions
+)
+{
+  debugassert(x.size() == y.size(), "x and y must have the same size.");
+
+  std::vector<Condition<T>> conditions;
+  conditions.reserve(x.size() + additional_conditions.size());
+
+  for (size_t k{0}; k < x.size(); k++)
+  {
+    conditions.emplace_back(x[k], y[k], 0);
+  }
+  conditions.insert(conditions.end(), additional_conditions.begin(), additional_conditions.end());
+
+  std::sort(
+      conditions.begin(),
+      conditions.end(),
+      [&](Condition<T> const &a, Condition<T> const &b) { return a.x_value < b.x_value; }
+  );
+
+  return conditions;
+}
+
 template <class LSQMatrix, typename T, BoundaryCondition BC>
 void fill(
     LSQMatrix &A,
@@ -119,33 +146,16 @@ void fill(
     std::vector<Condition<T>> const &additional_conditions
 )
 {
-  assertm(x.size() == y.size(), "x and y must have the same size.");
-  assertm(
+  debugassert(x.size() == y.size(), "x and y must have the same size.");
+  debugassert(
       A.num_rows() == x.size() + additional_conditions.size(),
       "lsq_matrix must have the same size as x + additional_conditions."
   );
 
-  size_t const &num_rows = A.num_rows();
-  size_t const &num_cols = A.num_cols();
+  size_t const num_rows = A.num_rows();
+  size_t const num_cols = A.num_cols();
 
-  std::vector<Condition<T>> conditions;
-  conditions.reserve(num_rows);
-
-  size_t k{0};
-  for (; k < x.size(); k++)
-  {
-    conditions.emplace_back(x[k], y[k], 0);
-  }
-  for (k -= x.size(); k < additional_conditions.size(); k++)
-  {
-    conditions.push_back(additional_conditions[k]);
-  }
-
-  std::sort(
-      conditions.begin(),
-      conditions.end(),
-      [&](Condition<T> const &a, Condition<T> const &b) { return a.x_value < b.x_value; }
-  );
+  std::vector<Condition<T>> conditions = create_sorted_conditions(x, y, additional_conditions);
 
   std::vector<T> nnz(degree + 1);
   for (size_t i{0}; i < num_rows; i++)
@@ -180,42 +190,62 @@ lsq(size_t degree,
     std::vector<T> const &y,
     std::vector<Condition<T>> const &additional_conditions)
 {
-  if (x.size() != y.size())
-  {
-    throw std::runtime_error("x and y must have the same size");
-  }
+  debugassert(x.size() == y.size(), "x and y must have the same size.");
 
-  size_t const &num_rows = x.size() + additional_conditions.size();
+  size_t num_rows = x.size() + additional_conditions.size();
+  if constexpr (BoundaryCondition::OPEN == BC)
+  {
+    num_rows -= 2 * degree;
+  }
   size_t num_cols{knots_size - degree - 1};
   if constexpr (BoundaryCondition::PERIODIC == BC)
   {
+    num_rows -= 1;
     num_cols -= degree;
   }
 
   Eigen::VectorX<T> b(num_rows);
 
+  // HACK: testing if we should pass a view of x and y
+  std::vector<T> x_view, y_view;
+  if constexpr (BoundaryCondition::OPEN == BC)
+  {
+    x_view = std::vector<T>(x.begin() + degree, x.end() - degree);
+    y_view = std::vector<T>(y.begin() + degree, y.end() - degree);
+  }
+  else if constexpr (BoundaryCondition::PERIODIC == BC)
+  {
+    x_view = std::vector<T>(x.begin(), x.end() - 1);
+    y_view = std::vector<T>(y.begin(), y.end() - 1);
+  }
+  else
+  {
+    x_view = x;
+    y_view = y;
+  }
+
   if (num_cols > DENSE_MAX_COL)
   {
     LSQMatrix<T, Eigen::SparseMatrix<T>> A(num_rows, num_cols, num_cols * (degree + 1));
     fill<LSQMatrix<T, Eigen::SparseMatrix<T>>, T, BC>(
-        A, b, degree, nnz_basis, x, y, additional_conditions
+        A, b, degree, nnz_basis, x_view, y_view, additional_conditions
     );
     Eigen::VectorX<T> res = A.solve(b);
 
     return control_points::ControlPoints<T, BC>{
-        {{res.data(), res.data() + res.rows() * res.cols()}}, degree
+        {std::vector<T>{res.data(), res.data() + res.rows() * res.cols()}}, degree
     };
   }
   else
   {
     LSQMatrix<T, Eigen::MatrixX<T>> A(num_rows, num_cols);
     fill<LSQMatrix<T, Eigen::MatrixX<T>>, T, BC>(
-        A, b, degree, nnz_basis, x, y, additional_conditions
+        A, b, degree, nnz_basis, x_view, y_view, additional_conditions
     );
     Eigen::VectorX<T> res = A.solve(b);
 
     return control_points::ControlPoints<T, BC>{
-        {{res.data(), res.data() + res.rows() * res.cols()}}, degree
+        {std::vector<T>{res.data(), res.data() + res.rows() * res.cols()}}, degree
     };
   }
 }

@@ -1,5 +1,5 @@
-#ifndef BSPLINEX_HPP
-#define BSPLINEX_HPP
+#ifndef BSPLINEX_BSPLINEX_HPP
+#define BSPLINEX_BSPLINEX_HPP
 
 #include "BSplineX/bspline/bspline.hpp"
 #include "BSplineX/bspline/bspline_factory.hpp"

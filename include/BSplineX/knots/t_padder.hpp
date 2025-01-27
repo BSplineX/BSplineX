@@ -1,8 +1,7 @@
-#ifndef T_PADDER_HPP
-#define T_PADDER_HPP
+#ifndef BSPLINEX_KNOTS_T_PADDER_HPP
+#define BSPLINEX_KNOTS_T_PADDER_HPP
 
 // Standard includes
-#include <stdexcept>
 #include <vector>
 
 // BSplineX includes
@@ -56,14 +55,16 @@ public:
 
   T left(size_t) const
   {
-    throw std::runtime_error(
+    releaseassert(
+        false,
         "OPEN knots padder has zero length, this function is here only for compatibility reasons."
     );
   }
 
   T right(size_t) const
   {
-    throw std::runtime_error(
+    releaseassert(
+        false,
         "OPEN knots padder has zero length, this function is here only for compatibility reasons."
     );
   }
@@ -132,13 +133,13 @@ public:
 
   T left([[maybe_unused]] size_t index) const
   {
-    assertm(index < this->degree, "Out of bounds");
+    debugassert(index < this->degree, "Out of bounds");
     return this->pad_left;
   }
 
   T right([[maybe_unused]] size_t index) const
   {
-    assertm(index < this->degree, "Out of bounds");
+    debugassert(index < this->degree, "Out of bounds");
     return this->pad_right;
   }
 
@@ -207,13 +208,13 @@ public:
 
   T left(size_t index) const
   {
-    assertm(index < this->pad_left.size(), "Out of bounds");
+    debugassert(index < this->pad_left.size(), "Out of bounds");
     return this->pad_left[index];
   }
 
   T right(size_t index) const
   {
-    assertm(index < this->pad_right.size(), "Out of bounds");
+    debugassert(index < this->pad_right.size(), "Out of bounds");
     return this->pad_right[index];
   }
 

@@ -1,5 +1,5 @@
-#ifndef BSPLINE_FACTORY_HPP
-#define BSPLINE_FACTORY_HPP
+#ifndef BSPLINEX_BSPLINE_BSPLINE_FACTORY_HPP
+#define BSPLINEX_BSPLINE_BSPLINE_FACTORY_HPP
 
 // BSplineX
 #include "BSplineX/bspline/bspline_factory_clamped.hpp"
