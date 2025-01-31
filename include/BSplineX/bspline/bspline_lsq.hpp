@@ -29,6 +29,7 @@
 #include "BSplineX/control_points/control_points.hpp"
 #include "BSplineX/defines.hpp"
 #include "BSplineX/types.hpp"
+#include "BSplineX/views.hpp"
 
 namespace bsplinex::lsq
 {
@@ -108,10 +109,10 @@ struct Condition
   }
 };
 
-template <typename T>
+template <typename T, class Iter>
 std::vector<Condition<T>> create_sorted_conditions(
-    std::vector<T> const &x,
-    std::vector<T> const &y,
+    views::ArrayView<Iter> const &x,
+    views::ArrayView<Iter> const &y,
     std::vector<Condition<T>> const &additional_conditions
 )
 {
@@ -135,14 +136,14 @@ std::vector<Condition<T>> create_sorted_conditions(
   return conditions;
 }
 
-template <class LSQMatrix, typename T, BoundaryCondition BC>
+template <class LSQMatrix, typename T, class Iter, BoundaryCondition BC>
 void fill(
     LSQMatrix &A,
     Eigen::VectorX<T> &b,
     size_t degree,
     std::function<size_t(T, std::vector<T> &)> nnz_basis,
-    std::vector<T> const &x,
-    std::vector<T> const &y,
+    views::ArrayView<Iter> const &x,
+    views::ArrayView<Iter> const &y,
     std::vector<Condition<T>> const &additional_conditions
 )
 {
@@ -181,55 +182,35 @@ void fill(
   }
 }
 
-template <typename T, BoundaryCondition BC>
+template <typename T, class Iter, BoundaryCondition BC>
 control_points::ControlPoints<T, BC>
 lsq(size_t degree,
     size_t knots_size,
     std::function<size_t(T, std::vector<T> &)> nnz_basis,
-    std::vector<T> const &x,
-    std::vector<T> const &y,
+    views::ArrayView<Iter> const &x,
+    views::ArrayView<Iter> const &y,
     std::vector<Condition<T>> const &additional_conditions)
 {
   debugassert(x.size() == y.size(), "x and y must have the same size.");
 
-  size_t num_rows = x.size() + additional_conditions.size();
-  if constexpr (BoundaryCondition::OPEN == BC)
-  {
-    num_rows -= 2 * degree;
-  }
+  using iter_type = typename std::vector<T>::const_iterator;
+
+  size_t const num_rows{x.size() + additional_conditions.size()};
   size_t num_cols{knots_size - degree - 1};
+
   if constexpr (BoundaryCondition::PERIODIC == BC)
   {
-    num_rows -= 1;
     num_cols -= degree;
   }
 
   Eigen::VectorX<T> b(num_rows);
 
-  // HACK: testing if we should pass a view of x and y
-  std::vector<T> x_view, y_view;
-  if constexpr (BoundaryCondition::OPEN == BC)
-  {
-    x_view = std::vector<T>(x.begin() + degree, x.end() - degree);
-    y_view = std::vector<T>(y.begin() + degree, y.end() - degree);
-  }
-  else if constexpr (BoundaryCondition::PERIODIC == BC)
-  {
-    x_view = std::vector<T>(x.begin(), x.end() - 1);
-    y_view = std::vector<T>(y.begin(), y.end() - 1);
-  }
-  else
-  {
-    x_view = x;
-    y_view = y;
-  }
-
   if (num_cols > DENSE_MAX_COL)
   {
-    LSQMatrix<T, Eigen::SparseMatrix<T>> A(num_rows, num_cols, num_cols * (degree + 1));
-    fill<LSQMatrix<T, Eigen::SparseMatrix<T>>, T, BC>(
-        A, b, degree, nnz_basis, x_view, y_view, additional_conditions
-    );
+    using sparse_lsq = LSQMatrix<T, Eigen::SparseMatrix<T>>;
+
+    sparse_lsq A(num_rows, num_cols, num_cols * (degree + 1));
+    fill<sparse_lsq, T, iter_type, BC>(A, b, degree, nnz_basis, x, y, additional_conditions);
     Eigen::VectorX<T> res = A.solve(b);
 
     return control_points::ControlPoints<T, BC>{
@@ -238,10 +219,10 @@ lsq(size_t degree,
   }
   else
   {
-    LSQMatrix<T, Eigen::MatrixX<T>> A(num_rows, num_cols);
-    fill<LSQMatrix<T, Eigen::MatrixX<T>>, T, BC>(
-        A, b, degree, nnz_basis, x_view, y_view, additional_conditions
-    );
+    using dense_lsq = LSQMatrix<T, Eigen::MatrixX<T>>;
+
+    dense_lsq A(num_rows, num_cols);
+    fill<dense_lsq, T, iter_type, BC>(A, b, degree, nnz_basis, x, y, additional_conditions);
     Eigen::VectorX<T> res = A.solve(b);
 
     return control_points::ControlPoints<T, BC>{

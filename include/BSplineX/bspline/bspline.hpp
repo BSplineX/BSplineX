@@ -21,6 +21,9 @@ template <typename T, Curve C, BoundaryCondition BC, Extrapolation EXT>
 class BSpline
 {
 private:
+  using vec_iter = typename std::vector<T>::const_iterator;
+  using vec_view = views::ArrayView<vec_iter>;
+
   knots::Knots<T, C, BC, EXT> knots{};
   control_points::ControlPoints<T, BC> control_points{};
   size_t degree{};
@@ -105,13 +108,13 @@ public:
   {
     releaseassert(x.size() == y.size(), "x and y must have the same size");
 
-    this->control_points = std::move(lsq::lsq<T, BC>(
+    this->control_points = std::move(lsq::lsq<T, vec_iter, BC>(
         degree,
         knots.size(),
         [this](T value, std::vector<T> &vec) -> size_t
         { return this->nnz_basis(value, vec.begin(), vec.end()); },
-        x,
-        y,
+        vec_view{x.begin(), x.end()},
+        vec_view{y.begin(), y.end()},
         {}
     ));
   }
@@ -139,6 +142,7 @@ public:
       );
     }
 
+    knots::Knots<T, C, BC, EXT> new_knots;
     if constexpr (Curve::UNIFORM == C)
     {
       T step = x.at(1) - x.at(0);
@@ -149,20 +153,54 @@ public:
             "x is not uniform."
         );
       }
-      this->knots = std::move(knots::Knots<T, C, BC, EXT>{{x.front(), x.back(), x.size()}, degree});
+      new_knots = std::move(knots::Knots<T, C, BC, EXT>{{x.front(), x.back(), x.size()}, degree});
     }
     else
     {
-      this->knots = std::move(knots::Knots<T, C, BC, EXT>{{x}, degree});
+      new_knots = std::move(knots::Knots<T, C, BC, EXT>{{x}, degree});
     }
 
-    this->control_points = std::move(lsq::lsq<T, BC>(
+    auto const domain = new_knots.domain();
+    releaseassert(
+        std::all_of(
+            additional_conditions.begin(),
+            additional_conditions.end(),
+            [&domain](auto const &elem)
+            { return elem.x_value >= domain.first and elem.x_value <= domain.second; }
+        ),
+        "Additional conditions must lie inside the knots interval."
+    );
+
+    this->knots = std::move(new_knots);
+
+    vec_view x_view, y_view;
+    if constexpr (BoundaryCondition::OPEN == BC)
+    {
+      x_view = vec_view{std::next(x.begin(), degree), std::prev(x.end(), degree)};
+      y_view = vec_view{std::next(y.begin(), degree), std::prev(y.end(), degree)};
+    }
+    else if constexpr (BoundaryCondition::CLAMPED == BC)
+    {
+      x_view = vec_view{x.begin(), x.end()};
+      y_view = vec_view{y.begin(), y.end()};
+    }
+    else if constexpr (BoundaryCondition::PERIODIC == BC)
+    {
+      x_view = vec_view{x.begin(), std::prev(x.end(), 1)};
+      y_view = vec_view{y.begin(), std::prev(y.end(), 1)};
+    }
+    else
+    {
+      releaseassert(false, "Unkown boundary condition, you should never get here!");
+    }
+
+    this->control_points = std::move(lsq::lsq<T, vec_iter, BC>(
         degree,
-        knots.size(),
+        this->knots.size(),
         [this](T value, std::vector<T> &vec) -> size_t
         { return this->nnz_basis(value, vec.begin(), vec.end()); },
-        x,
-        y,
+        x_view,
+        y_view,
         additional_conditions
     ));
   }
