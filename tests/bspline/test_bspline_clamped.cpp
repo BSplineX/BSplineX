@@ -9,12 +9,7 @@ using namespace Catch::Matchers;
 using namespace bsplinex;
 using namespace bsplinex::bspline;
 
-TEST_CASE(
-    "bspline::BSpline<T, C, BoundaryCondition::CLAMPED, Extrapolation::NONE> "
-    "bspline{knots::Data<T, C> t_data, "
-    "control_points::Data<T> c_data, degree}",
-    "[bspline]"
-)
+TEST_CASE("ClampedNonUniform", "[bspline]")
 {
   size_t degree{3};
 
@@ -40,13 +35,7 @@ TEST_CASE(
   }
 }
 
-TEST_CASE(
-    "bspline::BSpline<T, C, BoundaryCondition::CLAMPED, "
-    "Extrapolation::CONSTANT> "
-    "bspline{knots::Data<T, C> t_data, "
-    "control_points::Data<T> c_data, degree}",
-    "[bspline]"
-)
+TEST_CASE("ClampedNonUniformConstant", "[bspline]")
 {
   size_t degree{3};
 
