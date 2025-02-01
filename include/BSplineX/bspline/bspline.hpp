@@ -17,6 +17,14 @@
 namespace bsplinex::bspline
 {
 
+/**
+ * @brief A BSpline class.
+ *
+ * @tparam T The type of the control points.
+ * @tparam C The curve type.
+ * @tparam BC The boundary condition.
+ * @tparam EXT The extrapolation type.
+ */
 template <typename T, Curve C, BoundaryCondition BC, Extrapolation EXT>
 class BSpline
 {
@@ -30,8 +38,23 @@ private:
   std::vector<T> support{};
 
 public:
+  /**
+   * @brief Default constructor.
+   *
+   * Constructs an empty BSpline.
+   */
   BSpline() { DEBUG_LOG_CALL(); }
 
+  /**
+   * @brief Constructs a BSpline from a knot vector and control points.
+   *
+   * Note that depending on the boundary condition, the knot vector and control
+   * points will be padded to respect the boundary condition.
+   *
+   * @param knots_data The knot vector data.
+   * @param control_points_data The control points data.
+   * @param degree The degree of the BSpline.
+   */
   BSpline(
       knots::Data<T, C> const &knots_data,
       control_points::Data<T> const &control_points_data,
@@ -44,6 +67,13 @@ public:
     this->support.resize(this->degree + 1);
   }
 
+  /**
+   * @brief Copy constructor.
+   *
+   * Constructs a BSpline by copying another BSpline.
+   *
+   * @param other The BSpline to copy from.
+   */
   BSpline(BSpline const &other)
       : knots(other.knots), control_points(other.control_points), degree(other.degree),
         support(other.support)
@@ -51,6 +81,13 @@ public:
     DEBUG_LOG_CALL();
   }
 
+  /**
+   * @brief Move constructor.
+   *
+   * Constructs a BSpline by moving another BSpline.
+   *
+   * @param other The BSpline to move from.
+   */
   BSpline(BSpline &&other) noexcept
       : knots(std::move(other.knots)), control_points(std::move(other.control_points)),
         degree(other.degree), support(std::move(other.support))
@@ -58,8 +95,19 @@ public:
     DEBUG_LOG_CALL();
   }
 
+  /**
+   * @brief Destructor.
+   */
   ~BSpline() noexcept { DEBUG_LOG_CALL(); }
 
+  /**
+   * @brief Copy assignment operator.
+   *
+   * Assigns the contents of another BSpline to this BSpline.
+   *
+   * @param other The BSpline to copy from.
+   * @return A reference to this BSpline.
+   */
   BSpline &operator=(BSpline const &other)
   {
     DEBUG_LOG_CALL();
@@ -72,6 +120,14 @@ public:
     return *this;
   }
 
+  /**
+   * @brief Move assignment operator.
+   *
+   * Assigns the contents of another BSpline to this BSpline by moving.
+   *
+   * @param other The BSpline to move from.
+   * @return A reference to this BSpline.
+   */
   BSpline &operator=(BSpline &&other) noexcept
   {
     DEBUG_LOG_CALL();
@@ -84,12 +140,24 @@ public:
     return *this;
   }
 
+  /**
+   * @brief Evaluates the BSpline at a given value.
+   *
+   * @param value The value to evaluate the BSpline at.
+   * @return The value of the BSpline at the given value.
+   */
   T evaluate(T value)
   {
     auto index_value_pair = this->knots.find(value);
     return this->deboor(index_value_pair.first, index_value_pair.second);
   }
 
+  /**
+   * @brief Computes the basis functions at a given value.
+   *
+   * @param value The value to compute the basis functions at.
+   * @return The basis functions at the given value.
+   */
   std::vector<T> basis(T value)
   {
     std::vector<T> basis_functions(this->degree + 1, (T)0);
@@ -104,6 +172,12 @@ public:
     return basis_functions;
   }
 
+  /**
+   * @brief Fits the BSpline to some data.
+   *
+   * @param x The x values of the data.
+   * @param y The y values of the data.
+   */
   void fit(std::vector<T> const &x, std::vector<T> const &y)
   {
     releaseassert(x.size() == y.size(), "x and y must have the same size");
@@ -119,6 +193,26 @@ public:
     ));
   }
 
+  /**
+   * @brief Interpolates the BSpline to some data.
+   *
+   * Note that if the boundary condition is:
+   * - OPEN: the first and last `degree` x and y values are not interpolated. If
+   * you want to use them, either use another boundary condition or manually pad
+   * the data.
+   * - CLAMPED: all x and y values are interpolated.
+   * - PERIODIC: the last x and y values are not interpolated. This seems to be
+   * an issue, but if your data is truly periodic, you can simply repeat the
+   * first x and y values at the end of the data and everything will work as
+   * expected.
+   *
+   * @param x The x values of the data. They must be sorted in ascending order.
+   * @param y The y values of the data.
+   * @param additional_conditions Additional conditions to impose on the BSpline.
+   * They must lie inside the knots interval. The number of additional conditions
+   * must be equal to `degree - 1` except for periodic BSplines where no
+   * additional conditions can be provided.
+   */
   void interpolate(
       std::vector<T> const &x,
       std::vector<T> const &y,

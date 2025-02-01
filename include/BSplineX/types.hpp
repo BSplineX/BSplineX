@@ -4,6 +4,9 @@
 namespace bsplinex
 {
 
+/**
+ * @brief Enum class representing different types of boundary conditions.
+ */
 enum class BoundaryCondition
 {
   CLAMPED  = 0,
@@ -11,12 +14,18 @@ enum class BoundaryCondition
   PERIODIC = 2
 };
 
+/**
+ * @brief Enum class representing different types of curves.
+ */
 enum class Curve
 {
   NON_UNIFORM = 0,
   UNIFORM     = 1
 };
 
+/**
+ * @brief Enum class representing different types of extrapolation methods.
+ */
 enum class Extrapolation
 {
   CONSTANT = 0,
