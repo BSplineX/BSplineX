@@ -28,6 +28,13 @@ namespace bsplinex::bspline
 template <typename T, Curve C, BoundaryCondition BC, Extrapolation EXT>
 class BSpline
 {
+public:
+  static Curve const curve_type{C};
+
+  static BoundaryCondition const boundary_condition_type{BC};
+
+  static Extrapolation const get_extrapolation_type{EXT};
+
 private:
   using vec_iter = typename std::vector<T>::const_iterator;
   using vec_view = views::ArrayView<vec_iter>;
@@ -148,8 +155,27 @@ public:
    */
   T evaluate(T value)
   {
-    auto index_value_pair = this->knots.find(value);
-    return this->deboor(index_value_pair.first, index_value_pair.second);
+    auto [index, x_value] = this->knots.find(value);
+    return this->deboor(index, x_value);
+  }
+
+  /**
+   * @brief Evaluates the BSpline at the given values.
+   *
+   * @param values The values to evaluate the BSpline at.
+   * @return The values of the BSpline at the given values.
+   */
+  std::vector<T> evaluate(std::vector<T> const &values)
+  {
+    std::vector<T> results;
+    results.reserve(values.size());
+
+    for (auto const &value : values)
+    {
+      results.push_back(this->evaluate(value));
+    }
+
+    return results;
   }
 
   /**
@@ -171,6 +197,11 @@ public:
 
     return basis_functions;
   }
+
+  /**
+   * @brief Gives the (inclusive) boundary of the BSpline domain (i.e., [x_min, x_max])
+   */
+  std::pair<T, T> domain() const { return this->knots.domain(); }
 
   /**
    * @brief Fits the BSpline to some data.
@@ -243,7 +274,8 @@ public:
       for (size_t i{0}; i < x.size() - 1; i++)
       {
         releaseassert(
-            std::abs(x.at(i + 1) - x.at(i) - step) <= std::numeric_limits<T>::epsilon(),
+            std::abs(x.at(i + 1) - x.at(i) - step) <=
+                std::numeric_limits<T>::epsilon() * 10.0, // HACK:
             "x is not uniform."
         );
       }

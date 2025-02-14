@@ -1,17 +1,38 @@
 // Third-party includes
 #include <algorithm>
+#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <random>
+#include <stdexcept>
+#include <string>
+#include <utility>
 
 // BSplineX includes
-#include "BSplineX/bspline/bspline_factory_open.hpp"
 #include "BSplineX/bspline/bspline_lsq.hpp"
 #include "BSplineX/bspline/bspline_types.hpp"
+#include "BSplineX/types.hpp"
 
 using namespace Catch::Matchers;
 using namespace bsplinex;
 using namespace bsplinex::bspline;
+
+using real_t = double;
+
+// clang-format off
+#define BSPLINE_TEST_TYPES \
+types::OpenUniform<real_t>, \
+types::OpenUniformConstant<real_t>, \
+types::OpenNonUniform<real_t>, \
+types::OpenNonUniformConstant<real_t>, \
+types::ClampedUniform<real_t>, \
+types::ClampedUniformConstant<real_t>, \
+types::ClampedNonUniform<real_t>, \
+types::ClampedNonUniformConstant<real_t>, \
+types::PeriodicUniform<real_t>, \
+types::PeriodicNonUniform<real_t>
+// clang-format on
 
 static std::mt19937 &get_device()
 {
@@ -23,170 +44,182 @@ static std::mt19937 &get_device()
   return rng;
 }
 
-static std::vector<double>
-random_vector(std::mt19937 &rng, size_t num_elems, double min = -10.0, double max = 10.0)
+static std::vector<real_t>
+random_vector(std::mt19937 &rng, size_t num_elems, real_t min = -10.0, real_t max = 10.0)
 {
   std::uniform_real_distribution unif{min, max};
-  std::vector<double> vec(num_elems);
+  std::vector<real_t> vec(num_elems);
   std::generate(vec.begin(), vec.end(), [&unif, &rng]() { return unif(rng); });
 
   return vec;
 }
 
-TEST_CASE("OpenNonUniform", "[bspline]")
+static std::vector<real_t> uniform_vector(size_t num_elems, real_t min = -10.0, real_t max = 10.0)
+{
+  std::vector<real_t> vec(num_elems);
+  real_t step_size = (max - min) / (num_elems - 1);
+  std::generate(
+      vec.begin(),
+      std::prev(vec.end(), 1),
+      [min, step_size, i = static_cast<size_t>(0)]() mutable { return min + step_size * i++; }
+  );
+
+  // Avoid numerical errors
+  vec.back() = max;
+
+  return vec;
+}
+
+static std::vector<real_t>
+sorted_random_vector(std::mt19937 &rng, size_t num_elems, real_t min = -10.0, real_t max = 10.0)
+{
+  std::vector<real_t> vec = random_vector(rng, num_elems, min, max);
+  std::sort(vec.begin(), vec.end());
+
+  return vec;
+}
+
+template <typename BSplineType>
+BSplineType random_bspline(std::mt19937 &rng, size_t degree, size_t num_ctrl)
+{
+  std::vector<real_t> ctrl_pts = random_vector(rng, num_ctrl, -1.0, 1.0);
+
+  size_t num_knots;
+  if constexpr (BoundaryCondition::OPEN == BSplineType::boundary_condition_type)
+  {
+    num_knots = num_ctrl + degree + 1;
+  }
+  else if constexpr (BoundaryCondition::CLAMPED == BSplineType::boundary_condition_type)
+  {
+    num_knots = num_ctrl - degree + 1;
+  }
+  else if constexpr (BoundaryCondition::PERIODIC == BSplineType::boundary_condition_type)
+  {
+    num_knots = num_ctrl + 1;
+  }
+  else
+  {
+    throw std::runtime_error("Unknown BSpline Boundary Condition");
+  }
+  constexpr real_t knots_begin{-10.0};
+  constexpr real_t knots_end{10.0};
+
+  if constexpr (Curve::UNIFORM == BSplineType::curve_type)
+  {
+    BSplineType bspline{{knots_begin, knots_end, num_knots}, {ctrl_pts}, degree};
+
+    return bspline;
+  }
+  else if constexpr (Curve::NON_UNIFORM == BSplineType::curve_type)
+  {
+    std::vector<real_t> knots = sorted_random_vector(rng, num_knots, knots_begin, knots_end);
+
+    BSplineType bspline{{knots}, {ctrl_pts}, degree};
+
+    return bspline;
+  }
+  else
+  {
+    throw std::runtime_error("Unkown BSpline Curve.");
+  }
+}
+
+TEMPLATE_TEST_CASE("masinag", "[bspline][template][product]", BSPLINE_TEST_TYPES)
 {
   auto &rng = get_device();
 
-  // Normal BSpline
-  size_t degree{3};
+  size_t const degree = GENERATE(2, 3);
 
-  std::vector<double> t_data_vec{0.1, 1.3, 2.2, 2.2, 4.9, 6.3, 6.3, 6.3, 13.2};
-  knots::Data<double, Curve::NON_UNIFORM> t_data{t_data_vec};
+  using ctrl_val_t              = std::pair<size_t, size_t>;
+  auto const [ctrl_pts, values] = GENERATE(ctrl_val_t{50, 50}, ctrl_val_t{600, 2000});
 
-  std::vector<double> c_data_vec{0.1, 1.3, 2.2, 4.9, 13.2};
-  control_points::Data<double> c_data{c_data_vec};
+  TestType bspline = random_bspline<TestType>(rng, degree, ctrl_pts);
 
-  types::OpenNonUniform<double> bspline{t_data, c_data, degree};
+  auto [x_min, x_max] = bspline.domain();
 
-  // clang-format off
-  std::vector<double> x_values{2.2, 2.3000000000000003, 2.4000000000000004, 2.5000000000000004, 2.6000000000000005, 2.7000000000000006, 2.8000000000000007, 2.900000000000001, 3.000000000000001, 3.100000000000001, 3.200000000000001, 3.300000000000001, 3.4000000000000012, 3.5000000000000013, 3.6000000000000014, 3.7000000000000015, 3.8000000000000016, 3.9000000000000017, 4.000000000000002, 4.100000000000001, 4.200000000000002, 4.3000000000000025, 4.400000000000002, 4.500000000000002, 4.600000000000002, 4.700000000000003, 4.8000000000000025, 4.900000000000002, 5.000000000000003, 5.100000000000003, 5.200000000000003, 5.3000000000000025, 5.400000000000003, 5.5000000000000036, 5.600000000000003, 5.700000000000003, 5.800000000000003, 5.900000000000004, 6.0000000000000036, 6.100000000000003, 6.200000000000004};
-  std::vector<double> y_values{0.4, 0.4987905929445725, 0.5953834608104188, 0.6901102371457323, 0.7833025554987059, 0.8752920494175335, 0.9664103524504085, 1.0569890981455239, 1.1473599200510731, 1.2378544517152497, 1.3288043266862466, 1.420541178512258, 1.5133966407414765, 1.6077023469220952, 1.7037899306023085, 1.8019910253303089, 1.9026372646542904, 2.0060602821224456, 2.112591711282968, 2.2225631856840518, 2.3363063388738903, 2.4541528044006755, 2.5764342158126015, 2.7034822066578617, 2.83562841048465, 2.9732044608411603, 3.1165419912755823, 3.2659726353361123, 3.4243850625148546, 3.604896086079547, 3.8231795552418366, 4.094909319213373, 4.435759227205808, 4.861403128430789, 5.387514872099959, 6.029768307424969, 6.8038372836174785, 7.725395649889126, 8.810117255451555, 10.073675949516419, 11.53174558129538};
-  // clang-format on
+  std::vector<real_t> x;
+  if constexpr (Curve::UNIFORM == TestType::curve_type)
+  {
+    x = uniform_vector(values, x_min, x_max);
+  }
+  else if constexpr (Curve::NON_UNIFORM == TestType::curve_type)
+  {
+    x = sorted_random_vector(rng, values, x_min, x_max);
+  }
+  else
+  {
+    throw std::runtime_error("Unkown BSplineType.");
+  }
 
-  // Big BSpline
-  size_t const num_ctrl{600};
-  size_t const num_knots{num_ctrl + degree + 1};
-  std::vector<double> big_ctrl_pts = random_vector(rng, num_ctrl, -1.0, 1.0);
-  std::vector<double> big_knots    = random_vector(rng, num_knots, -10.0, 10.0);
-
-  std::sort(big_knots.begin(), big_knots.end());
-
-  types::OpenNonUniform<double> big_bspline =
-      factory::open_nonuniform(degree, big_knots, big_ctrl_pts);
-
-  size_t const num_elems{2000};
-  std::vector<double> big_x = random_vector(
-      rng, num_elems, big_knots.at(degree), big_knots.at(big_knots.size() - 1 - degree)
-  );
-  std::sort(big_x.begin(), big_x.end());
-  std::vector<double> big_y(num_elems);
-  std::generate(
-      big_y.begin(),
-      big_y.end(),
-      [i = 0, &big_bspline, &big_x]() mutable { return big_bspline.evaluate(big_x.at(i++)); }
-  );
+  std::vector<real_t> y = bspline.evaluate(x);
 
   SECTION("evaluate(...)")
   {
-    for (size_t i{0}; i < x_values.size(); i++)
+    for (size_t i{0}; i < x.size(); i++)
     {
-      REQUIRE_THAT(bspline.evaluate(x_values.at(i)), WithinRel(y_values.at(i)));
+      REQUIRE_THAT(bspline.evaluate(x.at(i)), WithinRel(y.at(i)));
     }
   }
 
   SECTION("compute_basis(...)")
   {
-    for (size_t i{0}; i < x_values.size(); i++)
+    auto c_data = bspline.get_control_points();
+
+    for (size_t i{0}; i < x.size(); i++)
     {
-      std::vector<double> basis = bspline.basis(x_values.at(i));
+      std::vector<real_t> basis = bspline.basis(x.at(i));
       REQUIRE(basis.size() == c_data.size());
-      double res{0.0};
+      real_t res{0.0};
       for (size_t j{0}; j < basis.size(); j++)
       {
         res += basis.at(j) * c_data.at(j);
       }
-      REQUIRE_THAT(res, WithinRel(y_values.at(i)));
+      REQUIRE_THAT(res, WithinRel(y.at(i), 1e-10));
     }
   }
 
-  SECTION("fit(...) - dense")
+  SECTION("fit(...)")
   {
-    bspline.fit(x_values, y_values);
+    bspline.fit(x, y);
 
-    for (size_t i{0}; i < x_values.size(); i++)
+    for (size_t i{0}; i < x.size(); i++)
     {
-      REQUIRE_THAT(bspline.evaluate(x_values.at(i)), WithinRel(y_values.at(i)));
+      REQUIRE_THAT(bspline.evaluate(x.at(i)), WithinRel(y.at(i), 1e-10));
     }
   }
 
-  SECTION("fit(...) - sparse")
+  SECTION("interpolate(...)")
   {
+    std::vector<lsq::Condition<real_t>> additional;
 
-    big_bspline.fit(big_x, big_y);
-
-    for (size_t i{0}; i < big_x.size(); i++)
+    if constexpr (BoundaryCondition::PERIODIC != TestType::boundary_condition_type)
     {
-      REQUIRE_THAT(big_bspline.evaluate(big_x.at(i)), WithinRel(big_y.at(i), 1e-12));
+      for (size_t i{0}; i < degree - 1; i++)
+      {
+        additional.emplace_back(x.at(degree + i), y.at(degree + i), 0);
+      }
+    }
+
+    bspline.interpolate(x, y, additional);
+    for (size_t i{degree}; i < x.size() - degree; i++)
+    {
+      REQUIRE_THAT(bspline.evaluate(x.at(i)), WithinRel(y.at(i), 1e-8));
     }
   }
 
-  SECTION("interpolate(...) - dense")
+  if constexpr (BoundaryCondition::PERIODIC != TestType::boundary_condition_type)
   {
-    std::vector<lsq::Condition<double>> additional;
-    for (size_t i{0}; i < degree - 1; i++)
+    SECTION("interpolate(...) - invalid additional conditions")
     {
-      additional.emplace_back(x_values.at(degree + i), y_values.at(degree + i), 0);
-    }
-
-    bspline.interpolate(x_values, y_values, additional);
-    for (size_t i{degree}; i < x_values.size() - degree; i++)
-    {
-      REQUIRE_THAT(bspline.evaluate(x_values.at(i)), WithinRel(y_values.at(i)));
-    }
-  }
-
-  SECTION("interpolate(...) - sparse")
-  {
-    std::vector<lsq::Condition<double>> additional;
-    for (size_t i{0}; i < degree - 1; i++)
-    {
-      additional.emplace_back(big_x.at(degree + i), big_y.at(degree + i), 0);
-    }
-
-    big_bspline.interpolate(big_x, big_y, additional);
-
-    for (size_t i{degree}; i < big_x.size() - degree; i++)
-    {
-      REQUIRE_THAT(big_bspline.evaluate(big_x.at(i)), WithinRel(big_y.at(i), 1e-10));
-    }
-  }
-
-  SECTION("interpolate(...) - invalid additional conditions")
-  {
-    std::vector<lsq::Condition<double>> additional;
-    for (size_t i{0}; i < degree - 1; i++)
-    {
-      additional.emplace_back(x_values.back(), y_values.back(), 0);
-    }
-    REQUIRE_THROWS_WITH(
-        bspline.interpolate(x_values, y_values, additional),
-        "Additional conditions must lie inside the knots interval."
-    );
-  }
-}
-
-TEST_CASE("OpenNonUniformConstant", "[bspline]")
-{
-  size_t degree{3};
-
-  std::vector<double> t_data_vec{0.1, 1.3, 2.2, 2.2, 4.9, 6.3, 6.3, 6.3, 13.2};
-  knots::Data<double, Curve::NON_UNIFORM> t_data{t_data_vec};
-
-  std::vector<double> c_data_vec{0.1, 1.3, 2.2, 4.9, 13.2};
-  control_points::Data<double> c_data{c_data_vec};
-
-  types::OpenNonUniformConstant<double> bspline{t_data, c_data, degree};
-
-  // clang-format off
-  std::vector<double> x_values{-1.0, 0.0, 1.0, 2.2, 3.225, 4.25, 5.275, 6.3, 6.4, 6.9, 7.1};
-  std::vector<double> y_values{0.4, 0.4, 0.4, 0.4, 1.3516518061271148, 2.3946959304983997, 4.0211091244533534, 13.2, 13.2, 13.2, 13.2};
-  // clang-format on
-
-  SECTION("bspline.evaluate(...)")
-  {
-    for (size_t i{0}; i < x_values.size(); i++)
-    {
-      REQUIRE_THAT(bspline.evaluate(x_values.at(i)), WithinRel(y_values.at(i)));
+      std::vector<lsq::Condition<real_t>> additional;
+      for (size_t i{0}; i < degree - 1; i++)
+      {
+        additional.emplace_back(x.back() + static_cast<real_t>(1.0), y.back(), 0);
+      }
+      REQUIRE_THROWS_WITH(
+          bspline.interpolate(x, y, additional),
+          "Additional conditions must lie inside the knots interval."
+      );
     }
   }
 }

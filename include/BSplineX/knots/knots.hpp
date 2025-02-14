@@ -114,7 +114,7 @@ public:
     return std::pair<size_t, T>{this->finder.find(value), value};
   }
 
-  std::pair<T, T> domain() { return {value_left, value_right}; }
+  std::pair<T, T> domain() const { return {value_left, value_right}; }
 
   T at(size_t index) const { return this->atter.at(index); }
 
