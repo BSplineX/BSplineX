@@ -162,14 +162,29 @@ public:
       value -= this->period * (std::floor((value - this->value_right) / this->period) + 1);
     }
 
-    if (value < this->value_left || value > this->value_right)
+    if (value < this->value_left)
     {
       value = this->value_left;
+    }
+    else if (value > this->value_right)
+    {
+      value = this->value_right;
     }
 
     return value;
   }
 };
+
+/*
+
+value_right = 1
+value = 2
+period = 1
+
+
+
+
+*/
 
 } // namespace bsplinex::knots
 

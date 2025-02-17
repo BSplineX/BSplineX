@@ -161,6 +161,34 @@ TEMPLATE_TEST_CASE("masinag", "[bspline][template][product]", BSPLINE_TEST_TYPES
     }
   }
 
+  if constexpr (Extrapolation::CONSTANT == TestType::extrapolation_type)
+  {
+    SECTION("evaluate(...) - extrapolate constant")
+    {
+      for (size_t i{0}; i < 50; i++)
+      {
+        REQUIRE_THAT(
+            bspline.evaluate(x_min - static_cast<real_t>(i)), WithinRel(bspline.evaluate(x_min))
+        );
+        REQUIRE_THAT(
+            bspline.evaluate(x_max + static_cast<real_t>(i)), WithinRel(bspline.evaluate(x_max))
+        );
+      }
+    }
+  }
+  else if constexpr (Extrapolation::PERIODIC == TestType::extrapolation_type)
+  {
+    SECTION("evaluate(...) - extrapolate periodic")
+    {
+      real_t const period = x_max - x_min;
+      for (size_t i{0}; i < x.size(); i++)
+      {
+        REQUIRE_THAT(bspline.evaluate(x.at(i) + period), WithinRel(y.at(i), 1e-8));
+        REQUIRE_THAT(bspline.evaluate(x.at(i) - period), WithinRel(y.at(i), 1e-8));
+      }
+    }
+  }
+
   SECTION("compute_basis(...)")
   {
     auto c_data = bspline.get_control_points();

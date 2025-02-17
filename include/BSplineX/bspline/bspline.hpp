@@ -33,7 +33,7 @@ public:
 
   static BoundaryCondition const boundary_condition_type{BC};
 
-  static Extrapolation const get_extrapolation_type{EXT};
+  static Extrapolation const extrapolation_type{EXT};
 
 private:
   using vec_iter = typename std::vector<T>::const_iterator;
