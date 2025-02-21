@@ -101,8 +101,8 @@ BSplineType random_bspline(std::mt19937 &rng, size_t degree, size_t num_ctrl)
   {
     throw std::runtime_error("Unknown BSpline Boundary Condition");
   }
-  constexpr real_t knots_begin{-10.0};
-  constexpr real_t knots_end{10.0};
+  constexpr real_t knots_begin{-100.0};
+  constexpr real_t knots_end{100.0};
 
   if constexpr (Curve::UNIFORM == BSplineType::curve_type)
   {
@@ -128,7 +128,7 @@ TEMPLATE_TEST_CASE("masinag", "[bspline][template][product]", BSPLINE_TEST_TYPES
 {
   auto &rng = get_device();
 
-  size_t const degree = GENERATE(2, 3);
+  size_t const degree = GENERATE(1, 2, 3);
 
   using ctrl_val_t              = std::pair<size_t, size_t>;
   auto const [ctrl_pts, values] = GENERATE(ctrl_val_t{50, 50}, ctrl_val_t{600, 2000});
@@ -148,7 +148,7 @@ TEMPLATE_TEST_CASE("masinag", "[bspline][template][product]", BSPLINE_TEST_TYPES
   }
   else
   {
-    throw std::runtime_error("Unkown BSplineType.");
+    throw std::runtime_error("Unkown BSpline Curve.");
   }
 
   std::vector<real_t> y = bspline.evaluate(x);
@@ -224,12 +224,18 @@ TEMPLATE_TEST_CASE("masinag", "[bspline][template][product]", BSPLINE_TEST_TYPES
     {
       for (size_t i{0}; i < degree - 1; i++)
       {
+        // TODO: should be done with a derivative to avoid singular matrices
         additional.emplace_back(x.at(degree + i), y.at(degree + i), 0);
       }
     }
 
     bspline.interpolate(x, y, additional);
-    for (size_t i{degree}; i < x.size() - degree; i++)
+    size_t padding{0};
+    if constexpr (BoundaryCondition::OPEN == TestType::boundary_condition_type)
+    {
+      padding = degree;
+    }
+    for (size_t i{padding}; i < x.size() - padding; i++)
     {
       REQUIRE_THAT(bspline.evaluate(x.at(i)), WithinRel(y.at(i), 1e-8));
     }
@@ -240,14 +246,18 @@ TEMPLATE_TEST_CASE("masinag", "[bspline][template][product]", BSPLINE_TEST_TYPES
     SECTION("interpolate(...) - invalid additional conditions")
     {
       std::vector<lsq::Condition<real_t>> additional;
-      for (size_t i{0}; i < degree - 1; i++)
+      size_t const additional_size = degree - 1;
+      for (size_t i{0}; i < additional_size; i++)
       {
         additional.emplace_back(x.back() + static_cast<real_t>(1.0), y.back(), 0);
       }
-      REQUIRE_THROWS_WITH(
-          bspline.interpolate(x, y, additional),
-          "Additional conditions must lie inside the knots interval."
-      );
+      if (additional_size > 0)
+      {
+        REQUIRE_THROWS_WITH(
+            bspline.interpolate(x, y, additional),
+            "Additional conditions must lie inside the knots interval."
+        );
+      }
     }
   }
 }

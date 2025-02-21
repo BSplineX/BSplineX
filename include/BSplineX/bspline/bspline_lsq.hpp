@@ -3,10 +3,13 @@
 
 // Standard includes
 #include <functional>
+#include <iostream>
 #include <vector>
 
 // Third-party includes
 #include <Eigen/Dense>
+#include <Eigen/Jacobi>
+#include <Eigen/src/Core/ConditionEstimator.h>
 
 // For some reason Eigen has a couple of set but unused variables
 #ifdef __GNUC__
@@ -48,52 +51,98 @@ public:
   virtual Eigen::VectorX<T> solve(Eigen::VectorX<T> const &b) = 0;
   [[nodiscard]] virtual size_t num_rows() const               = 0;
   [[nodiscard]] virtual size_t num_cols() const               = 0;
+  [[nodiscard]] virtual T conditioning_number() const         = 0;
 };
 
 template <typename T>
 class LSQMatrix<T, Eigen::MatrixX<T>>
 {
 private:
-  Eigen::MatrixX<T> A;
+  using mat_t = Eigen::MatrixX<T>;
+  using vec_t = Eigen::VectorX<T>;
+
+  mat_t A;
 
 public:
-  LSQMatrix(size_t num_rows, size_t num_cols) : A{Eigen::MatrixX<T>::Zero(num_rows, num_cols)} {}
+  LSQMatrix(size_t num_rows, size_t num_cols) : A{mat_t::Zero(num_rows, num_cols)} {}
 
-  T &operator()(size_t row, size_t col) { return A(row, col); }
+  T &operator()(size_t row, size_t col) { return this->A(row, col); }
 
-  Eigen::VectorX<T> solve(Eigen::VectorX<T> const &b) { return A.colPivHouseholderQr().solve(b); }
+  vec_t solve(vec_t const &b)
+  {
+    Eigen::LeastSquaresConjugateGradient<mat_t> lscg;
+    lscg.compute(this->A);
+    vec_t x = lscg.solve(b);
 
-  [[nodiscard]] size_t num_rows() const { return A.rows(); }
+    std::cout << "DENSE" << std::endl;
+    std::cout << "iterations: " << lscg.iterations() << std::endl;
+    std::cout << "error: " << lscg.error() << std::endl;
+    std::cout << "|Ax - b| = " << (this->A * x - b).norm() << std::endl;
+    std::cout << "|b| = " << b.norm() << std::endl;
+    std::cout << "|Ax - b| / |b| = " << (this->A * x - b).norm() / b.norm() << std::endl;
+    std::cout << "condition number = " << this->conditioning_number() << std::endl;
 
-  [[nodiscard]] size_t num_cols() const { return A.cols(); }
+    return x;
+  }
+
+  [[nodiscard]] size_t num_rows() const { return this->A.rows(); }
+
+  [[nodiscard]] size_t num_cols() const { return this->A.cols(); }
+
+  [[nodiscard]] T conditioning_number() const
+  {
+    Eigen::JacobiSVD<mat_t> svd(this->A);
+    T cond = svd.singularValues()(0) / svd.singularValues()(svd.singularValues().size() - 1);
+
+    return cond;
+  }
 };
 
 template <typename T>
 class LSQMatrix<T, Eigen::SparseMatrix<T>>
 {
 private:
-  Eigen::SparseMatrix<T> A;
+  using mat_t = Eigen::SparseMatrix<T>;
+  using vec_t = Eigen::VectorX<T>;
+  mat_t A;
 
 public:
   LSQMatrix(size_t num_rows, size_t num_cols, size_t num_nnz) : A(num_rows, num_cols)
   {
-    A.reserve(num_nnz);
+    this->A.reserve(num_nnz);
   }
 
-  T &operator()(size_t row, size_t col) { return A.coeffRef(row, col); }
+  T &operator()(size_t row, size_t col) { return this->A.coeffRef(row, col); }
 
-  Eigen::VectorX<T> solve(Eigen::VectorX<T> const &b)
+  vec_t solve(vec_t const &b)
   {
-    A.makeCompressed();
+    this->A.makeCompressed();
 
-    Eigen::SparseQR<Eigen::SparseMatrix<T>, Eigen::COLAMDOrdering<int>> solver{};
-    solver.compute(A);
-    return solver.solve(b);
+    Eigen::LeastSquaresConjugateGradient<mat_t> lscg;
+    lscg.compute(this->A);
+    vec_t x = lscg.solve(b);
+
+    std::cout << "SPARSE" << std::endl;
+    std::cout << "iterations: " << lscg.iterations() << std::endl;
+    std::cout << "error: " << lscg.error() << std::endl;
+    std::cout << "|Ax - b| = " << (this->A * x - b).norm() << std::endl;
+    std::cout << "|b| = " << b.norm() << std::endl;
+    std::cout << "|Ax - b| / |b| = " << (this->A * x - b).norm() / b.norm() << std::endl;
+
+    return x;
   }
 
   [[nodiscard]] size_t num_rows() const { return A.rows(); }
 
   [[nodiscard]] size_t num_cols() const { return A.cols(); }
+
+  [[nodiscard]] T conditioning_number() const
+  {
+    // Eigen::JacobiSVD<Eigen::SparseMatrix<T>> svd(this->A);
+    // T cond = svd.singularValues()(0) / svd.singularValues()(svd.singularValues().size() - 1);
+
+    return 0;
+  }
 };
 
 template <typename T>
@@ -140,7 +189,7 @@ template <class LSQMatrix, typename T, class Iter, BoundaryCondition BC>
 void fill(
     LSQMatrix &A,
     Eigen::VectorX<T> &b,
-    size_t degree,
+    size_t const degree,
     std::function<size_t(T, std::vector<T> &)> nnz_basis,
     views::ArrayView<Iter> const &x,
     views::ArrayView<Iter> const &y,
@@ -163,7 +212,7 @@ void fill(
   {
     Condition<T> const &condition = conditions.at(i);
 
-    size_t index = nnz_basis(condition.x_value, nnz);
+    size_t const index = nnz_basis(condition.x_value, nnz);
     for (size_t j{0}; j <= degree; j++)
     {
       if constexpr (BoundaryCondition::PERIODIC == BC)
@@ -180,12 +229,15 @@ void fill(
 
     std::fill(nnz.begin(), nnz.end(), (T)0);
   }
+
+  // Check the conditioning number
+  // std::cout << "conditioning number for A is: " << A.conditioning_number() << std::endl;
 }
 
 template <typename T, class Iter, BoundaryCondition BC>
 control_points::ControlPoints<T, BC>
-lsq(size_t degree,
-    size_t knots_size,
+lsq(size_t const degree,
+    size_t const knots_size,
     std::function<size_t(T, std::vector<T> &)> nnz_basis,
     views::ArrayView<Iter> const &x,
     views::ArrayView<Iter> const &y,
