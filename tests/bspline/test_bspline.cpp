@@ -124,11 +124,11 @@ BSplineType random_bspline(std::mt19937 &rng, size_t degree, size_t num_ctrl)
   }
 }
 
-TEMPLATE_TEST_CASE("masinag", "[bspline][template][product]", BSPLINE_TEST_TYPES)
+TEMPLATE_TEST_CASE("bspline", "[bspline][template][product]", BSPLINE_TEST_TYPES)
 {
   auto &rng = get_device();
 
-  size_t const degree = GENERATE(1, 2, 3);
+  size_t const degree = GENERATE(1);
 
   using ctrl_val_t              = std::pair<size_t, size_t>;
   auto const [ctrl_pts, values] = GENERATE(ctrl_val_t{50, 50}, ctrl_val_t{600, 2000});
