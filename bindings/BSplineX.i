@@ -2,9 +2,14 @@
 
 // Injected C++ code
 %{
+#include "BSplineX/types.hpp"
 #include "BSplineX/bspline/bspline.hpp"
 #include "BSplineX/bspline/bspline_types.hpp"
 #include "BSplineX/bspline/bspline_factory.hpp"
+#include "BSplineX/bspline/bspline_factory_open.hpp"
+#include "BSplineX/bspline/bspline_factory_clamped.hpp"
+#include "BSplineX/bspline/bspline_factory_periodic.hpp"
+#include "BSplineX/bspline/bspline_lsq.hpp"
 using namespace bsplinex;
 %}
 
@@ -13,9 +18,13 @@ using namespace bsplinex;
 %template() std::pair<double, double>;
 %template() std::vector<double>;
 
-
+%include "BSplineX/types.hpp"
 %include "BSplineX/bspline/bspline.hpp"
 %include "BSplineX/bspline/bspline_factory.hpp"
+%include "BSplineX/bspline/bspline_factory_open.hpp"
+%include "BSplineX/bspline/bspline_factory_clamped.hpp"
+%include "BSplineX/bspline/bspline_factory_periodic.hpp"
+%include "BSplineX/bspline/bspline_lsq.hpp"
 %include "BSplineX/bspline/bspline_types.hpp"
 %include "exception.i"
 using namespace bsplinex;
@@ -27,6 +36,9 @@ using namespace bsplinex;
     SWIG_exception(SWIG_RuntimeError, e.what());
   }
 }
+
+%template(Condition) lsq::Condition<double>;
+%template() std::vector<lsq::Condition<double>>;
 
 //  ██████╗ ██████╗ ███████╗███╗   ██╗
 // ██╔═══██╗██╔══██╗██╔════╝████╗  ██║
