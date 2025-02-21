@@ -3,8 +3,11 @@
 
 // Standard includes
 #include <functional>
-#include <iostream>
 #include <vector>
+
+#ifndef NDEBUG
+#include <iostream>
+#endif
 
 // Third-party includes
 #include <Eigen/Dense>
@@ -51,7 +54,6 @@ public:
   virtual Eigen::VectorX<T> solve(Eigen::VectorX<T> const &b) = 0;
   [[nodiscard]] virtual size_t num_rows() const               = 0;
   [[nodiscard]] virtual size_t num_cols() const               = 0;
-  [[nodiscard]] virtual T conditioning_number() const         = 0;
 };
 
 template <typename T>
@@ -74,6 +76,7 @@ public:
     lscg.compute(this->A);
     vec_t x = lscg.solve(b);
 
+#ifndef NDEBUG
     std::cout << "DENSE" << std::endl;
     std::cout << "iterations: " << lscg.iterations() << std::endl;
     std::cout << "error: " << lscg.error() << std::endl;
@@ -81,6 +84,7 @@ public:
     std::cout << "|b| = " << b.norm() << std::endl;
     std::cout << "|Ax - b| / |b| = " << (this->A * x - b).norm() / b.norm() << std::endl;
     std::cout << "condition number = " << this->conditioning_number() << std::endl;
+#endif
 
     return x;
   }
@@ -122,12 +126,15 @@ public:
     lscg.compute(this->A);
     vec_t x = lscg.solve(b);
 
+#ifndef NDEBUG
     std::cout << "SPARSE" << std::endl;
     std::cout << "iterations: " << lscg.iterations() << std::endl;
     std::cout << "error: " << lscg.error() << std::endl;
     std::cout << "|Ax - b| = " << (this->A * x - b).norm() << std::endl;
     std::cout << "|b| = " << b.norm() << std::endl;
     std::cout << "|Ax - b| / |b| = " << (this->A * x - b).norm() / b.norm() << std::endl;
+    std::cout << "condition number = n.a." << std::endl;
+#endif
 
     return x;
   }
@@ -135,14 +142,6 @@ public:
   [[nodiscard]] size_t num_rows() const { return A.rows(); }
 
   [[nodiscard]] size_t num_cols() const { return A.cols(); }
-
-  [[nodiscard]] T conditioning_number() const
-  {
-    // Eigen::JacobiSVD<Eigen::SparseMatrix<T>> svd(this->A);
-    // T cond = svd.singularValues()(0) / svd.singularValues()(svd.singularValues().size() - 1);
-
-    return 0;
-  }
 };
 
 template <typename T>
@@ -229,9 +228,6 @@ void fill(
 
     std::fill(nnz.begin(), nnz.end(), (T)0);
   }
-
-  // Check the conditioning number
-  // std::cout << "conditioning number for A is: " << A.conditioning_number() << std::endl;
 }
 
 template <typename T, class Iter, BoundaryCondition BC>
