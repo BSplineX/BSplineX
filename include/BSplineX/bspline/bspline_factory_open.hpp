@@ -19,13 +19,13 @@ namespace bsplinex::factory
  * reduced by `p` knots at the beginning and `p` knots at the end to respect
  * the padding of the open boundary condition.
  *
- * @tparam T The type of the control points.
+ * @tparam T The numeric type.
  * @param degree The degree of the BSpline.
  * @param begin The begin of the uniform knot vector.
  * @param end The end of the uniform knot vector.
  * @param num_elems The number of elements in the knot vector.
  * @param ctrl_points The control points of the BSpline.
- * @return A clamped uniform BSpline.
+ * @return A open uniform BSpline.
  */
 template <typename T = double>
 inline types::OpenUniform<T>
@@ -42,12 +42,12 @@ open_uniform(size_t degree, T begin, T end, size_t num_elems, std::vector<T> con
  * reduced by `p` knots at the beginning and `p` knots at the end to respect
  * the padding of the open boundary condition.
  *
- * @tparam T The type of the control points.
+ * @tparam T The numeric type.
  * @param degree The degree of the BSpline.
  * @param begin The begin of the uniform knot vector.
  * @param end The end of the uniform knot vector.
  * @param num_elems The number of elements in the knot vector.
- * @return A clamped uniform BSpline.
+ * @return A open uniform BSpline.
  */
 template <typename T = double>
 inline types::OpenUniform<T> open_uniform(size_t degree, T begin, T end, size_t num_elems)
@@ -61,9 +61,9 @@ inline types::OpenUniform<T> open_uniform(size_t degree, T begin, T end, size_t 
  * This is a useful constructor in case you want to interpolate a BSpline to
  * some data.
  *
- * @tparam T The type of the control points.
+ * @tparam T The numeric type.
  * @param degree The degree of the BSpline.
- * @return A clamped uniform BSpline.
+ * @return A open uniform BSpline.
  */
 template <typename T = double>
 inline types::OpenUniform<T> open_uniform(size_t degree)
@@ -83,13 +83,13 @@ inline types::OpenUniform<T> open_uniform(size_t degree)
  * reduced by `p` knots at the beginning and `p` knots at the end to respect
  * the padding of the open boundary condition.
  *
- * @tparam T The type of the control points.
+ * @tparam T The numeric type.
  * @param degree The degree of the BSpline.
  * @param begin The begin of the uniform knot vector.
  * @param end The end of the uniform knot vector.
  * @param num_elems The number of elements in the knot vector.
  * @param ctrl_points The control points of the BSpline.
- * @return A clamped uniform constant BSpline.
+ * @return A open uniform constant BSpline.
  */
 template <typename T = double>
 inline types::OpenUniformConstant<T> open_uniform_constant(
@@ -107,12 +107,12 @@ inline types::OpenUniformConstant<T> open_uniform_constant(
  * reduced by `p` knots at the beginning and `p` knots at the end to respect
  * the padding of the open boundary condition.
  *
- * @tparam T The type of the control points.
+ * @tparam T The numeric type.
  * @param degree The degree of the BSpline.
  * @param begin The begin of the uniform knot vector.
  * @param end The end of the uniform knot vector.
  * @param num_elems The number of elements in the knot vector.
- * @return A clamped uniform constant BSpline.
+ * @return A open uniform constant BSpline.
  */
 template <typename T = double>
 inline types::OpenUniformConstant<T>
@@ -129,9 +129,9 @@ open_uniform_constant(size_t degree, T begin, T end, size_t num_elems)
  * This is a useful constructor in case you want to interpolate a BSpline to
  * some data.
  *
- * @tparam T The type of the control points.
+ * @tparam T The numeric type.
  * @param degree The degree of the BSpline.
- * @return A clamped uniform constant BSpline.
+ * @return A open uniform constant BSpline.
  */
 template <typename T = double>
 inline types::OpenUniformConstant<T> open_uniform_constant(size_t degree)
@@ -152,11 +152,11 @@ inline types::OpenUniformConstant<T> open_uniform_constant(size_t degree)
  * Note that this being an open BSpline, the knot vector you specify will be
  * respected and the first and last knots will have multiplicity `p+1`.
  *
- * @tparam T The type of the control points.
+ * @tparam T The numeric type.
  * @param degree The degree of the BSpline.
  * @param knots The knot vector of the BSpline.
  * @param ctrl_points The control points of the BSpline.
- * @return A clamped non-uniform BSpline.
+ * @return A open non-uniform BSpline.
  */
 template <typename T = double>
 inline types::OpenNonUniform<T>
@@ -172,10 +172,10 @@ open_nonuniform(size_t degree, std::vector<T> const &knots, std::vector<T> const
  * Note that this being an open BSpline, the knot vector you specify will be
  * respected and the first and last knots will have multiplicity `p+1`.
  *
- * @tparam T The type of the control points.
+ * @tparam T The numeric type.
  * @param degree The degree of the BSpline.
  * @param knots The knot vector of the BSpline.
- * @return A clamped non-uniform BSpline.
+ * @return A open non-uniform BSpline.
  */
 template <typename T = double>
 inline types::OpenNonUniform<T> open_nonuniform(size_t degree, std::vector<T> const &knots)
@@ -189,9 +189,9 @@ inline types::OpenNonUniform<T> open_nonuniform(size_t degree, std::vector<T> co
  * This is a useful constructor in case you want to interpolate a BSpline to
  * some data.
  *
- * @tparam T The type of the control points.
+ * @tparam T The numeric type.
  * @param degree The degree of the BSpline.
- * @return A clamped non-uniform BSpline.
+ * @return A open non-uniform BSpline.
  */
 template <typename T = double>
 inline types::OpenNonUniform<T> open_nonuniform(size_t degree)
@@ -208,11 +208,11 @@ inline types::OpenNonUniform<T> open_nonuniform(size_t degree)
  * Note that this being an open BSpline, the knot vector you specify will be
  * respected and the first and last knots will have multiplicity `p+1`.
  *
- * @tparam T The type of the control points.
+ * @tparam T The numeric type.
  * @param degree The degree of the BSpline.
  * @param knots The knot vector of the BSpline.
  * @param ctrl_points The control points of the BSpline.
- * @return A clamped non-uniform constant BSpline.
+ * @return A open non-uniform constant BSpline.
  */
 template <typename T = double>
 inline types::OpenNonUniformConstant<T> open_nonuniform_constant(
@@ -229,10 +229,10 @@ inline types::OpenNonUniformConstant<T> open_nonuniform_constant(
  * Note that this being an open BSpline, the knot vector you specify will be
  * respected and the first and last knots will have multiplicity `p+1`.
  *
- * @tparam T The type of the control points.
+ * @tparam T The numeric type.
  * @param degree The degree of the BSpline.
  * @param knots The knot vector of the BSpline.
- * @return A clamped non-uniform constant BSpline.
+ * @return A open non-uniform constant BSpline.
  */
 template <typename T = double>
 inline types::OpenNonUniformConstant<T>
@@ -247,9 +247,9 @@ open_nonuniform_constant(size_t degree, std::vector<T> const &knots)
  * This is a useful constructor in case you want to interpolate a BSpline to
  * some data.
  *
- * @tparam T The type of the control points.
+ * @tparam T The numeric type.
  * @param degree The degree of the BSpline.
- * @return A clamped non-uniform constant BSpline.
+ * @return A open non-uniform constant BSpline.
  */
 template <typename T = double>
 inline types::OpenNonUniformConstant<T> open_nonuniform_constant(size_t degree)

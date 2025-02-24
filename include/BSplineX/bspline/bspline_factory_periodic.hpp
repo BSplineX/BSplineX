@@ -19,13 +19,13 @@ namespace bsplinex::factory
  * you specify will be respected, but some padding will be applied to ensure
  * periodicity.
  *
- * @tparam T The type of the control points.
+ * @tparam T The numeric type.
  * @param degree The degree of the BSpline.
  * @param begin The begin of the uniform knot vector.
  * @param end The end of the uniform knot vector.
  * @param num_elems The number of elements in the knot vector.
  * @param ctrl_points The control points of the BSpline.
- * @return A clamped uniform constant BSpline.
+ * @return A periodic uniform BSpline.
  */
 template <typename T = double>
 inline types::PeriodicUniform<T>
@@ -41,12 +41,12 @@ periodic_uniform(size_t degree, T begin, T end, size_t num_elems, std::vector<T>
  * Note that this being a periodic BSpline, the knot vector you specify will be
  * respected, but some padding will be applied to ensure periodicity.
  *
- * @tparam T The type of the control points.
+ * @tparam T The numeric type.
  * @param degree The degree of the BSpline.
  * @param begin The begin of the uniform knot vector.
  * @param end The end of the uniform knot vector.
  * @param num_elems The number of elements in the knot vector.
- * @return A clamped uniform constant BSpline.
+ * @return A periodic uniform BSpline.
  */
 template <typename T = double>
 inline types::PeriodicUniform<T> periodic_uniform(size_t degree, T begin, T end, size_t num_elems)
@@ -60,9 +60,9 @@ inline types::PeriodicUniform<T> periodic_uniform(size_t degree, T begin, T end,
  * This is a useful constructor in case you want to interpolate a BSpline to
  * some data.
  *
- * @tparam T The type of the control points.
+ * @tparam T The numeric type.
  * @param degree The degree of the BSpline.
- * @return A clamped uniform constant BSpline.
+ * @return A periodic uniform BSpline.
  */
 template <typename T = double>
 inline types::PeriodicUniform<T> periodic_uniform(size_t degree)
@@ -82,11 +82,11 @@ inline types::PeriodicUniform<T> periodic_uniform(size_t degree)
  * you specify will be respected, but some padding will be applied to ensure
  * periodicity.
  *
- * @tparam T The type of the control points.
+ * @tparam T The numeric type.
  * @param degree The degree of the BSpline.
  * @param knots The knot vector of the BSpline.
  * @param ctrl_points The control points of the BSpline.
- * @return A clamped non-uniform constant BSpline.
+ * @return A periodic non-uniform BSpline.
  */
 template <typename T = double>
 inline types::PeriodicNonUniform<T>
@@ -102,10 +102,10 @@ periodic_nonuniform(size_t degree, std::vector<T> const &knots, std::vector<T> c
  * Note that this being a periodic BSpline, the knot vector you specify will be
  * respected, but some padding will be applied to ensure periodicity.
  *
- * @tparam T The type of the control points.
+ * @tparam T The numeric type.
  * @param degree The degree of the BSpline.
  * @param knots The knot vector of the BSpline.
- * @return A clamped non-uniform constant BSpline.
+ * @return A periodic non-uniform BSpline.
  */
 template <typename T = double>
 inline types::PeriodicNonUniform<T> periodic_nonuniform(size_t degree, std::vector<T> const &knots)
@@ -119,9 +119,9 @@ inline types::PeriodicNonUniform<T> periodic_nonuniform(size_t degree, std::vect
  * This is a useful constructor in case you want to interpolate a BSpline to
  * some data.
  *
- * @tparam T The type of the control points.
+ * @tparam T The numeric type.
  * @param degree The degree of the BSpline.
- * @return A clamped non-uniform constant BSpline.
+ * @return A periodic non-uniform BSpline.
  */
 template <typename T = double>
 inline types::PeriodicNonUniform<T> periodic_nonuniform(size_t degree)
