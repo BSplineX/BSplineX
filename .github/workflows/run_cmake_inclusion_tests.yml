@@ -42,7 +42,7 @@ jobs:
           rm -rf third_party
           rm -rf build/*
           cd build
-          cmake -DFETCH_CONTENT_METHOD=ON ..
+          cmake -DFETCH_CONTENT_METHOD=ON -DFETCH_GIT_TAG=${GITHUB_REF_NAME} ..
           cmake --build .
           ./test
 
