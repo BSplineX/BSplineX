@@ -80,6 +80,7 @@ public:
   T at(size_t index) const { return this->atter.at(index); }
 
   [[nodiscard]] size_t size() const { return this->atter.size(); }
+  
 };
 
 } // namespace bsplinex::control_points

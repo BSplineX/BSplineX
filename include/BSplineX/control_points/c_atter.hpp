@@ -65,6 +65,20 @@ public:
   }
 
   [[nodiscard]] size_t size() const { return this->data.size() + this->padder.size(); }
+
+  std::vector<T> get_values() const
+  {
+    std::vector<T> values(data.size() + padder.size());
+    for (size_t i = 0; i < data.size(); i++)
+    {
+      values[i] = data.at(i);
+    }
+    for (size_t i = 0; i < padder.size(); i++)
+    {
+      values[data.size() + i] = padder.right(i);
+    }
+    return values;
+  }
 };
 
 } // namespace bsplinex::control_points
