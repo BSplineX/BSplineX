@@ -42,7 +42,8 @@ jobs:
           rm -rf third_party
           rm -rf build/*
           cd build
-          cmake -DFETCH_CONTENT_METHOD=ON ..
+          echo "FETCH_GIT_TAG=${GITHUB_HEAD_REF:-${GITHUB_REF_NAME}}" >> $GITHUB_ENV
+          cmake -DFETCH_CONTENT_METHOD=ON -DFETCH_GIT_TAG=${GITHUB_HEAD_REF:-${GITHUB_REF_NAME}} ..
           cmake --build .
           ./test
 

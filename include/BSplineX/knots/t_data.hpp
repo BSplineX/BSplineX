@@ -1,8 +1,10 @@
-#ifndef T_DATA_HPP
-#define T_DATA_HPP
+#ifndef BSPLINEX_KNOTS_T_DATA_HPP
+#define BSPLINEX_KNOTS_T_DATA_HPP
 
 // Standard includes
+#include <algorithm>
 #include <cstddef>
+#include <functional>
 #include <vector>
 
 // BSplineX includes
@@ -37,8 +39,8 @@ public:
   Data(T begin, T end, T step)
   {
     DEBUG_LOG_CALL();
-    assertm(step > 0, "Negative step-size");
-    assertm(begin < end, "Wrong interval");
+    debugassert(step > 0, "Negative step-size");
+    debugassert(begin < end, "Wrong interval");
 
     this->begin     = begin;
     this->step_size = step;
@@ -48,10 +50,9 @@ public:
 
   // Specifying the num-elems means the domain will be [begin, end]
   Data(T begin, T end, size_t num_elems)
-      : begin{begin}, end{end}, num_elems{num_elems}, step_size{(end - begin) / num_elems}
   {
     DEBUG_LOG_CALL();
-    assertm(begin < end, "Wrong interval");
+    debugassert(begin < end, "Wrong interval");
 
     this->begin     = begin;
     this->end       = end;
@@ -99,7 +100,7 @@ public:
 
   T at(size_t index) const
   {
-    assertm(index < this->num_elems, "Out of bounds");
+    debugassert(index < this->num_elems, "Out of bounds");
     return this->begin + index * this->step_size;
   }
 
@@ -107,8 +108,8 @@ public:
 
   std::vector<T> slice(size_t first, size_t last) const
   {
-    assertm(first <= last, "Invalid range");
-    assertm(last <= this->num_elems, "Out of bounds");
+    debugassert(first <= last, "Invalid range");
+    debugassert(last <= this->num_elems, "Out of bounds");
 
     std::vector<T> tmp{};
     tmp.reserve(last - first);
@@ -131,7 +132,16 @@ private:
 public:
   Data() { DEBUG_LOG_CALL(); }
 
-  Data(std::vector<T> const &data) : raw_data(data) { DEBUG_LOG_CALL(); }
+  Data(std::vector<T> const &data) : raw_data(data)
+  {
+    DEBUG_LOG_CALL();
+    // NOTE: thank the STL for this wonderful backwards built sort check. Think it as if std::less
+    // is <= and std::less_equal is <.
+    debugassert(
+        std::is_sorted(data.begin(), data.end(), std::less<T>{}),
+        "The given data must be sorted respecting the operator <=."
+    );
+  }
 
   Data(Data const &other) : raw_data(other.raw_data) { DEBUG_LOG_CALL(); }
 
@@ -159,7 +169,7 @@ public:
 
   T at(size_t index) const
   {
-    assertm(index < this->raw_data.size(), "Out of bounds");
+    debugassert(index < this->raw_data.size(), "Out of bounds");
     return this->raw_data[index];
   }
 
@@ -167,8 +177,8 @@ public:
 
   std::vector<T> slice(size_t first, size_t last) const
   {
-    assertm(first <= last, "Invalid range");
-    assertm(last <= this->raw_data.size(), "Out of bounds");
+    debugassert(first <= last, "Invalid range");
+    debugassert(last <= this->raw_data.size(), "Out of bounds");
 
     return std::vector<T>{this->raw_data.begin() + first, this->raw_data.begin() + last};
   }

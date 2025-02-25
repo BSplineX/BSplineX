@@ -1,5 +1,5 @@
-#ifndef T_EXTRAPOLATOR_HPP
-#define T_EXTRAPOLATOR_HPP
+#ifndef BSPLINEX_KNOTS_T_EXTRAPOLATOR_HPP
+#define BSPLINEX_KNOTS_T_EXTRAPOLATOR_HPP
 
 // Standard includes
 #include <cmath>
@@ -84,8 +84,8 @@ public:
 
   T extrapolate(T value) const
   {
-    assertm(
-        value < this->value_left || value >= this->value_right, "Value not outside of the domain"
+    debugassert(
+        value < this->value_left || value > this->value_right, "Value not outside of the domain"
     );
     return value < this->value_left ? this->value_left : this->value_right;
   }
@@ -147,8 +147,8 @@ public:
 
   T extrapolate(T value) const
   {
-    assertm(
-        value < this->value_left || value >= this->value_right, "Value not outside of the domain"
+    debugassert(
+        value < this->value_left || value > this->value_right, "Value not outside of the domain"
     );
 
     // TODO: Figure out how to prevent numerical errors
@@ -157,19 +157,34 @@ public:
     {
       value += this->period * (std::floor((this->value_left - value) / this->period) + 1);
     }
-    else if (value >= this->value_right)
+    else if (value > this->value_right)
     {
       value -= this->period * (std::floor((value - this->value_right) / this->period) + 1);
     }
 
-    if (value < this->value_left || value >= this->value_right)
+    if (value < this->value_left)
     {
       value = this->value_left;
+    }
+    else if (value > this->value_right)
+    {
+      value = this->value_right;
     }
 
     return value;
   }
 };
+
+/*
+
+value_right = 1
+value = 2
+period = 1
+
+
+
+
+*/
 
 } // namespace bsplinex::knots
 

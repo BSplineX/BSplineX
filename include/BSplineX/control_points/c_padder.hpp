@@ -1,8 +1,7 @@
-#ifndef C_PADDER_HPP
-#define C_PADDER_HPP
+#ifndef BSPLINEX_CONTROL_POINTS_C_PADDER_HPP
+#define BSPLINEX_CONTROL_POINTS_C_PADDER_HPP
 
 // Standard includes
-#include <stdexcept>
 #include <vector>
 
 // BSplineX includes
@@ -17,13 +16,36 @@ template <typename T, BoundaryCondition BC>
 class Padder
 {
 public:
-  Padder() = default;
+  Padder() { DEBUG_LOG_CALL(); }
 
-  Padder(Data<T> &, size_t) {}
+  Padder(Data<T> &, size_t) { DEBUG_LOG_CALL(); }
+
+  Padder(Padder const &) { DEBUG_LOG_CALL(); }
+
+  Padder(Padder &&) noexcept { DEBUG_LOG_CALL(); }
+
+  ~Padder() noexcept { DEBUG_LOG_CALL(); }
+
+  Padder &operator=(Padder const &other)
+  {
+    DEBUG_LOG_CALL();
+    if (this == &other)
+      return *this;
+    return *this;
+  }
+
+  Padder &operator=(Padder &&other) noexcept
+  {
+    DEBUG_LOG_CALL();
+    if (this == &other)
+      return *this;
+    return *this;
+  }
 
   T right(size_t) const
   {
-    throw std::runtime_error(
+    releaseassert(
+        false,
         "Generic control points padder has zero length, this function is here only for "
         "compatibility reasons."
     );
@@ -41,13 +63,37 @@ private:
   std::vector<T> pad_right{};
 
 public:
-  Padder() = default;
+  Padder() { DEBUG_LOG_CALL(); }
 
-  Padder(Data<T> &data, size_t degree) { this->pad_right = data.slice(0, degree); }
+  Padder(Data<T> &data, size_t degree) : pad_right{data.slice(0, degree)} { DEBUG_LOG_CALL(); }
+
+  Padder(Padder const &other) : pad_right(other.pad_right) { DEBUG_LOG_CALL(); }
+
+  Padder(Padder &&other) noexcept : pad_right(std::move(other.pad_right)) { DEBUG_LOG_CALL(); }
+
+  ~Padder() noexcept { DEBUG_LOG_CALL(); }
+
+  Padder &operator=(Padder const &other)
+  {
+    DEBUG_LOG_CALL();
+    if (this == &other)
+      return *this;
+    pad_right = other.pad_right;
+    return *this;
+  }
+
+  Padder &operator=(Padder &&other) noexcept
+  {
+    DEBUG_LOG_CALL();
+    if (this == &other)
+      return *this;
+    pad_right = std::move(other.pad_right);
+    return *this;
+  }
 
   T right(size_t index) const
   {
-    assertm(index < this->pad_right.size(), "Out of bounds");
+    debugassert(index < this->pad_right.size(), "Out of bounds");
     return this->pad_right[index];
   }
 

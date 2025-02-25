@@ -9,6 +9,10 @@ option(ADD_SUBDIRECTORY_METHOD OFF)
 option(FETCH_CONTENT_METHOD ON)
 option(FIND_PACKAGE_METHOD OFF)
 
+if(NOT DEFINED FETCH_GIT_TAG)
+  set(FETCH_GIT_TAG main)
+endif()
+
 set(CMAKE_BUILD_TYPE Release)
 
 add_executable(test test.cpp)
@@ -33,7 +37,7 @@ if(FETCH_CONTENT_METHOD)
   fetchcontent_declare(
       BSplineX
       GIT_REPOSITORY https://github.com/BSplineX/BSplineX.git
-      GIT_TAG        cmake_tests
+      GIT_TAG        ${FETCH_GIT_TAG}
   )
 
   fetchcontent_makeavailable(BSplineX)

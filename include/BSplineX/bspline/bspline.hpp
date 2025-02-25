@@ -1,53 +1,67 @@
-#ifndef BSPLINE_HPP
-#define BSPLINE_HPP
+#ifndef BSPLINEX_BSPLINE_BSPLINE_HPP
+#define BSPLINEX_BSPLINE_BSPLINE_HPP
 
 // Standard includes
+#include <algorithm>
+#include <limits>
 #include <sstream>
 #include <vector>
 
-// Third-party includes
-#include <Eigen/Dense>
-
-// For some reason Eigen has a couple of set but unused variables
-#ifdef __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
-#endif
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-but-set-variable"
-#endif
-#include <Eigen/Sparse>
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
-#ifdef __GNUC__
-#pragma GCC diagnostic pop
-#endif
-
 // BSplineX includes
+#include "BSplineX/bspline/bspline_lsq.hpp"
 #include "BSplineX/control_points/control_points.hpp"
 #include "BSplineX/defines.hpp"
 #include "BSplineX/knots/knots.hpp"
 #include "BSplineX/types.hpp"
 
-constexpr size_t DENSE_MAX_COL = 512;
-
 namespace bsplinex::bspline
 {
 
+/**
+ * @brief A BSpline class.
+ *
+ * @tparam T The type of the control points.
+ * @tparam C The curve type.
+ * @tparam BC The boundary condition.
+ * @tparam EXT The extrapolation type.
+ */
 template <typename T, Curve C, BoundaryCondition BC, Extrapolation EXT>
 class BSpline
 {
+public:
+  static Curve const curve_type{C};
+
+  static BoundaryCondition const boundary_condition_type{BC};
+
+  static Extrapolation const extrapolation_type{EXT};
+
 private:
+  using vec_iter = typename std::vector<T>::const_iterator;
+  using vec_view = views::ArrayView<vec_iter>;
+
   knots::Knots<T, C, BC, EXT> knots{};
   control_points::ControlPoints<T, BC> control_points{};
-  size_t degree{0};
+  size_t degree{};
   std::vector<T> support{};
 
 public:
+  /**
+   * @brief Default constructor.
+   *
+   * Constructs an empty BSpline.
+   */
   BSpline() { DEBUG_LOG_CALL(); }
 
+  /**
+   * @brief Constructs a BSpline from a knot vector and control points.
+   *
+   * Note that depending on the boundary condition, the knot vector and control
+   * points will be padded to respect the boundary condition.
+   *
+   * @param knots_data The knot vector data.
+   * @param control_points_data The control points data.
+   * @param degree The degree of the BSpline.
+   */
   BSpline(
       knots::Data<T, C> const &knots_data,
       control_points::Data<T> const &control_points_data,
@@ -60,6 +74,13 @@ public:
     this->support.resize(this->degree + 1);
   }
 
+  /**
+   * @brief Copy constructor.
+   *
+   * Constructs a BSpline by copying another BSpline.
+   *
+   * @param other The BSpline to copy from.
+   */
   BSpline(BSpline const &other)
       : knots(other.knots), control_points(other.control_points), degree(other.degree),
         support(other.support)
@@ -67,6 +88,13 @@ public:
     DEBUG_LOG_CALL();
   }
 
+  /**
+   * @brief Move constructor.
+   *
+   * Constructs a BSpline by moving another BSpline.
+   *
+   * @param other The BSpline to move from.
+   */
   BSpline(BSpline &&other) noexcept
       : knots(std::move(other.knots)), control_points(std::move(other.control_points)),
         degree(other.degree), support(std::move(other.support))
@@ -74,8 +102,19 @@ public:
     DEBUG_LOG_CALL();
   }
 
+  /**
+   * @brief Destructor.
+   */
   ~BSpline() noexcept { DEBUG_LOG_CALL(); }
 
+  /**
+   * @brief Copy assignment operator.
+   *
+   * Assigns the contents of another BSpline to this BSpline.
+   *
+   * @param other The BSpline to copy from.
+   * @return A reference to this BSpline.
+   */
   BSpline &operator=(BSpline const &other)
   {
     DEBUG_LOG_CALL();
@@ -88,6 +127,14 @@ public:
     return *this;
   }
 
+  /**
+   * @brief Move assignment operator.
+   *
+   * Assigns the contents of another BSpline to this BSpline by moving.
+   *
+   * @param other The BSpline to move from.
+   * @return A reference to this BSpline.
+   */
   BSpline &operator=(BSpline &&other) noexcept
   {
     DEBUG_LOG_CALL();
@@ -100,17 +147,48 @@ public:
     return *this;
   }
 
+  /**
+   * @brief Evaluates the BSpline at a given value.
+   *
+   * @param value The value to evaluate the BSpline at.
+   * @return The value of the BSpline at the given value.
+   */
   T evaluate(T value)
   {
-    auto index_value_pair = this->knots.find(value);
-    return this->deboor(index_value_pair.first, index_value_pair.second);
+    auto [index, x_value] = this->knots.find(value);
+    return this->deboor(index, x_value);
   }
 
+  /**
+   * @brief Evaluates the BSpline at the given values.
+   *
+   * @param values The values to evaluate the BSpline at.
+   * @return The values of the BSpline at the given values.
+   */
+  std::vector<T> evaluate(std::vector<T> const &values)
+  {
+    std::vector<T> results;
+    results.reserve(values.size());
+
+    for (auto const &value : values)
+    {
+      results.push_back(this->evaluate(value));
+    }
+
+    return results;
+  }
+
+  /**
+   * @brief Computes the basis functions at a given value.
+   *
+   * @param value The value to compute the basis functions at.
+   * @return The basis functions at the given value.
+   */
   std::vector<T> basis(T value)
   {
     std::vector<T> basis_functions(this->degree + 1, (T)0);
 
-    size_t index = this->compute_basis(value, basis_functions.begin(), basis_functions.end());
+    size_t index = this->nnz_basis(value, basis_functions.begin(), basis_functions.end());
 
     basis_functions.insert(basis_functions.begin(), index, (T)0);
     basis_functions.insert(
@@ -120,71 +198,151 @@ public:
     return basis_functions;
   }
 
+  /**
+   * @brief Gives the (inclusive) boundary of the BSpline domain (i.e., [x_min, x_max])
+   */
+  std::pair<T, T> domain() const { return this->knots.domain(); }
+
+  /**
+   * @brief Fits the BSpline to some data.
+   *
+   * @param x The x values of the data.
+   * @param y The y values of the data.
+   */
   void fit(std::vector<T> const &x, std::vector<T> const &y)
   {
-    if (x.size() != y.size())
+    releaseassert(x.size() == y.size(), "x and y must have the same size");
+
+    this->control_points = std::move(lsq::lsq<T, vec_iter, BC>(
+        degree,
+        knots.size(),
+        [this](T value, std::vector<T> &vec) -> size_t
+        { return this->nnz_basis(value, vec.begin(), vec.end()); },
+        vec_view{x.begin(), x.end()},
+        vec_view{y.begin(), y.end()},
+        {}
+    ));
+  }
+
+  /**
+   * @brief Interpolates the BSpline to some data.
+   *
+   * Note that if the boundary condition is:
+   * - OPEN: the first and last `degree` x and y values are not interpolated. If
+   * you want to use them, either use another boundary condition or manually pad
+   * the data.
+   * - CLAMPED: all x and y values are interpolated.
+   * - PERIODIC: the last x and y values are not interpolated. This seems to be
+   * an issue, but if your data is truly periodic, you can simply repeat the
+   * first x and y values at the end of the data and everything will work as
+   * expected.
+   *
+   * @param x The x values of the data. They must be sorted in ascending order.
+   * @param y The y values of the data.
+   * @param additional_conditions Additional conditions to impose on the BSpline.
+   * They must lie inside the knots interval. The number of additional conditions
+   * must be equal to `degree - 1` except for periodic BSplines where no
+   * additional conditions can be provided.
+   */
+  void interpolate(
+      std::vector<T> const &x,
+      std::vector<T> const &y,
+      std::vector<lsq::Condition<T>> const &additional_conditions
+  )
+  {
+    releaseassert(x.size() == y.size(), "x and y must have the same size");
+
+    if constexpr (BoundaryCondition::PERIODIC == BC)
     {
-      throw std::runtime_error("x and y must have the same size");
-    }
-
-    // NOTE: bertolazzi says that the LU algorithm uses roughly half the computations as QR. it is
-    // less stable, but for a band matrix it may be fine. plus he suggests to sort the input points
-    // as that may improve performance substantially, especially if we develop a specialised LU band
-    // algorithm.
-
-    std::vector<T> nnz_basis(this->degree + 1, (T)0);
-    Eigen::Map<Eigen::VectorX<T> const> b(y.data(), y.size());
-    Eigen::VectorX<T> res;
-    size_t num_cols{this->control_points.size()};
-    if constexpr (BC == BoundaryCondition::PERIODIC)
-    {
-      num_cols -= this->degree;
-    }
-
-    if (num_cols <= DENSE_MAX_COL)
-    {
-      Eigen::MatrixX<T> A = Eigen::MatrixX<T>::Zero(x.size(), num_cols);
-
-      size_t index{0};
-      for (size_t i{0}; i < x.size(); i++)
-      {
-        index = this->compute_basis(x.at(i), nnz_basis.begin(), nnz_basis.end());
-        for (size_t j{0}; j <= this->degree; j++)
-        {
-          // TODO: avoid modulo
-          A(i, (j + index) % num_cols) += nnz_basis.at(j);
-        }
-        std::fill(nnz_basis.begin(), nnz_basis.end(), (T)0);
-      }
-
-      res = A.colPivHouseholderQr().solve(b);
+      releaseassert(
+          additional_conditions.empty(),
+          "For PERIODIC BSplines there must be exactly 0 additional conditions."
+      );
     }
     else
     {
-      Eigen::SparseMatrix<T> A(x.size(), num_cols);
-      A.reserve(num_cols * (this->degree + 1));
-
-      size_t index{0};
-      for (size_t i{0}; i < x.size(); i++)
-      {
-        index = this->compute_basis(x.at(i), nnz_basis.begin(), nnz_basis.end());
-        for (size_t j{0}; j <= this->degree; j++)
-        {
-          A.coeffRef(i, (j + index) % num_cols) += nnz_basis.at(j);
-        }
-        std::fill(nnz_basis.begin(), nnz_basis.end(), (T)0);
-      }
-      A.makeCompressed();
-
-      Eigen::SparseQR<Eigen::SparseMatrix<T>, Eigen::COLAMDOrdering<int>> solver{};
-      solver.compute(A);
-      res = solver.solve(b);
+      releaseassert(
+          additional_conditions.size() == degree - 1,
+          "There must be exactly degree - 1 additional conditions."
+      );
     }
 
-    this->control_points.set_data({res.data(), res.data() + res.rows() * res.cols()});
+    knots::Knots<T, C, BC, EXT> new_knots;
+    if constexpr (Curve::UNIFORM == C)
+    {
+      T step = x.at(1) - x.at(0);
+      for (size_t i{0}; i < x.size() - 1; i++)
+      {
+        releaseassert(
+            std::abs(x.at(i + 1) - x.at(i) - step) <=
+                std::numeric_limits<T>::epsilon() * 1000.0, // HACK:
+            "x is not uniform."
+        );
+      }
+      new_knots = std::move(knots::Knots<T, C, BC, EXT>{{x.front(), x.back(), x.size()}, degree});
+    }
+    else
+    {
+      new_knots = std::move(knots::Knots<T, C, BC, EXT>{{x}, degree});
+    }
+
+    auto const domain = new_knots.domain();
+    releaseassert(
+        std::all_of(
+            additional_conditions.begin(),
+            additional_conditions.end(),
+            [&domain](auto const &elem)
+            { return elem.x_value >= domain.first and elem.x_value <= domain.second; }
+        ),
+        "Additional conditions must lie inside the knots interval."
+    );
+
+    this->knots = std::move(new_knots);
+
+    vec_view x_view, y_view;
+    if constexpr (BoundaryCondition::OPEN == BC)
+    {
+      x_view = vec_view{std::next(x.begin(), degree), std::prev(x.end(), degree)};
+      y_view = vec_view{std::next(y.begin(), degree), std::prev(y.end(), degree)};
+    }
+    else if constexpr (BoundaryCondition::CLAMPED == BC)
+    {
+      x_view = vec_view{x.begin(), x.end()};
+      y_view = vec_view{y.begin(), y.end()};
+    }
+    else if constexpr (BoundaryCondition::PERIODIC == BC)
+    {
+      x_view = vec_view{x.begin(), std::prev(x.end(), 1)};
+      y_view = vec_view{y.begin(), std::prev(y.end(), 1)};
+    }
+    else
+    {
+      releaseassert(false, "Unkown boundary condition, you should never get here!");
+    }
+
+    this->control_points = std::move(lsq::lsq<T, vec_iter, BC>(
+        degree,
+        this->knots.size(),
+        [this](T value, std::vector<T> &vec) -> size_t
+        { return this->nnz_basis(value, vec.begin(), vec.end()); },
+        x_view,
+        y_view,
+        additional_conditions
+    ));
   }
 
-  std::vector<T> get_control_points() { return this->control_points.get_values(); }
+  std::vector<T> get_control_points()
+  {
+    std::vector<T> ctrl_pts{};
+    ctrl_pts.reserve(this->control_points.size());
+
+    for (size_t i{0}; i < this->control_points.size(); i++)
+    {
+      ctrl_pts.push_back(this->control_points.at(i));
+    }
+
+    return ctrl_pts;
+  }
 
 private:
   void check_sizes()
@@ -218,7 +376,43 @@ private:
 
     // clang-format on
 
-    throw std::runtime_error(ss.str());
+    releaseassert(false, ss.str());
+  }
+
+  template <typename It>
+  size_t nnz_basis(T value, [[maybe_unused]] It begin, It end)
+  {
+    debugassert(
+        (end - begin) == (long long)(this->degree + 1),
+        "Unexpected number of basis asked, exactly degree + 1 basis can be asked"
+    );
+
+    debugassert(
+        std::all_of(begin, end, [](T i) { return (T)0 == i; }),
+        "Initial basis must be initialised to zero"
+    );
+
+    auto [index, val] = this->knots.find(value);
+
+    *(end - 1) = 1.0;
+    for (size_t d{1}; d <= this->degree; d++)
+    {
+      *(end - 1 - d) = (this->knots.at(index + 1) - val) /
+                       (this->knots.at(index + 1) - this->knots.at(index - d + 1)) *
+                       *(end - 1 - d + 1);
+      for (size_t i{index - d + 1}; i < index; i++)
+      {
+        *(end - 1 - index + i) =
+            (val - this->knots.at(i)) / (this->knots.at(i + d) - this->knots.at(i)) *
+                *(end - 1 - index + i) +
+            (this->knots.at(i + d + 1) - val) /
+                (this->knots.at(i + d + 1) - this->knots.at(i + 1)) * *(end - 1 - index + i + 1);
+      }
+      *(end - 1) = (val - this->knots.at(index)) /
+                   (this->knots.at(index + d) - this->knots.at(index)) * *(end - 1);
+    }
+
+    return index - this->degree;
   }
 
   T deboor(size_t index, T value)
@@ -240,38 +434,6 @@ private:
     }
 
     return this->support[this->degree];
-  }
-
-  template <typename It>
-  size_t compute_basis(T value, [[maybe_unused]] It begin, It end)
-  {
-    assertm((end - begin) == (long long)(this->degree + 1), "Unexpected number of basis asked");
-
-    assertm(
-        std::all_of(begin, end, [](T i) { return (T)0 == i; }),
-        "Initial basis must be initialised to zero"
-    );
-
-    auto [index, val] = this->knots.find(value);
-
-    // assertm(begin + index < end, "Index outside of boundaries");
-
-    *(end - 1) = 1.0;
-    for (size_t d{1}; d <= this->degree; d++)
-    {
-      *(end - 1 - d) = (knots.at(index + 1) - val) /
-                       (knots.at(index + 1) - knots.at(index - d + 1)) * *(end - 1 - d + 1);
-      for (size_t i{index - d + 1}; i < index; i++)
-      {
-        *(end - 1 - index + i) =
-            (val - knots.at(i)) / (knots.at(i + d) - knots.at(i)) * *(end - 1 - index + i) +
-            (knots.at(i + d + 1) - val) / (knots.at(i + d + 1) - knots.at(i + 1)) *
-                *(end - 1 - index + i + 1);
-      }
-      *(end - 1) = (val - knots.at(index)) / (knots.at(index + d) - knots.at(index)) * *(end - 1);
-    }
-
-    return index - this->degree;
   }
 };
 

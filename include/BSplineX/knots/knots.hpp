@@ -1,5 +1,5 @@
-#ifndef KNOTS_HPP
-#define KNOTS_HPP
+#ifndef BSPLINEX_KNOTS_KNOTS_HPP
+#define BSPLINEX_KNOTS_KNOTS_HPP
 
 // Standard includes
 #include <utility>
@@ -41,9 +41,9 @@ template <typename T, Curve C, BoundaryCondition BC, Extrapolation EXT>
 class Knots
 {
 private:
-  Atter<T, C, BC> atter;
-  Extrapolator<T, C, BC, EXT> extrapolator;
-  Finder<T, C, BC, EXT> finder;
+  Atter<T, C, BC> atter{};
+  Extrapolator<T, C, BC, EXT> extrapolator{};
+  Finder<T, C, BC, EXT> finder{};
   T value_left{};
   T value_right{};
   size_t degree{};
@@ -106,7 +106,7 @@ public:
 
   std::pair<size_t, T> find(T value) const
   {
-    if (value < this->value_left || value >= this->value_right)
+    if (value < this->value_left || value > this->value_right)
     {
       value = this->extrapolator.extrapolate(value);
     }
@@ -114,29 +114,12 @@ public:
     return std::pair<size_t, T>{this->finder.find(value), value};
   }
 
-  std::pair<T, T> domain() { return {value_left, value_right}; }
+  std::pair<T, T> domain() const { return {value_left, value_right}; }
 
   T at(size_t index) const { return this->atter.at(index); }
 
   [[nodiscard]] size_t size() const { return this->atter.size(); }
 };
-
-/*
-
-Knots
-  - Finder
-    - Atter
-    - Extrapolator
-  - Atter
-    - Data
-    - Padder
-  - Padder
-    - Data
-  - Extrapolator
-    - Atter
-  - Data
-
-*/
 
 } // namespace bsplinex::knots
 

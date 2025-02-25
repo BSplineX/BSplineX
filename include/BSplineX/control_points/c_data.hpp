@@ -1,5 +1,5 @@
-#ifndef C_DATA_HPP
-#define C_DATA_HPP
+#ifndef BSPLINEX_CONTROL_POINTS_C_DATA_HPP
+#define BSPLINEX_CONTROL_POINTS_C_DATA_HPP
 
 // Standard includes
 #include <cstddef>
@@ -18,13 +18,37 @@ private:
   std::vector<T> raw_data{};
 
 public:
-  Data() = default;
+  Data() { DEBUG_LOG_CALL(); }
 
-  Data(std::vector<T> const &data) : raw_data(data) {}
+  Data(std::vector<T> const &data) : raw_data{data} { DEBUG_LOG_CALL(); }
+
+  Data(Data const &other) : raw_data(other.raw_data) { DEBUG_LOG_CALL(); }
+
+  Data(Data &&other) noexcept : raw_data(std::move(other.raw_data)) { DEBUG_LOG_CALL(); }
+
+  ~Data() { DEBUG_LOG_CALL(); }
+
+  Data &operator=(Data const &other)
+  {
+    DEBUG_LOG_CALL();
+    if (this == &other)
+      return *this;
+    raw_data = other.raw_data;
+    return *this;
+  }
+
+  Data &operator=(Data &&other) noexcept
+  {
+    DEBUG_LOG_CALL();
+    if (this == &other)
+      return *this;
+    raw_data = std::move(other.raw_data);
+    return *this;
+  }
 
   T at(size_t index) const
   {
-    assertm(index < this->raw_data.size(), "Out of bounds");
+    debugassert(index < this->raw_data.size(), "Out of bounds");
     return this->raw_data[index];
   }
 
@@ -32,8 +56,8 @@ public:
 
   std::vector<T> slice(size_t first, size_t last)
   {
-    assertm(first <= last, "Invalid range");
-    assertm(last <= this->raw_data.size(), "Out of bounds");
+    debugassert(first <= last, "Invalid range");
+    debugassert(last <= this->raw_data.size(), "Out of bounds");
 
     return std::vector<T>{this->raw_data.begin() + first, this->raw_data.begin() + last};
   }
