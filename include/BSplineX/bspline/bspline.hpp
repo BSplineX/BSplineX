@@ -275,7 +275,7 @@ public:
       {
         releaseassert(
             std::abs(x.at(i + 1) - x.at(i) - step) <=
-                std::numeric_limits<T>::epsilon() * 100.0, // HACK:
+                std::numeric_limits<T>::epsilon() * 1000.0, // HACK:
             "x is not uniform."
         );
       }

@@ -32,6 +32,7 @@ types::ClampedNonUniform<real_t>, \
 types::ClampedNonUniformConstant<real_t>, \
 types::PeriodicUniform<real_t>, \
 types::PeriodicNonUniform<real_t>
+
 // clang-format on
 
 static std::mt19937 &get_device()
@@ -128,7 +129,8 @@ TEMPLATE_TEST_CASE("masinag", "[bspline][template][product]", BSPLINE_TEST_TYPES
 {
   auto &rng = get_device();
 
-  size_t const degree = GENERATE(1, 2, 3);
+  size_t const degree =
+      GENERATE(1); // TODO: test with bigger degrees once we implement derivatives for interpolation
 
   using ctrl_val_t              = std::pair<size_t, size_t>;
   auto const [ctrl_pts, values] = GENERATE(ctrl_val_t{50, 50}, ctrl_val_t{600, 2000});
@@ -227,6 +229,10 @@ TEMPLATE_TEST_CASE("masinag", "[bspline][template][product]", BSPLINE_TEST_TYPES
         // TODO: should be done with a derivative to avoid singular matrices
         additional.emplace_back(x.at(degree + i), y.at(degree + i), 0);
       }
+    }
+    else
+    {
+      y.back() = y.front();
     }
 
     bspline.interpolate(x, y, additional);

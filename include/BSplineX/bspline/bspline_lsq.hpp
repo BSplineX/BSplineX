@@ -74,6 +74,7 @@ public:
     lscg.compute(this->A);
     vec_t x = lscg.solve(b);
 
+#ifndef NDEBUG
     std::cout << "DENSE" << std::endl;
     std::cout << "iterations: " << lscg.iterations() << std::endl;
     std::cout << "error: " << lscg.error() << std::endl;
@@ -81,7 +82,7 @@ public:
     std::cout << "|b| = " << b.norm() << std::endl;
     std::cout << "|Ax - b| / |b| = " << (this->A * x - b).norm() / b.norm() << std::endl;
     std::cout << "condition number = " << this->conditioning_number() << std::endl;
-
+#endif
     return x;
   }
 
@@ -122,12 +123,14 @@ public:
     lscg.compute(this->A);
     vec_t x = lscg.solve(b);
 
+#ifndef NDEBUG
     std::cout << "SPARSE" << std::endl;
     std::cout << "iterations: " << lscg.iterations() << std::endl;
     std::cout << "error: " << lscg.error() << std::endl;
     std::cout << "|Ax - b| = " << (this->A * x - b).norm() << std::endl;
     std::cout << "|b| = " << b.norm() << std::endl;
     std::cout << "|Ax - b| / |b| = " << (this->A * x - b).norm() / b.norm() << std::endl;
+#endif
 
     return x;
   }
