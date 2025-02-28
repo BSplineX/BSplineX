@@ -4,6 +4,7 @@
 // Standard includes
 #include <algorithm>
 #include <limits>
+#include <memory>
 #include <sstream>
 #include <vector>
 
@@ -43,6 +44,7 @@ private:
   control_points::ControlPoints<T, BC> control_points{};
   size_t degree{};
   std::vector<T> support{};
+  std::unique_ptr<BSpline> derivative;
 
 public:
   /**
@@ -151,28 +153,42 @@ public:
    * @brief Evaluates the BSpline at a given value.
    *
    * @param value The value to evaluate the BSpline at.
+   * @param derivative_order The order of the derivative to evaluate (0 is the function itself).
    * @return The value of the BSpline at the given value.
    */
-  T evaluate(T value)
+  T evaluate(T value, size_t derivative_order = 0)
   {
-    auto [index, x_value] = this->knots.find(value);
-    return this->deboor(index, x_value);
+    if (0 == derivative_order)
+    {
+      auto [index, x_value] = this->knots.find(value);
+      return this->deboor(index, x_value);
+    }
+    else
+    {
+      if (not this->derivative)
+      {
+        this->compute_derivative();
+      }
+
+      return derivative->evaluate(value, derivative_order - 1);
+    }
   }
 
   /**
    * @brief Evaluates the BSpline at the given values.
    *
    * @param values The values to evaluate the BSpline at.
+   * @param derivative_order The order of the derivative to evaluate (0 is the function itself).
    * @return The values of the BSpline at the given values.
    */
-  std::vector<T> evaluate(std::vector<T> const &values)
+  std::vector<T> evaluate(std::vector<T> const &values, size_t derivative_order = 0)
   {
     std::vector<T> results;
     results.reserve(values.size());
 
     for (auto const &value : values)
     {
-      results.push_back(this->evaluate(value));
+      results.push_back(this->evaluate(value, derivative_order));
     }
 
     return results;
@@ -213,15 +229,17 @@ public:
   {
     releaseassert(x.size() == y.size(), "x and y must have the same size");
 
-    this->control_points = std::move(lsq::lsq<T, vec_iter, BC>(
-        degree,
-        knots.size(),
-        [this](T value, std::vector<T> &vec) -> size_t
-        { return this->nnz_basis(value, vec.begin(), vec.end()); },
-        vec_view{x.begin(), x.end()},
-        vec_view{y.begin(), y.end()},
-        {}
-    ));
+    this->control_points = std::move(
+        lsq::lsq<T, vec_iter, BC>(
+            degree,
+            knots.size(),
+            [this](T value, std::vector<T> &vec) -> size_t
+            { return this->nnz_basis(value, vec.begin(), vec.end()); },
+            vec_view{x.begin(), x.end()},
+            vec_view{y.begin(), y.end()},
+            {}
+        )
+    );
   }
 
   /**
@@ -320,15 +338,17 @@ public:
       releaseassert(false, "Unkown boundary condition, you should never get here!");
     }
 
-    this->control_points = std::move(lsq::lsq<T, vec_iter, BC>(
-        degree,
-        this->knots.size(),
-        [this](T value, std::vector<T> &vec) -> size_t
-        { return this->nnz_basis(value, vec.begin(), vec.end()); },
-        x_view,
-        y_view,
-        additional_conditions
-    ));
+    this->control_points = std::move(
+        lsq::lsq<T, vec_iter, BC>(
+            degree,
+            this->knots.size(),
+            [this](T value, std::vector<T> &vec) -> size_t
+            { return this->nnz_basis(value, vec.begin(), vec.end()); },
+            x_view,
+            y_view,
+            additional_conditions
+        )
+    );
   }
 
   std::vector<T> get_control_points()
@@ -345,6 +365,18 @@ public:
   }
 
 private:
+  BSpline(
+      knots::Knots<T, C, BC, EXT> const &knots,
+      control_points::ControlPoints<T, BC> const &control_points,
+      size_t degree
+  )
+      : knots{knots}, control_points{control_points}, degree{degree}
+  {
+    DEBUG_LOG_CALL();
+    this->check_sizes();
+    this->support.resize(this->degree + 1);
+  }
+
   void check_sizes()
   {
     if (this->control_points.size() == this->knots.size() - this->degree - 1)
@@ -434,6 +466,15 @@ private:
     }
 
     return this->support[this->degree];
+  }
+
+  void compute_derivative()
+  {
+    this->derivative = std::unique_ptr<BSpline>(new BSpline(
+        this->knots.get_derivative_knots(),
+        this->control_points.get_derivative_control_points(this->knots),
+        this->degree - 1
+    ));
   }
 };
 

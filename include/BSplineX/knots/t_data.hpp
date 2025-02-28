@@ -19,8 +19,9 @@ class Data
 {
 public:
   virtual T at(size_t index) const                              = 0;
-  virtual size_t size() const                                   = 0;
+  [[nodiscard]] virtual size_t size() const                     = 0;
   virtual std::vector<T> slice(size_t first, size_t last) const = 0;
+  virtual void pop_tails()                                      = 0;
 };
 
 template <typename T>
@@ -121,6 +122,14 @@ public:
 
     return tmp;
   }
+
+  void pop_tails()
+  {
+    debugassert(this->num_elems >= 2, "Cannot pop tails from a domain with less than 2 elements");
+    this->begin     += this->step_size;
+    this->end       -= this->step_size;
+    this->num_elems -= 2;
+  }
 };
 
 template <typename T>
@@ -181,6 +190,15 @@ public:
     debugassert(last <= this->raw_data.size(), "Out of bounds");
 
     return std::vector<T>{this->raw_data.begin() + first, this->raw_data.begin() + last};
+  }
+
+  void pop_tails()
+  {
+    debugassert(
+        this->raw_data.size() >= 2, "Cannot pop tails from a domain with less than 2 elements"
+    );
+    this->raw_data.pop_back();
+    this->raw_data.erase(this->raw_data.begin());
   }
 };
 

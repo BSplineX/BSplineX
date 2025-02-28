@@ -66,6 +66,8 @@ public:
 
   [[nodiscard]] size_t size() const { return this->data.size() + this->padder.size(); }
 
+  [[nodiscard]] size_t data_size() const { return this->data.size(); }
+
   std::vector<T> get_values() const
   {
     std::vector<T> values(data.size() + padder.size());

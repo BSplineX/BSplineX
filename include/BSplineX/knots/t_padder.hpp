@@ -21,6 +21,7 @@ public:
   [[nodiscard]] virtual size_t size() const       = 0;
   [[nodiscard]] virtual size_t size_left() const  = 0;
   [[nodiscard]] virtual size_t size_right() const = 0;
+  virtual void pop_tails()                        = 0;
 };
 
 template <typename T, Curve C>
@@ -74,6 +75,14 @@ public:
   [[nodiscard]] size_t size_left() const { return 0; }
 
   [[nodiscard]] size_t size_right() const { return 0; }
+
+  void pop_tails()
+  {
+    releaseassert(
+        false,
+        "OPEN knots padder has zero length, this function is here only for compatibility reasons."
+    );
+  }
 };
 
 template <typename T, Curve C>
@@ -82,7 +91,7 @@ class Padder<T, C, BoundaryCondition::CLAMPED>
 private:
   T pad_left{};
   T pad_right{};
-  size_t degree{0};
+  size_t pad_size{0};
 
 public:
   Padder() { DEBUG_LOG_CALL(); }
@@ -92,17 +101,17 @@ public:
     DEBUG_LOG_CALL();
     this->pad_left  = data.at(0);
     this->pad_right = data.at(data.size() - 1);
-    this->degree    = degree;
+    this->pad_size  = degree;
   }
 
   Padder(Padder const &other)
-      : pad_left(other.pad_left), pad_right(other.pad_right), degree(other.degree)
+      : pad_left(other.pad_left), pad_right(other.pad_right), pad_size(other.pad_size)
   {
     DEBUG_LOG_CALL();
   }
 
   Padder(Padder &&other) noexcept
-      : pad_left(other.pad_left), pad_right(other.pad_right), degree(other.degree)
+      : pad_left(other.pad_left), pad_right(other.pad_right), pad_size(other.pad_size)
   {
     DEBUG_LOG_CALL();
   }
@@ -116,7 +125,7 @@ public:
       return *this;
     pad_left  = other.pad_left;
     pad_right = other.pad_right;
-    degree    = other.degree;
+    pad_size  = other.pad_size;
     return *this;
   }
 
@@ -127,27 +136,29 @@ public:
       return *this;
     pad_left  = other.pad_left;
     pad_right = other.pad_right;
-    degree    = other.degree;
+    pad_size  = other.pad_size;
     return *this;
   }
 
   T left([[maybe_unused]] size_t index) const
   {
-    debugassert(index < this->degree, "Out of bounds");
+    debugassert(index < this->pad_size, "Out of bounds");
     return this->pad_left;
   }
 
   T right([[maybe_unused]] size_t index) const
   {
-    debugassert(index < this->degree, "Out of bounds");
+    debugassert(index < this->pad_size, "Out of bounds");
     return this->pad_right;
   }
 
   [[nodiscard]] size_t size() const { return this->size_left() + this->size_right(); }
 
-  [[nodiscard]] size_t size_left() const { return this->degree; }
+  [[nodiscard]] size_t size_left() const { return this->pad_size; }
 
-  [[nodiscard]] size_t size_right() const { return this->degree; }
+  [[nodiscard]] size_t size_right() const { return this->pad_size; }
+
+  void pop_tails() { --this->pad_size; }
 };
 
 template <typename T, Curve C>
@@ -223,6 +234,12 @@ public:
   [[nodiscard]] size_t size_left() const { return this->pad_left.size(); }
 
   [[nodiscard]] size_t size_right() const { return this->pad_right.size(); }
+
+  void pop_tails()
+  {
+    this->pad_left.pop_back();
+    this->pad_right.pop_back();
+  }
 };
 
 } // namespace bsplinex::knots

@@ -7,6 +7,7 @@
 // BSplineX includes
 #include "BSplineX/control_points/c_atter.hpp"
 #include "BSplineX/defines.hpp"
+#include "BSplineX/knots/knots.hpp"
 #include "BSplineX/types.hpp"
 
 /**
@@ -80,7 +81,28 @@ public:
   T at(size_t index) const { return this->atter.at(index); }
 
   [[nodiscard]] size_t size() const { return this->atter.size(); }
-  
+
+  template <Curve C, Extrapolation EXT>
+  ControlPoints get_derivative_control_points(knots::Knots<T, C, BC, EXT> const &knots) const
+  {
+    std::vector<T> d_ctrl_points;
+    d_ctrl_points.reserve(this->atter.data_size() - 1);
+    for (size_t i = 0; i < this->atter.data_size() - 1; i++)
+    {
+      d_ctrl_points.push_back(
+          static_cast<T>(this->degree) / (knots.at(i + this->degree + 1) - knots.at(i + 1)) *
+          (this->at(i + 1) - this->at(i))
+      );
+    }
+
+    return ControlPoints({d_ctrl_points}, this->degree - 1);
+  }
+
+private:
+  ControlPoints(Atter<T, BC> atter, size_t degree) : atter{atter}, degree{degree}
+  {
+    DEBUG_LOG_CALL();
+  }
 };
 
 } // namespace bsplinex::control_points

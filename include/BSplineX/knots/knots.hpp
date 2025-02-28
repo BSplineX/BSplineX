@@ -119,6 +119,21 @@ public:
   T at(size_t index) const { return this->atter.at(index); }
 
   [[nodiscard]] size_t size() const { return this->atter.size(); }
+
+  Knots get_derivative_knots() const
+  {
+    Atter<T, C, BC> d_atter = this->atter;
+    return Knots(d_atter.pop_tails(), this->degree - 1);
+  }
+
+private:
+  Knots(Atter<T, C, BC> const &atter, size_t degree)
+      : atter{atter}, extrapolator{this->atter, degree}, finder{this->atter, degree},
+        value_left{this->atter.at(degree)},
+        value_right{this->atter.at(this->atter.size() - degree - 1)}, degree{degree}
+  {
+    DEBUG_LOG_CALL();
+  }
 };
 
 } // namespace bsplinex::knots

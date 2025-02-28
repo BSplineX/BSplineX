@@ -39,7 +39,7 @@ public:
     DEBUG_LOG_CALL();
     if (this == &other)
       return *this;
-    data = other.data;
+    data   = other.data;
     padder = other.padder;
     return *this;
   }
@@ -49,7 +49,7 @@ public:
     DEBUG_LOG_CALL();
     if (this == &other)
       return *this;
-    data = std::move(other.data);
+    data   = std::move(other.data);
     padder = std::move(other.padder);
     return *this;
   }
@@ -73,23 +73,35 @@ public:
 
   [[nodiscard]] size_t size() const { return this->data.size() + this->padder.size(); }
 
+  Atter &pop_tails()
+  {
+    if (this->padder.size() > 0)
+    {
+      this->padder.pop_tails();
+    }
+    else
+    {
+      this->data.pop_tails();
+    }
+
+    return *this;
+  }
+
   class iterator
   {
   private:
-    Atter<T, C, BC> const *atter{nullptr};
+    Atter const *atter{nullptr};
     size_t index{0};
 
   public:
     // iterator traits
-    using difference_type = int;
-    using value_type = T;
-    using pointer = const T *;
-    using reference = const T &;
+    using difference_type   = int;
+    using value_type        = T;
+    using pointer           = const T *;
+    using reference         = const T &;
     using iterator_category = std::random_access_iterator_tag;
 
-    iterator(Atter<T, C, BC> const *atter, size_t index) : atter{atter}, index{index}
-    {
-    }
+    iterator(Atter<T, C, BC> const *atter, size_t index) : atter{atter}, index{index} {}
 
     iterator(iterator const &b) = default;
 
@@ -127,8 +139,8 @@ public:
 
     iterator operator+(int n) const
     {
-      iterator retval = *this;
-      retval += n;
+      iterator retval  = *this;
+      retval          += n;
       return retval;
     }
 
@@ -140,8 +152,8 @@ public:
 
     iterator operator-(int n) const
     {
-      iterator retval = *this;
-      retval -= n;
+      iterator retval  = *this;
+      retval          -= n;
       return retval;
     }
 
