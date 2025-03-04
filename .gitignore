@@ -35,6 +35,10 @@
 *.out
 *.app
 
+### Ninja ###
+.ninja_deps
+.ninja_log
+
 ### CLion ###
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
@@ -201,5 +205,7 @@ tags
 
 # Build files
 build/*
+cmake/test_cmake_inclusion/build
+tests/Testing
 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode,c++,vim,clion
