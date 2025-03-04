@@ -9,6 +9,8 @@
 #include "BSplineX/knots/t_data.hpp"
 #include "BSplineX/types.hpp"
 
+#include <iostream>
+
 namespace bsplinex::knots
 {
 
@@ -237,7 +239,9 @@ public:
 
   void pop_tails()
   {
-    this->pad_left.pop_back();
+    debugassert(!this->pad_left.empty(), "Cannot pop tails from an empty domain");
+    debugassert(!this->pad_right.empty(), "Cannot pop tails from an empty domain");
+    this->pad_left.erase(this->pad_left.begin());
     this->pad_right.pop_back();
   }
 };

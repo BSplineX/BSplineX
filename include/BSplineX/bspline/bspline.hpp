@@ -158,6 +158,7 @@ public:
    */
   T evaluate(T value, size_t derivative_order = 0)
   {
+    releaseassert(derivative_order <= this->degree, "derivative_order must be <= degree")
     if (0 == derivative_order)
     {
       auto [index, x_value] = this->knots.find(value);
@@ -470,6 +471,7 @@ private:
 
   void compute_derivative()
   {
+    debugassert(this->degree > 0, "Cannot derivate a 0-degree bspline");
     this->derivative = std::unique_ptr<BSpline>(new BSpline(
         this->knots.get_derivative_knots(),
         this->control_points.get_derivative_control_points(this->knots),
