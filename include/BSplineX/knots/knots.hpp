@@ -18,7 +18,7 @@
  *
  * Curve domain:
  * - If the curve is open, the domain is [t_p, t_{end - p}]
- * - If the curve is periodic, the domain is [t_0, t_{end}] but appropiate
+ * - If the curve is periodic, the domain is [t_0, t_{end}] but appropriate
  *   padding is needed
  * - If the curve is clamped, the domain is [t_0, t_{end}] but the start and end
  *   knots must have multiplicity `p+1`
@@ -29,7 +29,7 @@
  * - If the curve is periodic, we need to add `p` knots at the left and right
  *   following periodicity: [0, 1, 2, 2.5, 3] with p = 3 ->
  *   [-2.0, -1.0, -0.5, 0, 1, 2, 2.5, 3, 4, 5, 5.5]
- * - If the curve is clamped, we must repeat the first an last knots `p` times:
+ * - If the curve is clamped, we must repeat the first and last knots `p` times:
  *   [0, 1, 2, 2.5, 3] with p = 3 -> [0, 0, 0, 0, 1, 2, 2.5, 3, 3, 3, 3]
  *
  */

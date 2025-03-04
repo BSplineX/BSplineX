@@ -83,7 +83,7 @@ public:
   [[nodiscard]] size_t get_derivative_data_size() const
   {
     size_t const data_size = this->data.size();
-    return (this->padder.size() == 0) ? data_size - 1 : data_size;
+    return this->padder.size() == 0 ? data_size - 1 : data_size;
   }
 };
 

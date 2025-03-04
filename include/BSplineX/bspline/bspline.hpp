@@ -203,13 +203,13 @@ public:
    */
   std::vector<T> basis(T value)
   {
-    std::vector<T> basis_functions(this->degree + 1, (T)0);
+    std::vector<T> basis_functions(this->degree + 1, static_cast<T>(0));
 
     size_t index = this->nnz_basis(value, basis_functions.begin(), basis_functions.end());
 
-    basis_functions.insert(basis_functions.begin(), index, (T)0);
+    basis_functions.insert(basis_functions.begin(), index, static_cast<T>(0));
     basis_functions.insert(
-        basis_functions.end(), this->control_points.size() - index - this->degree - 1, (T)0
+        basis_functions.end(), this->control_points.size() - index - this->degree - 1, static_cast<T>(0)
     );
 
     return basis_functions;
@@ -336,7 +336,7 @@ public:
     }
     else
     {
-      releaseassert(false, "Unkown boundary condition, you should never get here!");
+      releaseassert(false, "Unknown boundary condition, you should never get here!");
     }
 
     this->control_points = std::move(
@@ -416,7 +416,7 @@ private:
   size_t nnz_basis(T value, [[maybe_unused]] It begin, It end)
   {
     debugassert(
-        (end - begin) == (long long)(this->degree + 1),
+        (end - begin) == static_cast<long long>(this->degree + 1),
         "Unexpected number of basis asked, exactly degree + 1 basis can be asked"
     );
 
@@ -433,7 +433,7 @@ private:
       *(end - 1 - d) = (this->knots.at(index + 1) - val) /
                        (this->knots.at(index + 1) - this->knots.at(index - d + 1)) *
                        *(end - 1 - d + 1);
-      for (size_t i{index - d + 1}; i < index; i++)
+      for (size_t i{index - d + 1}; i < index; ++i)
       {
         *(end - 1 - index + i) =
             (val - this->knots.at(i)) / (this->knots.at(i + d) - this->knots.at(i)) *
@@ -458,7 +458,7 @@ private:
     T alpha = 0;
     for (size_t r = 1; r <= this->degree; r++)
     {
-      for (size_t j = this->degree; j >= r; j--)
+      for (size_t j = this->degree; j >= r; --j)
       {
         alpha = (value - this->knots.at(j + index - this->degree)) /
                 (this->knots.at(j + 1 + index - r) - this->knots.at(j + index - this->degree));
@@ -471,7 +471,7 @@ private:
 
   void compute_derivative()
   {
-    debugassert(this->degree > 0, "Cannot derivate a 0-degree bspline");
+    debugassert(this->degree > 0, "Cannot compute derivative of a 0-degree bspline");
     this->derivative = std::unique_ptr<BSpline>(new BSpline(
         this->knots.get_derivative_knots(),
         this->control_points.get_derivative_control_points(this->knots),

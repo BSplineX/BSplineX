@@ -98,12 +98,6 @@ public:
 
     return ControlPoints({d_ctrl_points}, this->degree - 1);
   }
-
-private:
-  ControlPoints(Atter<T, BC> atter, size_t degree) : atter{atter}, degree{degree}
-  {
-    DEBUG_LOG_CALL();
-  }
 };
 
 } // namespace bsplinex::control_points
