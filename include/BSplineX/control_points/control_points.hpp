@@ -85,12 +85,7 @@ public:
   template <Curve C, Extrapolation EXT>
   ControlPoints get_derivative_control_points(knots::Knots<T, C, BC, EXT> const &knots) const
   {
-    size_t d_num_ctrl_pts = this->size() - 1;
-    if constexpr (BoundaryCondition::PERIODIC == BC)
-    {
-      d_num_ctrl_pts = this->atter.data_size();
-    }
-
+    size_t const d_num_ctrl_pts = this->atter.get_derivative_data_size();
     std::vector<T> d_ctrl_points;
     d_ctrl_points.reserve(d_num_ctrl_pts);
     for (size_t i = 0; i < d_num_ctrl_pts; i++)

@@ -66,8 +66,6 @@ public:
 
   [[nodiscard]] size_t size() const { return this->data.size() + this->padder.size(); }
 
-  [[nodiscard]] size_t data_size() const { return this->data.size(); }
-
   std::vector<T> get_values() const
   {
     std::vector<T> values(data.size() + padder.size());
@@ -80,6 +78,12 @@ public:
       values[data.size() + i] = padder.right(i);
     }
     return values;
+  }
+
+  [[nodiscard]] size_t get_derivative_data_size() const
+  {
+    size_t const data_size = this->data.size();
+    return (this->padder.size() == 0) ? data_size - 1 : data_size;
   }
 };
 
