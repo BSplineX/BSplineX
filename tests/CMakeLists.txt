@@ -1,4 +1,5 @@
 include(BSplineXCatch2)
+include(BSplineXJSON)
 
 file(GLOB_RECURSE KNOTS_TESTS "${CMAKE_CURRENT_SOURCE_DIR}/knots/test_*.cpp")
 add_executable(test_knots ${KNOTS_TESTS})
@@ -27,7 +28,7 @@ catch_discover_tests(test_deboor)
 
 file(GLOB_RECURSE
   BSPLINE_TESTS
-  "${CMAKE_CURRENT_SOURCE_DIR}/bspline/test_*.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/bspline/test_bspline.cpp"
 )
 add_executable(test_bspline ${BSPLINE_TESTS})
 target_link_libraries(test_bspline PRIVATE
@@ -35,3 +36,12 @@ target_link_libraries(test_bspline PRIVATE
 )
 catch_discover_tests(test_bspline)
 
+file(GLOB_RECURSE
+  BSPLINE_TESTS_WITH_DATA
+  "${CMAKE_CURRENT_SOURCE_DIR}/bspline/test_bspline_with_data.cpp"
+)
+add_executable(test_bspline_with_data ${BSPLINE_TESTS_WITH_DATA})
+target_link_libraries(test_bspline_with_data PRIVATE
+  BSplineX Catch2::Catch2WithMain nlohmann_json::nlohmann_json
+)
+catch_discover_tests(test_bspline_with_data)
