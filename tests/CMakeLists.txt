@@ -39,6 +39,7 @@ catch_discover_tests(test_bspline)
 file(GLOB_RECURSE
   BSPLINE_TESTS_WITH_DATA
   "${CMAKE_CURRENT_SOURCE_DIR}/bspline/test_bspline_with_data.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/bspline/matchers.hpp"
 )
 add_executable(test_bspline_with_data ${BSPLINE_TESTS_WITH_DATA})
 target_link_libraries(test_bspline_with_data PRIVATE
