@@ -341,7 +341,7 @@ public:
 
     this->control_points = std::move(
         lsq::lsq<T, vec_iter, BC>(
-            degree,
+            this->degree,
             this->knots.size(),
             [this](T value, std::vector<T> &vec) -> size_t
             { return this->nnz_basis(value, vec.begin(), vec.end()); },
@@ -363,6 +363,18 @@ public:
     }
 
     return ctrl_pts;
+  }
+
+  std::vector<T> get_knots() const
+  {
+    std::vector<T> knots{};
+    knots.reserve(this->knots.size());
+    for (size_t i{0}; i < this->knots.size(); i++)
+    {
+      knots.push_back(this->knots.at(i));
+    }
+
+    return knots;
   }
 
 private:

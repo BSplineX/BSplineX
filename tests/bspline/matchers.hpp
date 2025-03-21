@@ -12,14 +12,14 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 template <typename T>
-struct WithinRelVectorMatcher final : Catch::Matchers::MatcherBase<std::vector<T>>
+struct WithinAbsRelVectorMatcher final : Catch::Matchers::MatcherBase<std::vector<T>>
 {
   static_assert(
       std::is_floating_point_v<T>,
       "WithinRelVectorMatcher can only be used with floating-point types"
   );
 
-  WithinRelVectorMatcher(std::vector<T> const &target, T eps) : target(target), eps(eps) {}
+  WithinAbsRelVectorMatcher(std::vector<T> const &target, T eps) : target(target), eps(eps) {}
 
   bool match(std::vector<T> const &actual) const override
   {
@@ -37,7 +37,8 @@ struct WithinRelVectorMatcher final : Catch::Matchers::MatcherBase<std::vector<T
 
     for (size_t i = 0; i < actual.size(); ++i)
     {
-      if (!Catch::Matchers::WithinRel(this->target[i], this->eps).match(actual[i]))
+      if (!Catch::Matchers::WithinRel(this->target[i], this->eps).match(actual[i]) &&
+          !Catch::Matchers::WithinAbs(this->target[i], this->eps).match(actual[i]))
       {
         allMatch = false;
         this->failures.push_back({i, this->target[i], actual[i]});
@@ -50,7 +51,7 @@ struct WithinRelVectorMatcher final : Catch::Matchers::MatcherBase<std::vector<T
   std::string describe() const override
   {
     std::ostringstream ss;
-    ss << "is within " << this->eps << " relative tolerance of expected vector";
+    ss << "is within " << this->eps << " absolute or relative tolerance of expected vector";
 
     if (this->failures.empty() && this->mismatch_description.empty())
     {
@@ -68,7 +69,7 @@ struct WithinRelVectorMatcher final : Catch::Matchers::MatcherBase<std::vector<T
 
     for (auto const &failure : this->failures)
     {
-      T relDiff = static_cast<T>(0);
+      T relDiff = static_cast<T>(0), absDiff = std::abs(failure.actual - failure.expected);
       if (failure.expected != static_cast<T>(0))
       {
         relDiff = std::abs((failure.actual - failure.expected) / failure.expected);
@@ -82,7 +83,7 @@ struct WithinRelVectorMatcher final : Catch::Matchers::MatcherBase<std::vector<T
 
       ss << "  [" << failure.index << "] Expected: " << failure.expected
          << ", Actual: " << failure.actual << ", Relative diff: " << relDiff << " (exceeds " << eps
-         << ")\n";
+         << "), Absolute diff: " << absDiff << " (exceeds " << eps << ")\n";
     }
 
     return ss.str();
@@ -104,10 +105,11 @@ private:
 };
 
 template <typename T>
-WithinRelVectorMatcher<T>
-VectorsWithinRel(std::vector<T> const &expected, T margin = std::numeric_limits<T>::epsilon() * 100)
+WithinAbsRelVectorMatcher<T> VectorsWithinAbsRel(
+    std::vector<T> const &expected, T margin = std::numeric_limits<T>::epsilon() * 100
+)
 {
-  return WithinRelVectorMatcher<T>(expected, margin);
+  return WithinAbsRelVectorMatcher<T>(expected, margin);
 }
 
 #endif // BSPLINEX_MATCHERS_HPP
