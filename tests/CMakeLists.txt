@@ -45,4 +45,7 @@ add_executable(test_bspline_with_data ${BSPLINE_TESTS_WITH_DATA})
 target_link_libraries(test_bspline_with_data PRIVATE
   BSplineX Catch2::Catch2WithMain nlohmann_json::nlohmann_json
 )
+target_compile_definitions(test_bspline_with_data PRIVATE
+  TEST_RESOURCES_DIR="${CMAKE_SOURCE_DIR}/tests/bspline/data"
+)
 catch_discover_tests(test_bspline_with_data)

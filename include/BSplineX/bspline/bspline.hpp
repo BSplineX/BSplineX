@@ -158,7 +158,7 @@ public:
    */
   T evaluate(T value, size_t derivative_order = 0)
   {
-    releaseassert(derivative_order <= this->degree, "derivative_order must be <= degree")
+    releaseassert(derivative_order <= this->degree, "derivative_order must be <= degree");
     if (0 == derivative_order)
     {
       auto [index, x_value] = this->knots.find(value);
@@ -205,11 +205,13 @@ public:
   {
     std::vector<T> basis_functions(this->degree + 1, static_cast<T>(0));
 
-    size_t index = this->nnz_basis(value, basis_functions.begin(), basis_functions.end());
+    size_t index = this->nnz_basis(value, 0, basis_functions.begin(), basis_functions.end());
 
     basis_functions.insert(basis_functions.begin(), index, static_cast<T>(0));
     basis_functions.insert(
-        basis_functions.end(), this->control_points.size() - index - this->degree - 1, static_cast<T>(0)
+        basis_functions.end(),
+        this->control_points.size() - index - this->degree - 1,
+        static_cast<T>(0)
     );
 
     return basis_functions;
@@ -234,13 +236,14 @@ public:
         lsq::lsq<T, vec_iter, BC>(
             degree,
             knots.size(),
-            [this](T value, std::vector<T> &vec) -> size_t
-            { return this->nnz_basis(value, vec.begin(), vec.end()); },
+            [this](T value, size_t derivative_order, std::vector<T> &vec) -> size_t
+            { return this->nnz_basis(value, derivative_order, vec.begin(), vec.end()); },
             vec_view{x.begin(), x.end()},
             vec_view{y.begin(), y.end()},
             {}
         )
     );
+    this->invalidate_derivative();
   }
 
   /**
@@ -285,6 +288,7 @@ public:
           "There must be exactly degree - 1 additional conditions."
       );
     }
+    this->invalidate_derivative();
 
     knots::Knots<T, C, BC, EXT> new_knots;
     if constexpr (Curve::UNIFORM == C)
@@ -339,20 +343,29 @@ public:
       releaseassert(false, "Unknown boundary condition, you should never get here!");
     }
 
+    // FIXME: This is necessary since currently nnz_basis has to recompute the derivative
+    //        We should either generalize this for boundary conditions different from OPEN,
+    //        or avoid computing derivative in nnz_basis.
+    this->control_points = std::move(
+        control_points::ControlPoints<T, BC>(
+            {std::vector<T>(this->knots.size() - degree - 1, 0)}, degree
+        )
+    );
     this->control_points = std::move(
         lsq::lsq<T, vec_iter, BC>(
             this->degree,
             this->knots.size(),
-            [this](T value, std::vector<T> &vec) -> size_t
-            { return this->nnz_basis(value, vec.begin(), vec.end()); },
+            [this](T value, size_t derivative_order, std::vector<T> &vec) -> size_t
+            { return this->nnz_basis(value, derivative_order, vec.begin(), vec.end()); },
             x_view,
             y_view,
             additional_conditions
         )
     );
+    this->invalidate_derivative();
   }
 
-  std::vector<T> get_control_points()
+  std::vector<T> get_control_points() const
   {
     std::vector<T> ctrl_pts{};
     ctrl_pts.reserve(this->control_points.size());
@@ -425,8 +438,16 @@ private:
   }
 
   template <typename It>
-  size_t nnz_basis(T value, [[maybe_unused]] It begin, It end)
+  size_t nnz_basis(T value, size_t derivative_order, [[maybe_unused]] It begin, It end)
   {
+    if (derivative_order > 0)
+    {
+      if (not this->derivative)
+      {
+        this->compute_derivative();
+      }
+      return this->derivative->nnz_basis(value, derivative_order - 1, begin, std::prev(end));
+    }
     debugassert(
         (end - begin) == static_cast<long long>(this->degree + 1),
         "Unexpected number of basis asked, exactly degree + 1 basis can be asked"
@@ -490,6 +511,8 @@ private:
         this->degree - 1
     ));
   }
+
+  void invalidate_derivative() { this->derivative = nullptr; }
 };
 
 } // namespace bsplinex::bspline

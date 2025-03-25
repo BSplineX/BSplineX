@@ -153,10 +153,10 @@ struct Condition
 {
   T x_value;
   T y_value;
-  size_t derivative_degree;
+  size_t derivative_order;
 
-  Condition(T x_value, T y_value, size_t derivative_degree)
-      : x_value{x_value}, y_value{y_value}, derivative_degree{derivative_degree}
+  Condition(T x_value, T y_value, size_t derivative_order)
+      : x_value{x_value}, y_value{y_value}, derivative_order{derivative_order}
   {
   }
 };
@@ -193,7 +193,7 @@ void fill(
     LSQMatrix &A,
     Eigen::VectorX<T> &b,
     size_t const degree,
-    std::function<size_t(T, std::vector<T> &)> nnz_basis,
+    std::function<size_t(T, size_t, std::vector<T> &)> nnz_basis,
     views::ArrayView<Iter> const &x,
     views::ArrayView<Iter> const &y,
     std::vector<Condition<T>> const &additional_conditions
@@ -215,7 +215,7 @@ void fill(
   {
     Condition<T> const &condition = conditions.at(i);
 
-    size_t const index = nnz_basis(condition.x_value, nnz);
+    size_t const index = nnz_basis(condition.x_value, condition.derivative_order, nnz);
     for (size_t j{0}; j <= degree; j++)
     {
       if constexpr (BoundaryCondition::PERIODIC == BC)
@@ -241,7 +241,7 @@ template <typename T, class Iter, BoundaryCondition BC>
 control_points::ControlPoints<T, BC>
 lsq(size_t const degree,
     size_t const knots_size,
-    std::function<size_t(T, std::vector<T> &)> nnz_basis,
+    std::function<size_t(T, size_t, std::vector<T> &)> nnz_basis,
     views::ArrayView<Iter> const &x,
     views::ArrayView<Iter> const &y,
     std::vector<Condition<T>> const &additional_conditions)
