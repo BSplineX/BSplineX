@@ -100,4 +100,3 @@ using namespace bsplinex;
 %template(PeriodicNonUniform) bspline::BSpline<double, Curve::NON_UNIFORM, BoundaryCondition::PERIODIC, Extrapolation::PERIODIC>;
 %template() types::PeriodicNonUniform<double>;
 %template(periodic_nonuniform) factory::periodic_nonuniform<double>;
-

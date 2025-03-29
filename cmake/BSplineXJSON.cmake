@@ -47,5 +47,3 @@ else()
   )
   message(STATUS "BSplineX: Found JSON installed in ${JSON_INCLUDE_DIRS}")
 endif()
-
-

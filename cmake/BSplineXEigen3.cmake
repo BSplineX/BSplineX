@@ -31,4 +31,3 @@ else()
   )
   message(STATUS "BSplineX: Found Eigen installed in ${EIGEN_INCLUDE_DIRS}")
 endif()
-

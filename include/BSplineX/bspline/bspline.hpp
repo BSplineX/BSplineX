@@ -232,15 +232,17 @@ public:
   {
     releaseassert(x.size() == y.size(), "x and y must have the same size");
 
-    this->control_points = std::move(lsq::lsq<T, vec_iter, BC>(
-        degree,
-        knots.size(),
-        [this](T value, size_t derivative_order, std::vector<T> &vec) -> size_t
-        { return this->nnz_basis(value, derivative_order, vec.begin(), vec.end()); },
-        vec_view{x.begin(), x.end()},
-        vec_view{y.begin(), y.end()},
-        {}
-    ));
+    this->control_points = std::move(
+        lsq::lsq<T, vec_iter, BC>(
+            degree,
+            knots.size(),
+            [this](T value, size_t derivative_order, std::vector<T> &vec) -> size_t
+            { return this->nnz_basis(value, derivative_order, vec.begin(), vec.end()); },
+            vec_view{x.begin(), x.end()},
+            vec_view{y.begin(), y.end()},
+            {}
+        )
+    );
     this->invalidate_derivative();
   }
 
@@ -344,18 +346,22 @@ public:
     // FIXME: This is necessary since currently nnz_basis has to recompute the derivative
     //        We should either generalize this for boundary conditions different from OPEN,
     //        or avoid computing derivative in nnz_basis.
-    this->control_points = std::move(control_points::ControlPoints<T, BC>(
-        {std::vector<T>(this->knots.size() - degree - 1, 0)}, degree
-    ));
-    this->control_points = std::move(lsq::lsq<T, vec_iter, BC>(
-        this->degree,
-        this->knots.size(),
-        [this](T value, size_t derivative_order, std::vector<T> &vec) -> size_t
-        { return this->nnz_basis(value, derivative_order, vec.begin(), vec.end()); },
-        x_view,
-        y_view,
-        additional_conditions
-    ));
+    this->control_points = std::move(
+        control_points::ControlPoints<T, BC>(
+            {std::vector<T>(this->knots.size() - degree - 1, 0)}, degree
+        )
+    );
+    this->control_points = std::move(
+        lsq::lsq<T, vec_iter, BC>(
+            this->degree,
+            this->knots.size(),
+            [this](T value, size_t derivative_order, std::vector<T> &vec) -> size_t
+            { return this->nnz_basis(value, derivative_order, vec.begin(), vec.end()); },
+            x_view,
+            y_view,
+            additional_conditions
+        )
+    );
     this->invalidate_derivative();
   }
 

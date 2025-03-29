@@ -1,5 +1,4 @@
 #ifndef BSPLINEX_EXCEPTIONS_HPP
 #define BSPLINEX_EXCEPTIONS_HPP
 
-
 #endif

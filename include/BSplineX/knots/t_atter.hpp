@@ -97,8 +97,8 @@ public:
     // iterator traits
     using difference_type   = int;
     using value_type        = T;
-    using pointer           = const T *;
-    using reference         = const T &;
+    using pointer           = T const *;
+    using reference         = T const &;
     using iterator_category = std::random_access_iterator_tag;
 
     iterator(Atter<T, C, BC> const *atter, size_t index) : atter{atter}, index{index} {}
