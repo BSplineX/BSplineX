@@ -73,6 +73,31 @@ TEST_CASE("BSpline", "[bspline]")
         );
       }
 
+      SECTION("nnz_basis(...)")
+      {
+        std::vector<real_t> nnz_basis(degree + 1);
+        for (size_t derivative_order = 0;
+             derivative_order < test_data["bspline"]["nnz_basis"].size();
+             ++derivative_order)
+        {
+          SECTION("nnz_basis(..., derivative_order=" + std::to_string(derivative_order) + ")")
+          {
+            for (size_t i = 0; i < x_eval.size(); ++i)
+            {
+              auto [ref_index, ref_nnz_basis] =
+                  test_data["bspline"]["nnz_basis"][derivative_order][i]
+                      .get<std::pair<size_t, std::vector<real_t>>>();
+              std::fill(nnz_basis.begin(), nnz_basis.end(), 0.0);
+              size_t index = bspline.nnz_basis(
+                  x_eval.at(i), derivative_order, nnz_basis.begin(), nnz_basis.end()
+              );
+              REQUIRE(index == ref_index);
+              REQUIRE_THAT(nnz_basis, VectorsWithinAbsRel(ref_nnz_basis));
+            }
+          }
+        }
+      }
+
       SECTION("fit(...)")
       {
         auto [domain_left, domain_right] =
@@ -112,13 +137,13 @@ TEST_CASE("BSpline", "[bspline]")
                                                  std::vector<std::pair<real_t, real_t>>>>();
         std::vector<lsq::Condition<real_t>> additional_conditions{};
         additional_conditions.reserve(conds_left.size() + conds_right.size());
-        for (auto [derivative_degree, value] : conds_left)
+        for (auto [derivative_order, value] : conds_left)
         {
-          additional_conditions.emplace_back(x_interp.front(), value, derivative_degree);
+          additional_conditions.emplace_back(x_interp.front(), value, derivative_order);
         }
-        for (auto [derivative_degree, value] : conds_right)
+        for (auto [derivative_order, value] : conds_right)
         {
-          additional_conditions.emplace_back(x_interp.back(), value, derivative_degree);
+          additional_conditions.emplace_back(x_interp.back(), value, derivative_order);
         }
 
         auto y_eval_interp   = test_data["bspline_interp"]["y_eval"].get<std::vector<real_t>>();
@@ -134,8 +159,8 @@ TEST_CASE("BSpline", "[bspline]")
 
         bspline.interpolate(x_interp, y_interp, additional_conditions);
 
-        // REQUIRE_THAT(bspline.get_knots(), VectorsWithinRel(knots_interp));
-        // REQUIRE_THAT(bspline.get_control_points(), VectorsWithinRel(ctrl_pts_interp));
+        REQUIRE_THAT(bspline.get_knots(), VectorsWithinAbsRel(knots_interp));
+        // REQUIRE_THAT(bspline.get_control_points(), VectorsWithinAbsRel(ctrl_pts_interp));
         REQUIRE_THAT(bspline.evaluate(x_eval), VectorsWithinAbsRel(y_eval_interp));
       }
     }
