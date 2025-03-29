@@ -22,3 +22,5 @@ CheckOptions:
     value: 0
   - key: readability-identifier-length.MinimumParameterNameLength
     value: 0
+  - key: readability-identifier-length.MinimumLoopCounterNameLength
+    value: 0
