@@ -25,6 +25,7 @@ private:
 
   using difference_type = typename std::iterator_traits<Iter>::difference_type;
   using reference       = typename std::iterator_traits<Iter>::reference;
+  using const_reference = reference const;
 
 public:
   /**
@@ -64,7 +65,10 @@ public:
    *
    * @param other The ArrayView to move from.
    */
-  ArrayView(ArrayView &&other) : _begin{std::move(other._begin)}, _end{std::move(other._end)} {}
+  ArrayView(ArrayView &&other) noexcept
+      : _begin{std::move(other._begin)}, _end{std::move(other._end)}
+  {
+  }
 
   /**
    * @brief Copy assignment operator.
@@ -76,6 +80,11 @@ public:
    */
   ArrayView &operator=(ArrayView const &other)
   {
+    if (this == &other)
+    {
+      return *this;
+    }
+
     this->_begin = other._begin;
     this->_end   = other._end;
     return *this;
@@ -89,8 +98,13 @@ public:
    * @param other The ArrayView to move from.
    * @return A reference to this ArrayView.
    */
-  ArrayView &operator=(ArrayView &&other)
+  ArrayView &operator=(ArrayView &&other) noexcept
   {
+    if (this == &other)
+    {
+      return *this;
+    }
+
     this->_begin = std::move(other._begin);
     this->_end   = std::move(other._end);
     return *this;
@@ -118,7 +132,7 @@ public:
    * @return A const reference to the element at the specified index.
    * @throw in debug mode if the index is out of bounds.
    */
-  reference const at(difference_type index) const
+  const_reference at(difference_type index) const
   {
     debugassert(std::distance(this->_begin, this->_end) > index, "Out of bounds.");
     debugassert(index >= 0, "Negative indices are not supported.");
@@ -140,18 +154,18 @@ public:
    * @param index The index of the element to access.
    * @return A const reference to the element at the specified index.
    */
-  reference const operator[](difference_type index) const
+  const_reference operator[](difference_type index) const
   {
     return *std::next(this->_begin, index);
   }
 
   reference front() { return *(this->_begin); }
 
-  reference const front() const { return *(this->_begin); }
+  const_reference front() const { return *(this->_begin); }
 
   reference back() { return *std::prev(this->_end, 1); }
 
-  reference const back() const { return *std::prev(this->_end, 1); }
+  const_reference back() const { return *std::prev(this->_end, 1); }
 
   /**
    * @brief Get the number of elements in the view.

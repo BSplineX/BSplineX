@@ -35,7 +35,10 @@ public:
   {
     DEBUG_LOG_CALL();
     if (this == &other)
+    {
       return *this;
+    }
+
     data   = other.data;
     padder = other.padder;
     return *this;
@@ -45,7 +48,10 @@ public:
   {
     DEBUG_LOG_CALL();
     if (this == &other)
+    {
       return *this;
+    }
+
     data   = std::move(other.data);
     padder = std::move(other.padder);
     return *this;

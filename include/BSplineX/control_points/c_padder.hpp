@@ -18,11 +18,11 @@ class Padder
 public:
   Padder() { DEBUG_LOG_CALL(); }
 
-  Padder(Data<T> &, size_t) { DEBUG_LOG_CALL(); }
+  Padder(Data<T> & /*data*/, size_t /*degree*/) { DEBUG_LOG_CALL(); }
 
-  Padder(Padder const &) { DEBUG_LOG_CALL(); }
+  Padder(Padder const & /*other*/) { DEBUG_LOG_CALL(); }
 
-  Padder(Padder &&) noexcept { DEBUG_LOG_CALL(); }
+  Padder(Padder && /*other*/) noexcept { DEBUG_LOG_CALL(); }
 
   ~Padder() noexcept { DEBUG_LOG_CALL(); }
 
@@ -30,7 +30,10 @@ public:
   {
     DEBUG_LOG_CALL();
     if (this == &other)
+    {
       return *this;
+    }
+
     return *this;
   }
 
@@ -38,11 +41,14 @@ public:
   {
     DEBUG_LOG_CALL();
     if (this == &other)
+    {
       return *this;
+    }
+
     return *this;
   }
 
-  T right(size_t) const
+  T right(size_t /*index*/) const
   {
     releaseassert(
         false,
@@ -77,7 +83,10 @@ public:
   {
     DEBUG_LOG_CALL();
     if (this == &other)
+    {
       return *this;
+    }
+
     pad_right = other.pad_right;
     return *this;
   }
@@ -86,7 +95,10 @@ public:
   {
     DEBUG_LOG_CALL();
     if (this == &other)
+    {
       return *this;
+    }
+
     pad_right = std::move(other.pad_right);
     return *this;
   }

@@ -80,7 +80,10 @@ public:
   {
     DEBUG_LOG_CALL();
     if (this == &other)
+    {
       return *this;
+    }
+
     this->atter        = other.atter;
     this->extrapolator = other.extrapolator;
     new (&this->finder) Finder<T, C, BC, EXT>(this->atter, other.degree);
@@ -94,7 +97,10 @@ public:
   {
     DEBUG_LOG_CALL();
     if (this == &other)
+    {
       return *this;
+    }
+
     this->atter        = std::move(other.atter);
     this->extrapolator = std::move(other.extrapolator);
     new (&this->finder) Finder<T, C, BC, EXT>(this->atter, other.degree);

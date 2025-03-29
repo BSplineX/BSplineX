@@ -27,9 +27,12 @@ class Extrapolator<T, C, BC, Extrapolation::NONE>
 public:
   Extrapolator() = default;
 
-  Extrapolator(Atter<T, C, BC> const &, size_t) {}
+  Extrapolator(Atter<T, C, BC> const & /*atter*/, size_t /*degree*/) {}
 
-  T extrapolate(T) const { throw std::runtime_error("Extrapolation explicitly set to NONE"); }
+  T extrapolate(T /*value*/) const
+  {
+    throw std::runtime_error("Extrapolation explicitly set to NONE");
+  }
 };
 
 template <typename T, Curve C, BoundaryCondition BC>
@@ -66,7 +69,10 @@ public:
   {
     DEBUG_LOG_CALL();
     if (this == &other)
+    {
       return *this;
+    }
+
     value_left  = other.value_left;
     value_right = other.value_right;
     return *this;
@@ -76,7 +82,10 @@ public:
   {
     DEBUG_LOG_CALL();
     if (this == &other)
+    {
       return *this;
+    }
+
     value_left  = other.value_left;
     value_right = other.value_right;
     return *this;
@@ -127,7 +136,10 @@ public:
   {
     DEBUG_LOG_CALL();
     if (this == &other)
+    {
       return *this;
+    }
+
     value_left  = other.value_left;
     value_right = other.value_right;
     period      = other.period;
@@ -138,7 +150,10 @@ public:
   {
     DEBUG_LOG_CALL();
     if (this == &other)
+    {
       return *this;
+    }
+
     value_left  = other.value_left;
     value_right = other.value_right;
     period      = other.period;

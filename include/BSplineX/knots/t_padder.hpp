@@ -9,8 +9,6 @@
 #include "BSplineX/knots/t_data.hpp"
 #include "BSplineX/types.hpp"
 
-#include <iostream>
-
 namespace bsplinex::knots
 {
 
@@ -32,11 +30,11 @@ class Padder<T, C, BoundaryCondition::OPEN>
 public:
   Padder() { DEBUG_LOG_CALL(); }
 
-  Padder(Data<T, C> const &, size_t) { DEBUG_LOG_CALL(); }
+  Padder(Data<T, C> const & /*data*/, size_t /*degree*/) { DEBUG_LOG_CALL(); }
 
-  Padder(Padder const &) { DEBUG_LOG_CALL(); }
+  Padder(Padder const & /*other*/) { DEBUG_LOG_CALL(); }
 
-  Padder(Padder &&) noexcept { DEBUG_LOG_CALL(); }
+  Padder(Padder && /*other*/) noexcept { DEBUG_LOG_CALL(); }
 
   ~Padder() noexcept { DEBUG_LOG_CALL(); }
 
@@ -44,7 +42,10 @@ public:
   {
     DEBUG_LOG_CALL();
     if (this == &other)
+    {
       return *this;
+    }
+
     return *this;
   }
 
@@ -52,11 +53,14 @@ public:
   {
     DEBUG_LOG_CALL();
     if (this == &other)
+    {
       return *this;
+    }
+
     return *this;
   }
 
-  T left(size_t) const
+  T left(size_t /*index*/) const
   {
     releaseassert(
         false,
@@ -64,7 +68,7 @@ public:
     );
   }
 
-  T right(size_t) const
+  T right(size_t /*index*/) const
   {
     releaseassert(
         false,
@@ -124,7 +128,10 @@ public:
   {
     DEBUG_LOG_CALL();
     if (this == &other)
+    {
       return *this;
+    }
+
     pad_left  = other.pad_left;
     pad_right = other.pad_right;
     pad_size  = other.pad_size;
@@ -135,7 +142,10 @@ public:
   {
     DEBUG_LOG_CALL();
     if (this == &other)
+    {
       return *this;
+    }
+
     pad_left  = other.pad_left;
     pad_right = other.pad_right;
     pad_size  = other.pad_size;
@@ -203,7 +213,10 @@ public:
   {
     DEBUG_LOG_CALL();
     if (this == &other)
+    {
       return *this;
+    }
+
     pad_left  = other.pad_left;
     pad_right = other.pad_right;
     return *this;
@@ -213,7 +226,10 @@ public:
   {
     DEBUG_LOG_CALL();
     if (this == &other)
+    {
       return *this;
+    }
+
     pad_left  = std::move(other.pad_left);
     pad_right = std::move(other.pad_right);
     return *this;

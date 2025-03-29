@@ -78,6 +78,8 @@ public:
     DEBUG_LOG_CALL();
   }
 
+  ~Finder() = default;
+
   Finder(Finder const &other) = delete;
 
   Finder(Finder &&other) = delete;

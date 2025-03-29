@@ -79,7 +79,10 @@ public:
   {
     DEBUG_LOG_CALL();
     if (this == &other)
+    {
       return *this;
+    }
+
     begin     = other.begin;
     end       = other.end;
     num_elems = other.num_elems;
@@ -91,7 +94,10 @@ public:
   {
     DEBUG_LOG_CALL();
     if (this == &other)
+    {
       return *this;
+    }
+
     begin     = other.begin;
     end       = other.end;
     num_elems = other.num_elems;
@@ -162,7 +168,10 @@ public:
   {
     DEBUG_LOG_CALL();
     if (this == &other)
+    {
       return *this;
+    }
+
     raw_data = other.raw_data;
     return *this;
   }
@@ -171,7 +180,10 @@ public:
   {
     DEBUG_LOG_CALL()
     if (this == &other)
+    {
       return *this;
+    }
+
     raw_data = std::move(other.raw_data);
     return *this;
   }

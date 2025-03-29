@@ -127,7 +127,10 @@ public:
   {
     DEBUG_LOG_CALL();
     if (this == &other)
+    {
       return *this;
+    }
+
     knots          = other.knots;
     control_points = other.control_points;
     degree         = other.degree;
@@ -147,7 +150,10 @@ public:
   {
     DEBUG_LOG_CALL();
     if (this == &other)
+    {
       return *this;
+    }
+
     knots          = std::move(other.knots);
     control_points = std::move(other.control_points);
     degree         = other.degree;
@@ -334,7 +340,8 @@ public:
 
     this->knots = std::move(new_knots);
 
-    vec_const_view x_view, y_view;
+    vec_const_view x_view;
+    vec_const_view y_view;
     if constexpr (BoundaryCondition::OPEN == BC)
     {
       x_view = vec_const_view{std::next(x.begin(), degree), std::prev(x.end(), degree)};

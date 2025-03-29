@@ -62,7 +62,10 @@ public:
   {
     DEBUG_LOG_CALL();
     if (this == &other)
+    {
       return *this;
+    }
+
     atter  = other.atter;
     degree = other.degree;
     return *this;
@@ -72,7 +75,10 @@ public:
   {
     DEBUG_LOG_CALL();
     if (this == &other)
+    {
       return *this;
+    }
+
     atter  = std::move(other.atter);
     degree = other.degree;
     return *this;

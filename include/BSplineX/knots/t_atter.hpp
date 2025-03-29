@@ -38,7 +38,10 @@ public:
   {
     DEBUG_LOG_CALL();
     if (this == &other)
+    {
       return *this;
+    }
+
     data   = other.data;
     padder = other.padder;
     return *this;
@@ -48,7 +51,10 @@ public:
   {
     DEBUG_LOG_CALL();
     if (this == &other)
+    {
       return *this;
+    }
+
     data   = std::move(other.data);
     padder = std::move(other.padder);
     return *this;
@@ -103,7 +109,13 @@ public:
 
     iterator(Atter<T, C, BC> const *atter, size_t index) : atter{atter}, index{index} {}
 
-    iterator(iterator const &b) = default;
+    ~iterator() = default;
+
+    iterator(iterator const &b) : atter{b.atter}, index{b.index} {}
+
+    iterator(iterator &&b) = default;
+
+    iterator &operator=(iterator &&b) = default;
 
     iterator &operator++()
     {
