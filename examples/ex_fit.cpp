@@ -10,7 +10,8 @@ int main()
   // initialize a cubic, uniform, periodic B-spline curve where knots are [0.1, 1.1,
   // ..., 10.1, 11.1]
   constexpr size_t degree{3};
-  constexpr double knots_begin{0.1}, knots_end{12.0};
+  constexpr double knots_begin{0.1};
+  constexpr double knots_end{12.0};
   constexpr size_t num_knots{12};
 
   auto bspline = bsplinex::factory::periodic_uniform(degree, knots_begin, knots_end, num_knots);

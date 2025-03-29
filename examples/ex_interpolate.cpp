@@ -16,11 +16,10 @@ int main()
   // interpolate the curve to the points
   bspline.interpolate(x_interp, y_interp, {{6.7, 25.6, 0}});
 
-  double x, y;
   for (size_t i{degree}; i < x_interp.size() - degree; i++)
   {
-    x = x_interp.at(i);
-    y = y_interp.at(i);
+    double const x = x_interp.at(i);
+    double const y = y_interp.at(i);
     std::cout << "bspline.evaluate(" << x << ") = " << bspline.evaluate(x) << " == " << y
               << " -> abs(error) = " << std::abs(bspline.evaluate(x) - y) << std::endl;
   }

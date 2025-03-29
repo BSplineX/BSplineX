@@ -60,11 +60,12 @@ random_vector(std::mt19937 &rng, size_t num_elems, real_t min = -10.0, real_t ma
 static std::vector<real_t> uniform_vector(size_t num_elems, real_t min = -10.0, real_t max = 10.0)
 {
   std::vector<real_t> vec(num_elems);
-  real_t step_size = (max - min) / (num_elems - 1);
+  real_t step_size = (max - min) / static_cast<real_t>(num_elems - 1);
   std::generate(
       vec.begin(),
       std::prev(vec.end(), 1),
-      [min, step_size, i = ZERO<size_t>]() mutable { return min + step_size * i++; }
+      [min, step_size, i = ZERO<size_t>]() mutable
+      { return min + step_size * static_cast<real_t>(i++); }
   );
 
   // Avoid numerical errors
@@ -87,7 +88,7 @@ BSplineType random_bspline(std::mt19937 &rng, size_t degree, size_t num_ctrl)
 {
   std::vector<real_t> ctrl_pts = random_vector(rng, num_ctrl, -1.0, 1.0);
 
-  size_t num_knots;
+  size_t num_knots{0};
   if constexpr (BoundaryCondition::OPEN == BSplineType::boundary_condition_type)
   {
     num_knots = num_ctrl + degree + 1;
@@ -137,7 +138,7 @@ TEMPLATE_TEST_CASE("masinag", "[bspline][template][product]", BSPLINE_TEST_TYPES
   using ctrl_val_t              = std::pair<size_t, size_t>;
   auto const [ctrl_pts, values] = GENERATE(ctrl_val_t{50, 50}, ctrl_val_t{600, 2000});
 
-  TestType bspline = random_bspline<TestType>(rng, degree, ctrl_pts);
+  auto bspline = random_bspline<TestType>(rng, degree, ctrl_pts);
 
   auto [x_min, x_max] = bspline.domain();
 

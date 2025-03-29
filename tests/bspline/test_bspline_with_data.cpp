@@ -8,7 +8,6 @@
 #include <nlohmann/json.hpp>
 
 // BSplineX includes
-#include "BSplineX/bspline/bspline.hpp"
 #include "BSplineX/bspline/bspline_types.hpp"
 #include "matchers.hpp"
 
@@ -103,7 +102,8 @@ TEST_CASE("BSpline", "[bspline]")
             test_data["bspline"]["domain"].get<std::pair<real_t, real_t>>();
         std::vector<real_t> x = test_data["x"].get<std::vector<real_t>>();
         std::vector<real_t> y = test_data["y"].get<std::vector<real_t>>();
-        std::vector<real_t> x_fit, y_fit;
+        std::vector<real_t> x_fit;
+        std::vector<real_t> y_fit;
         x_fit.reserve(x.size());
         y_fit.reserve(y.size());
         for (size_t i{0}; i < x.size(); i++)

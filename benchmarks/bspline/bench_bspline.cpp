@@ -24,7 +24,7 @@ TEST_CASE(
 )
 {
   size_t degree{3};
-  knots::Data<double, Curve::UNIFORM> t_data{0.1, 13.2, (size_t)9};
+  knots::Data<double, Curve::UNIFORM> t_data{0.1, 13.2, static_cast<size_t>(9)};
   control_points::Data<double> c_data{{0.1, 1.3, 2.2, 4.9, 13.2}};
 
   BENCHMARK_ADVANCED("bspline.construct")(Catch::Benchmark::Chronometer meter)
@@ -41,7 +41,10 @@ TEST_CASE(
         BSpline<double, Curve::UNIFORM, BoundaryCondition::OPEN, Extrapolation::NONE>>>
         storage(meter.runs());
     for (auto &&o : storage)
+    {
       o.construct(t_data, c_data, degree);
+    }
+
     meter.measure([&](int i) { storage[i].destruct(); });
   };
 
@@ -74,12 +77,12 @@ TEST_CASE(
     for (size_t i{4}; i < 5; i++)
     {
       eval_elems = std::pow(10.0, i);
-      fill(start, stop, eval_elems, x_data);
+      fill(start, stop, static_cast<size_t>(eval_elems), x_data);
       res = 0.0;
 
       BENCHMARK(
           "bspline.evaluate - knots: " + std::to_string(knots_num) +
-          " evals: " + std::to_string((size_t)eval_elems)
+          " evals: " + std::to_string(static_cast<size_t>(eval_elems))
       )
       {
         for (auto x : x_data)
@@ -131,7 +134,10 @@ TEST_CASE(
         BSpline<double, Curve::NON_UNIFORM, BoundaryCondition::OPEN, Extrapolation::NONE>>>
         storage(meter.runs());
     for (auto &&o : storage)
+    {
       o.construct(t_data, c_data, degree);
+    }
+
     meter.measure([&](int i) { storage[i].destruct(); });
   };
 
@@ -169,11 +175,11 @@ TEST_CASE(
     for (size_t i{4}; i < 5; i++)
     {
       eval_elems = std::pow(10.0, i);
-      fill(start, stop, eval_elems, x_data);
+      fill(start, stop, static_cast<size_t>(eval_elems), x_data);
       res = 0.0;
       BENCHMARK(
           "bspline.evaluate - knots: " + std::to_string(knots_num) +
-          " evals: " + std::to_string((size_t)eval_elems)
+          " evals: " + std::to_string(static_cast<size_t>(eval_elems))
       )
       {
         for (auto x : x_data)
