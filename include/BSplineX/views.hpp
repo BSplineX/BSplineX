@@ -20,8 +20,8 @@ template <class Iter>
 class ArrayView
 {
 private:
-  Iter begin;
-  Iter end;
+  Iter _begin;
+  Iter _end;
 
   using difference_type = typename std::iterator_traits<Iter>::difference_type;
   using reference       = typename std::iterator_traits<Iter>::reference;
@@ -32,7 +32,9 @@ public:
    *
    * Constructs an empty ArrayView.
    */
-  ArrayView() {}
+  ArrayView() = default;
+
+  ~ArrayView() = default;
 
   /**
    * @brief Constructs an ArrayView from a range defined by two iterators.
@@ -41,7 +43,7 @@ public:
    * @param end The iterator pointing to the end of the range.
    * @throw in debug mode if end is not greater than begin.
    */
-  ArrayView(Iter begin, Iter end) : begin{begin}, end{end}
+  ArrayView(Iter begin, Iter end) : _begin{begin}, _end{end}
   {
     debugassert(end > begin, "Invalid view range.");
   }
@@ -53,7 +55,7 @@ public:
    *
    * @param other The ArrayView to copy from.
    */
-  ArrayView(ArrayView const &other) : begin{other.begin}, end{other.end} {}
+  ArrayView(ArrayView const &other) : _begin{other._begin}, _end{other._end} {}
 
   /**
    * @brief Move constructor.
@@ -62,7 +64,7 @@ public:
    *
    * @param other The ArrayView to move from.
    */
-  ArrayView(ArrayView &&other) : begin{std::move(other.begin)}, end{std::move(other.end)} {}
+  ArrayView(ArrayView &&other) : _begin{std::move(other._begin)}, _end{std::move(other._end)} {}
 
   /**
    * @brief Copy assignment operator.
@@ -74,8 +76,8 @@ public:
    */
   ArrayView &operator=(ArrayView const &other)
   {
-    this->begin = other.begin;
-    this->end   = other.end;
+    this->_begin = other._begin;
+    this->_end   = other._end;
     return *this;
   }
 
@@ -89,8 +91,8 @@ public:
    */
   ArrayView &operator=(ArrayView &&other)
   {
-    this->begin = std::move(other.begin);
-    this->end   = std::move(other.end);
+    this->_begin = std::move(other._begin);
+    this->_end   = std::move(other._end);
     return *this;
   }
 
@@ -103,7 +105,7 @@ public:
    */
   reference at(difference_type index)
   {
-    debugassert(std::distance(this->begin, this->end) > index, "Out of bounds.");
+    debugassert(std::distance(this->_begin, this->_end) > index, "Out of bounds.");
     debugassert(index >= 0, "Negative indices are not supported.");
 
     return this->operator[](index);
@@ -118,7 +120,7 @@ public:
    */
   reference const at(difference_type index) const
   {
-    debugassert(std::distance(this->begin, this->end) > index, "Out of bounds.");
+    debugassert(std::distance(this->_begin, this->_end) > index, "Out of bounds.");
     debugassert(index >= 0, "Negative indices are not supported.");
 
     return this->operator[](index);
@@ -130,7 +132,7 @@ public:
    * @param index The index of the element to access.
    * @return A reference to the element at the specified index.
    */
-  reference operator[](difference_type index) { return *std::next(this->begin, index); }
+  reference operator[](difference_type index) { return *std::next(this->_begin, index); }
 
   /**
    * @brief Access an element at a given index without bounds checking (const version).
@@ -138,14 +140,29 @@ public:
    * @param index The index of the element to access.
    * @return A const reference to the element at the specified index.
    */
-  reference const operator[](difference_type index) const { return *std::next(this->begin, index); }
+  reference const operator[](difference_type index) const
+  {
+    return *std::next(this->_begin, index);
+  }
+
+  reference front() { return *(this->_begin); }
+
+  reference const front() const { return *(this->_begin); }
+
+  reference back() { return *std::prev(this->_end, 1); }
+
+  reference const back() const { return *std::prev(this->_end, 1); }
 
   /**
    * @brief Get the number of elements in the view.
    *
    * @return The number of elements in the view.
    */
-  size_t size() const { return static_cast<size_t>(std::distance(this->begin, this->end)); }
+  size_t size() const { return static_cast<size_t>(std::distance(this->_begin, this->_end)); }
+
+  Iter begin() { return this->_begin; }
+
+  Iter end() { return this->_end; }
 };
 
 } // namespace bsplinex::views

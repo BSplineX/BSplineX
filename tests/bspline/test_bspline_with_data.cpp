@@ -1,9 +1,10 @@
 #include <fstream>
+#include <iostream>
+#include <vector>
 
 // Third-party includes
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
-#include <iostream>
 #include <nlohmann/json.hpp>
 
 // BSplineX includes
@@ -88,9 +89,7 @@ TEST_CASE("BSpline", "[bspline]")
                   test_data["bspline"]["nnz_basis"][derivative_order][i]
                       .get<std::pair<size_t, std::vector<real_t>>>();
               std::fill(nnz_basis.begin(), nnz_basis.end(), 0.0);
-              size_t index = bspline.nnz_basis(
-                  x_eval.at(i), derivative_order, nnz_basis.begin(), nnz_basis.end()
-              );
+              auto [index, nnz_basis] = bspline.nnz_basis(x_eval.at(i), derivative_order);
               REQUIRE(index == ref_index);
               REQUIRE_THAT(nnz_basis, VectorsWithinAbsRel(ref_nnz_basis));
             }

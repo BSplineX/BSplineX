@@ -210,7 +210,7 @@ void fill(
 
   std::vector<Condition<T>> conditions = create_sorted_conditions(x, y, additional_conditions);
 
-  std::vector<T> nnz(degree + 1);
+  std::vector<T> nnz(degree + 1, (T)0);
   for (size_t i{0}; i < num_rows; i++)
   {
     Condition<T> const &condition = conditions.at(i);
