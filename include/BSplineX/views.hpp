@@ -35,6 +35,9 @@ public:
    */
   ArrayView() = default;
 
+  /**
+   * @brief Default destructor
+   */
   ~ArrayView() = default;
 
   /**
@@ -159,12 +162,32 @@ public:
     return *std::next(this->_begin, index);
   }
 
+  /**
+   * @brief Get the first element of the view
+   *
+   * @return a reference to the first element of the view
+   */
   reference front() { return *(this->_begin); }
 
+  /**
+   * @brief Get the first element of the view
+   *
+   * @return a const reference to the first element of the view
+   */
   const_reference front() const { return *(this->_begin); }
 
+  /**
+   * @brief Get the last element of the view
+   *
+   * @return a reference to the last element of the view
+   */
   reference back() { return *std::prev(this->_end, 1); }
 
+  /**
+   * @brief Get the last element of the view
+   *
+   * @return a const reference to the last element of the view
+   */
   const_reference back() const { return *std::prev(this->_end, 1); }
 
   /**
@@ -172,10 +195,23 @@ public:
    *
    * @return The number of elements in the view.
    */
-  size_t size() const { return static_cast<size_t>(std::distance(this->_begin, this->_end)); }
+  [[nodiscard]] size_t size() const
+  {
+    return static_cast<size_t>(std::distance(this->_begin, this->_end));
+  }
 
+  /**
+   * @brief Get the begin iterator
+   *
+   * @return the begin iterator
+   */
   Iter begin() { return this->_begin; }
 
+  /**
+   * @brief Get the end iterator
+   *
+   * @return the end iterator
+   */
   Iter end() { return this->_end; }
 };
 

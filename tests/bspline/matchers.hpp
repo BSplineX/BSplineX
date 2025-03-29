@@ -115,11 +115,8 @@ private:
 };
 
 template <typename T>
-WithinAbsRelVectorMatcher<T> VectorsWithinAbsRel(
-    std::vector<T> const &expected,
-    T rtol = std::numeric_limits<T>::epsilon() * static_cast<T>(100000),
-    T atol = std::numeric_limits<T>::epsilon() * static_cast<T>(100000)
-)
+WithinAbsRelVectorMatcher<T>
+VectorsWithinAbsRel(std::vector<T> const &expected, T rtol = RTOL<T>, T atol = ATOL<T>)
 {
   return WithinAbsRelVectorMatcher<T>(expected, rtol, atol);
 }

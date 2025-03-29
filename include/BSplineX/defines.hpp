@@ -2,6 +2,7 @@
 #define BSPLINEX_DEFINES_HPP
 
 #include <cassert>
+#include <limits>
 
 #define debugassert(exp, msg) assert(((void)msg, exp))
 #define releaseassert(exp, msg)                                                                    \
@@ -25,6 +26,15 @@ constexpr auto ZERO = static_cast<T>(0);
 
 template <typename T>
 constexpr auto ONE = static_cast<T>(1);
+
+template <typename T>
+constexpr auto TOL_MULTIPLIER = static_cast<T>(100000);
+
+template <typename T>
+constexpr auto RTOL = std::numeric_limits<T>::epsilon() * TOL_MULTIPLIER<T>;
+
+template <typename T>
+constexpr auto ATOL = std::numeric_limits<T>::epsilon() * TOL_MULTIPLIER<T>;
 
 } // namespace bsplinex::constants
 

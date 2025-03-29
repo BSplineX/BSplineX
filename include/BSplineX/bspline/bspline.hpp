@@ -3,7 +3,6 @@
 
 // Standard includes
 #include <algorithm>
-#include <limits>
 #include <memory>
 #include <sstream>
 #include <utility>
@@ -211,11 +210,12 @@ public:
    * @brief Computes the basis functions at a given value.
    *
    * @param value The value to compute the basis functions at.
-   * @return The basis functions at the given value.
+   * @param derivative_order The order of the derivative of the requested basis.
+   * @return The basis functions at the given value of the requested derivative order.
    */
-  std::vector<T> basis(T value)
+  std::vector<T> basis(T value, size_t derivative_order = 0)
   {
-    auto [index, basis_functions] = this->nnz_basis(value, 0);
+    auto [index, basis_functions] = this->nnz_basis(value, derivative_order);
 
     basis_functions.insert(basis_functions.begin(), index, ZERO<T>);
     basis_functions.insert(
@@ -225,7 +225,15 @@ public:
     return basis_functions;
   }
 
-  std::pair<size_t, std::vector<T>> nnz_basis(T value, size_t derivative_order)
+  /**
+   * @brief Computes the non-zero basis functions at a given value.
+   *
+   * @param value The value to compute the basis functions at.
+   * @param derivative_order The order of the derivative of the requested basis.
+   * @return The index of the first non-zero basis function and the basis functions at the given
+   * value of the requested derivative order.
+   */
+  std::pair<size_t, std::vector<T>> nnz_basis(T value, size_t derivative_order = 0)
   {
     std::vector<T> nnz(this->degree + 1, ZERO<T>);
     size_t index = this->nnz_basis<vec_iter>(value, derivative_order, {nnz.begin(), nnz.end()});
@@ -316,7 +324,8 @@ public:
       {
         releaseassert(
             std::abs(x.at(i + 1) - x.at(i) - step) <=
-                std::numeric_limits<T>::epsilon() * 1000.0, // HACK:
+                    RTOL<T> * std::max(std::abs(x.at(i + 1) - x.at(i)), std::abs(step)) or
+                std::abs(x.at(i + 1) - x.at(i) - step) <= ATOL<T>,
             "x is not uniform."
         );
       }
