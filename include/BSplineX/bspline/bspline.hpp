@@ -232,17 +232,15 @@ public:
   {
     releaseassert(x.size() == y.size(), "x and y must have the same size");
 
-    this->control_points = std::move(
-        lsq::lsq<T, vec_iter, BC>(
-            degree,
-            knots.size(),
-            [this](T value, size_t derivative_order, std::vector<T> &vec) -> size_t
-            { return this->nnz_basis(value, derivative_order, vec.begin(), vec.end()); },
-            vec_view{x.begin(), x.end()},
-            vec_view{y.begin(), y.end()},
-            {}
-        )
-    );
+    this->control_points = std::move(lsq::lsq<T, vec_iter, BC>(
+        degree,
+        knots.size(),
+        [this](T value, size_t derivative_order, std::vector<T> &vec) -> size_t
+        { return this->nnz_basis(value, derivative_order, vec.begin(), vec.end()); },
+        vec_view{x.begin(), x.end()},
+        vec_view{y.begin(), y.end()},
+        {}
+    ));
     this->invalidate_derivative();
   }
 
@@ -346,22 +344,18 @@ public:
     // FIXME: This is necessary since currently nnz_basis has to recompute the derivative
     //        We should either generalize this for boundary conditions different from OPEN,
     //        or avoid computing derivative in nnz_basis.
-    this->control_points = std::move(
-        control_points::ControlPoints<T, BC>(
-            {std::vector<T>(this->knots.size() - degree - 1, 0)}, degree
-        )
-    );
-    this->control_points = std::move(
-        lsq::lsq<T, vec_iter, BC>(
-            this->degree,
-            this->knots.size(),
-            [this](T value, size_t derivative_order, std::vector<T> &vec) -> size_t
-            { return this->nnz_basis(value, derivative_order, vec.begin(), vec.end()); },
-            x_view,
-            y_view,
-            additional_conditions
-        )
-    );
+    this->control_points = std::move(control_points::ControlPoints<T, BC>(
+        {std::vector<T>(this->knots.size() - degree - 1, 0)}, degree
+    ));
+    this->control_points = std::move(lsq::lsq<T, vec_iter, BC>(
+        this->degree,
+        this->knots.size(),
+        [this](T value, size_t derivative_order, std::vector<T> &vec) -> size_t
+        { return this->nnz_basis(value, derivative_order, vec.begin(), vec.end()); },
+        x_view,
+        y_view,
+        additional_conditions
+    ));
     this->invalidate_derivative();
   }
 
@@ -437,17 +431,13 @@ private:
     releaseassert(false, ss.str());
   }
 
+public:
+  // Algorithm adapted from:
+  // - https://pages.mtu.edu/~shene/COURSES/cs3621/NOTES/spline/B-spline/bspline-curve-coef.html
+  // - https://pages.mtu.edu/~shene/COURSES/cs3621/NOTES/spline/B-spline/bspline-derv.html
   template <typename It>
-  size_t nnz_basis(T value, size_t derivative_order, [[maybe_unused]] It begin, It end)
+  size_t nnz_basis(T value, size_t derivative_order, It begin, It end)
   {
-    if (derivative_order > 0)
-    {
-      if (not this->derivative)
-      {
-        this->compute_derivative();
-      }
-      return this->derivative->nnz_basis(value, derivative_order - 1, begin, std::prev(end));
-    }
     debugassert(
         (end - begin) == static_cast<long long>(this->degree + 1),
         "Unexpected number of basis asked, exactly degree + 1 basis can be asked"
@@ -458,10 +448,13 @@ private:
         "Initial basis must be initialised to zero"
     );
 
+    releaseassert(this->degree > derivative_order, "Asked for derivative_order >= degree");
+
     auto [index, val] = this->knots.find(value);
 
+    // Compute the basis of degree - derivative_order
     *(end - 1) = 1.0;
-    for (size_t d{1}; d <= this->degree; d++)
+    for (size_t d{1}; d <= this->degree - derivative_order; d++)
     {
       *(end - 1 - d) = (this->knots.at(index + 1) - val) /
                        (this->knots.at(index + 1) - this->knots.at(index - d + 1)) *
@@ -478,9 +471,26 @@ private:
                    (this->knots.at(index + d) - this->knots.at(index)) * *(end - 1);
     }
 
+    // Compute the derivatives up to derivative_order
+    for (size_t p{this->degree + 1 - derivative_order}; p <= this->degree; p++)
+    {
+      for (size_t i{0}; i < this->degree; i++)
+      {
+        size_t const idx{index - this->degree + i};
+        T const den_1{this->knots.at(idx + p) - this->knots.at(idx)};
+        T const den_2{this->knots.at(idx + p + 1) - this->knots.at(idx + 1)};
+        T const base_1 = den_1 ? p / den_1 * (*(begin + i)) : static_cast<T>(0);
+        T const base_2 = den_2 ? p / den_2 * (*(begin + i + 1)) : static_cast<T>(0);
+        *(begin + i)   = base_1 - base_2;
+      }
+      T const den_1{this->knots.at(index + p) - this->knots.at(index)};
+      *(end - 1) = den_1 ? p / den_1 * (*(end - 1)) : static_cast<T>(0);
+    }
+
     return index - this->degree;
   }
 
+private:
   T deboor(size_t index, T value)
   {
     for (size_t j = 0; j <= this->degree; j++)

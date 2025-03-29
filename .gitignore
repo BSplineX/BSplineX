@@ -208,4 +208,7 @@ build/*
 cmake/test_cmake_inclusion/build
 tests/Testing
 
+# Data files
+tests/bspline/data/
+
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode,c++,vim,clion
