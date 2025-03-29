@@ -6,9 +6,12 @@
 
 // BSplineX
 #include "BSplineX/bspline/bspline_types.hpp"
+#include "BSplineX/defines.hpp"
 
 namespace bsplinex::factory
 {
+
+using namespace constants;
 
 /**
  * @brief Creates a clamped uniform BSpline.
@@ -66,8 +69,8 @@ inline types::ClampedUniform<T> clamped_uniform(size_t degree, T begin, T end, s
 template <typename T = double>
 inline types::ClampedUniform<T> clamped_uniform(size_t degree)
 {
-  constexpr T begin{(T)0};
-  constexpr T end{(T)1};
+  constexpr T begin{ZERO<T>};
+  constexpr T end{ONE<T>};
   constexpr size_t num_elems{2};
   return clamped_uniform<T>(degree, begin, end, num_elems, std::vector<T>(num_elems + degree - 1));
 }
@@ -132,8 +135,8 @@ clamped_uniform_constant(size_t degree, T begin, T end, size_t num_elems)
 template <typename T = double>
 inline types::ClampedUniformConstant<T> clamped_uniform_constant(size_t degree)
 {
-  constexpr T begin{(T)0};
-  constexpr T end{(T)1};
+  constexpr T begin{ZERO<T>};
+  constexpr T end{ONE<T>};
   constexpr size_t num_elems{2};
   return clamped_uniform_constant<T>(
       degree, begin, end, num_elems, std::vector<T>(num_elems + degree - 1)

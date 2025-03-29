@@ -11,6 +11,10 @@
 // Third-party includes
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
+#include "BSplineX/defines.hpp"
+
+using namespace bsplinex::constants;
+
 template <typename T>
 struct WithinAbsRelVectorMatcher final : Catch::Matchers::MatcherBase<std::vector<T>>
 {
@@ -73,8 +77,9 @@ struct WithinAbsRelVectorMatcher final : Catch::Matchers::MatcherBase<std::vecto
 
     for (auto const &failure : this->failures)
     {
-      T relDiff = static_cast<T>(0), absDiff = std::abs(failure.actual - failure.expected);
-      if (failure.expected != static_cast<T>(0))
+      T relDiff = ZERO<T>;
+      T absDiff = std::abs(failure.actual - failure.expected);
+      if (failure.expected != ZERO<T>)
       {
         relDiff = std::abs((failure.actual - failure.expected) / failure.expected);
       }
@@ -82,7 +87,7 @@ struct WithinAbsRelVectorMatcher final : Catch::Matchers::MatcherBase<std::vecto
       {
         relDiff = std::abs(failure.actual) > std::numeric_limits<T>::epsilon()
                       ? std::numeric_limits<T>::infinity()
-                      : static_cast<T>(0);
+                      : ZERO<T>;
       }
 
       ss << "  [" << failure.index << "] Expected: " << failure.expected

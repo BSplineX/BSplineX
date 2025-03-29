@@ -20,6 +20,8 @@
 namespace bsplinex::bspline
 {
 
+using namespace constants;
+
 /**
  * @brief A BSpline class.
  *
@@ -209,11 +211,9 @@ public:
   {
     auto [index, basis_functions] = this->nnz_basis(value, 0);
 
-    basis_functions.insert(basis_functions.begin(), index, static_cast<T>(0));
+    basis_functions.insert(basis_functions.begin(), index, ZERO<T>);
     basis_functions.insert(
-        basis_functions.end(),
-        this->control_points.size() - index - this->degree - 1,
-        static_cast<T>(0)
+        basis_functions.end(), this->control_points.size() - index - this->degree - 1, ZERO<T>
     );
 
     return basis_functions;
@@ -221,7 +221,7 @@ public:
 
   std::pair<size_t, std::vector<T>> nnz_basis(T value, size_t derivative_order)
   {
-    std::vector<T> nnz(this->degree + 1, (T)0);
+    std::vector<T> nnz(this->degree + 1, ZERO<T>);
     size_t index = this->nnz_basis<vec_iter>(value, derivative_order, {nnz.begin(), nnz.end()});
 
     return std::make_pair(index, std::move(nnz));
@@ -455,7 +455,7 @@ private:
     );
 
     debugassert(
-        std::all_of(nnz.begin(), nnz.end(), [](T i) { return (T)0 == i; }),
+        std::all_of(nnz.begin(), nnz.end(), [](T i) { return ZERO<T> == i; }),
         "Initial basis must be initialised to zero"
     );
 
@@ -499,15 +499,15 @@ private:
 
         T const den_1{this->knots.at(idx + p) - this->knots.at(idx)};
         T const den_2{this->knots.at(idx + p + 1) - this->knots.at(idx + 1)};
-        T const base_1 = den_1 ? p / den_1 * (nnz.at(i)) : static_cast<T>(0);
-        T const base_2 = den_2 ? p / den_2 * (nnz.at(i + 1)) : static_cast<T>(0);
+        T const base_1 = den_1 ? p / den_1 * (nnz.at(i)) : ZERO<T>;
+        T const base_2 = den_2 ? p / den_2 * (nnz.at(i + 1)) : ZERO<T>;
 
         nnz.at(i) = base_1 - base_2;
       }
 
       T const den_1{this->knots.at(index + p) - this->knots.at(index)};
 
-      nnz.back() = den_1 ? p / den_1 * nnz.back() : static_cast<T>(0);
+      nnz.back() = den_1 ? p / den_1 * nnz.back() : ZERO<T>;
     }
 
     return index - this->degree;

@@ -37,6 +37,8 @@
 namespace bsplinex::lsq
 {
 
+using namespace constants;
+
 template <typename T, class MatrixType>
 class LSQMatrix
 {
@@ -210,7 +212,7 @@ void fill(
 
   std::vector<Condition<T>> conditions = create_sorted_conditions(x, y, additional_conditions);
 
-  std::vector<T> nnz(degree + 1, (T)0);
+  std::vector<T> nnz(degree + 1, ZERO<T>);
   for (size_t i{0}; i < num_rows; i++)
   {
     Condition<T> const &condition = conditions.at(i);
@@ -230,7 +232,7 @@ void fill(
     }
     b(i) = condition.y_value;
 
-    std::fill(nnz.begin(), nnz.end(), (T)0);
+    std::fill(nnz.begin(), nnz.end(), ZERO<T>);
   }
 
   // Check the conditioning number
@@ -260,7 +262,7 @@ lsq(size_t const degree,
 
   Eigen::VectorX<T> b(num_rows);
 
-  if (num_cols > DENSE_MAX_COL)
+  if (num_cols > constants::DENSE_MAX_COL)
   {
     using sparse_lsq = LSQMatrix<T, Eigen::SparseMatrix<T>>;
 

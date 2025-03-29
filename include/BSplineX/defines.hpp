@@ -15,6 +15,17 @@
 #define DEBUG_LOG_CALL() ;
 #endif
 
+namespace bsplinex::constants
+{
+
 constexpr size_t DENSE_MAX_COL = 512;
+
+template <typename T>
+constexpr auto ZERO = static_cast<T>(0);
+
+template <typename T>
+constexpr auto ONE = static_cast<T>(1);
+
+} // namespace bsplinex::constants
 
 #endif

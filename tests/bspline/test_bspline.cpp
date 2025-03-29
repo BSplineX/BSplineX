@@ -12,11 +12,13 @@
 // BSplineX includes
 #include "BSplineX/bspline/bspline_lsq.hpp"
 #include "BSplineX/bspline/bspline_types.hpp"
+#include "BSplineX/defines.hpp"
 #include "BSplineX/types.hpp"
 
 using namespace Catch::Matchers;
 using namespace bsplinex;
 using namespace bsplinex::bspline;
+using namespace bsplinex::constants;
 
 using real_t = double;
 
@@ -62,7 +64,7 @@ static std::vector<real_t> uniform_vector(size_t num_elems, real_t min = -10.0, 
   std::generate(
       vec.begin(),
       std::prev(vec.end(), 1),
-      [min, step_size, i = static_cast<size_t>(0)]() mutable { return min + step_size * i++; }
+      [min, step_size, i = ZERO<size_t>]() mutable { return min + step_size * i++; }
   );
 
   // Avoid numerical errors
@@ -255,7 +257,7 @@ TEMPLATE_TEST_CASE("masinag", "[bspline][template][product]", BSPLINE_TEST_TYPES
       size_t const additional_size = degree - 1;
       for (size_t i{0}; i < additional_size; i++)
       {
-        additional.emplace_back(x.back() + static_cast<real_t>(1.0), y.back(), 0);
+        additional.emplace_back(x.back() + ONE<real_t>, y.back(), 0);
       }
       if (additional_size > 0)
       {

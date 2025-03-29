@@ -13,6 +13,8 @@
 namespace bsplinex::knots
 {
 
+using namespace constants;
+
 template <typename T, Curve C, BoundaryCondition BC, Extrapolation EXT>
 class Finder
 {
@@ -70,8 +72,8 @@ public:
 
   Finder(Atter<T, Curve::UNIFORM, BC> const &atter, size_t degree)
       : value_left{atter.at(degree)}, value_right{atter.at(atter.size() - 1 - degree)},
-        step_size_inv{static_cast<T>(1) / (atter.at(degree + 1) - atter.at(degree))},
-        degree{degree}, max_index{atter.size() - 1 - degree - 1}
+        step_size_inv{ONE<T> / (atter.at(degree + 1) - atter.at(degree))}, degree{degree},
+        max_index{atter.size() - 1 - degree - 1}
   {
     DEBUG_LOG_CALL();
   }
