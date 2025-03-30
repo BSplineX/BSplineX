@@ -60,7 +60,7 @@ public:
     return *this;
   }
 
-  T at(size_t index) const
+  [[nodiscard]] T at(size_t index) const
   {
     debugassert(index < this->size(), "Out of bounds");
     if (index < this->padder.size_left())
@@ -111,7 +111,7 @@ public:
 
     ~iterator() = default;
 
-    iterator(iterator const &b) : atter{b.atter}, index{b.index} {}
+    iterator(iterator const &b) = default;
 
     iterator(iterator &&b) = default;
 
@@ -200,9 +200,9 @@ public:
     bool operator>=(iterator const &b) const { return !(*this < b); }
   };
 
-  iterator begin() const { return {this, 0}; }
+  [[nodiscard]] iterator begin() const { return {this, 0}; }
 
-  iterator end() const { return {this, this->size()}; }
+  [[nodiscard]] iterator end() const { return {this, this->size()}; }
 };
 
 } // namespace bsplinex::knots

@@ -1,14 +1,19 @@
+// Third-party includes
+#include <algorithm>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <nlohmann/json.hpp>
+#include <string>
 #include <vector>
 
-// Third-party includes
-#include <catch2/catch_test_macros.hpp>
-#include <catch2/matchers/catch_matchers_floating_point.hpp>
-#include <nlohmann/json.hpp>
-
 // BSplineX includes
+#include "BSplineX/bspline/bspline_lsq.hpp"
 #include "BSplineX/bspline/bspline_types.hpp"
+#include "BSplineX/types.hpp"
 #include "matchers.hpp"
 
 using real_t = double;
@@ -16,13 +21,12 @@ using real_t = double;
 using namespace Catch::Matchers;
 using namespace bsplinex;
 using namespace bsplinex::bspline;
-using namespace nlohmann;
 
-json load_test_data(std::filesystem::path const &filepath)
+nlohmann::json load_test_data(std::filesystem::path const &filepath)
 {
   std::ifstream file(filepath);
   REQUIRE(file.is_open());
-  return json::parse(file);
+  return nlohmann::json::parse(file);
 }
 
 std::string get_test_name(
@@ -38,28 +42,29 @@ std::string get_test_name(
 
 TEST_CASE("BSpline", "[bspline]")
 {
-  std::filesystem::path data_path = std::filesystem::path(TEST_RESOURCES_DIR) / "open.json";
-  json data                       = load_test_data(data_path);
+  std::filesystem::path const data_path =
+      std::filesystem::path(TEST_RESOURCES_DIR) / "open" / "non-uniform.json";
+  nlohmann::json const data = load_test_data(data_path);
   for (auto const &test_data : data)
   {
-    auto boundary_condition = test_data["bspline"]["boundary_condition"].get<std::string>();
-    auto curve_type         = test_data["bspline"]["curve"].get<std::string>();
-    size_t degree           = test_data["bspline"]["degree"].get<size_t>();
-    size_t num_knots        = test_data["bspline"]["knots"].size();
-    auto test_name          = get_test_name(boundary_condition, curve_type, degree, num_knots);
+    auto const boundary_condition = test_data["bspline"]["boundary_condition"].get<std::string>();
+    auto const curve_type         = test_data["bspline"]["curve"].get<std::string>();
+    auto const degree             = test_data["bspline"]["degree"].get<size_t>();
+    auto const num_knots          = test_data["bspline"]["knots"].size();
+    auto const test_name = get_test_name(boundary_condition, curve_type, degree, num_knots);
 
     SECTION(test_name)
     {
+
       types::OpenNonUniform<real_t> bspline{
-          test_data["bspline"]["knots"].get<std::vector<real_t>>(),
-          test_data["bspline"]["ctrl"].get<std::vector<real_t>>(),
+          {test_data["bspline"]["knots"].get<std::vector<real_t>>()},
+          {test_data["bspline"]["ctrl"].get<std::vector<real_t>>()},
           degree,
       };
 
       auto x_eval = test_data["x_eval"].get<std::vector<real_t>>();
       SECTION("evaluate(...)")
       {
-        std::cerr << "--evaluate--" << std::endl;
         auto y_eval = test_data["bspline"]["y_eval"].get<std::vector<real_t>>();
         for (size_t i{0}; i < x_eval.size(); i++)
         {

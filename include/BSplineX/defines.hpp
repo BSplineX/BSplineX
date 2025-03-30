@@ -4,10 +4,20 @@
 #include <cassert>
 #include <limits>
 
-#define debugassert(exp, msg) assert(((void)msg, exp))
-#define releaseassert(exp, msg)                                                                    \
-  if (!(exp))                                                                                      \
+template <typename T>
+constexpr void debugassert(T exp, std::string const &msg)
+{
+  assert(((void)msg, exp)); // Preserve original behavior
+}
+
+template <typename T>
+constexpr void releaseassert(T exp, std::string const &msg)
+{
+  if (!exp)
+  {
     throw std::runtime_error(msg);
+  }
+}
 
 #ifdef BSPLINEX_DEBUG_LOG_CALL
 #include <cstdio>

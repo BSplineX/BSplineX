@@ -110,7 +110,7 @@ public:
     return *this;
   }
 
-  std::pair<size_t, T> find(T value) const
+  [[nodiscard]] std::pair<size_t, T> find(T value) const
   {
     if (value < this->value_left || value > this->value_right)
     {
@@ -120,13 +120,13 @@ public:
     return std::pair<size_t, T>{this->finder.find(value), value};
   }
 
-  std::pair<T, T> domain() const { return {value_left, value_right}; }
+  [[nodiscard]] std::pair<T, T> domain() const { return {value_left, value_right}; }
 
-  T at(size_t index) const { return this->atter.at(index); }
+  [[nodiscard]] T at(size_t index) const { return this->atter.at(index); }
 
   [[nodiscard]] size_t size() const { return this->atter.size(); }
 
-  Knots get_derivative_knots() const
+  [[nodiscard]] Knots get_derivative_knots() const
   {
     Atter<T, C, BC> d_atter = this->atter;
     return Knots(d_atter.pop_tails(), this->degree - 1);

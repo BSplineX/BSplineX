@@ -210,5 +210,6 @@ tests/Testing
 
 # Data files
 tests/bspline/data/
+venv/
 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode,c++,vim,clion

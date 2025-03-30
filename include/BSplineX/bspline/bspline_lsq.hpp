@@ -77,12 +77,12 @@ public:
     vec_t x = lscg.solve(b);
 
 #ifndef NDEBUG
-    std::cout << "DENSE" << std::endl;
-    std::cout << "iterations: " << lscg.iterations() << std::endl;
-    std::cout << "error: " << lscg.error() << std::endl;
-    std::cout << "|Ax - b| = " << (this->A * x - b).norm() << std::endl;
-    std::cout << "|b| = " << b.norm() << std::endl;
-    std::cout << "|Ax - b| / |b| = " << (this->A * x - b).norm() / b.norm() << std::endl;
+    std::cout << "DENSE" << "\n";
+    std::cout << "iterations: " << lscg.iterations() << "\n";
+    std::cout << "error: " << lscg.error() << "\n";
+    std::cout << "|Ax - b| = " << (this->A * x - b).norm() << "\n";
+    std::cout << "|b| = " << b.norm() << "\n";
+    std::cout << "|Ax - b| / |b| = " << (this->A * x - b).norm() / b.norm() << "\n";
     std::cout << "condition number = " << this->conditioning_number() << std::endl;
 #endif
     return x;
@@ -94,7 +94,7 @@ public:
 
   [[nodiscard]] T conditioning_number() const
   {
-    Eigen::JacobiSVD<mat_t> svd(this->A);
+    Eigen::JacobiSVD<mat_t> const svd(this->A);
     T cond = svd.singularValues()(0) / svd.singularValues()(svd.singularValues().size() - 1);
 
     return cond;
@@ -126,11 +126,11 @@ public:
     vec_t x = lscg.solve(b);
 
 #ifndef NDEBUG
-    std::cout << "SPARSE" << std::endl;
-    std::cout << "iterations: " << lscg.iterations() << std::endl;
-    std::cout << "error: " << lscg.error() << std::endl;
-    std::cout << "|Ax - b| = " << (this->A * x - b).norm() << std::endl;
-    std::cout << "|b| = " << b.norm() << std::endl;
+    std::cout << "SPARSE\n";
+    std::cout << "iterations: " << lscg.iterations() << "\n";
+    std::cout << "error: " << lscg.error() << "\n";
+    std::cout << "|Ax - b| = " << (this->A * x - b).norm() << "\n";
+    std::cout << "|b| = " << b.norm() << "\n";
     std::cout << "|Ax - b| / |b| = " << (this->A * x - b).norm() / b.norm() << std::endl;
 #endif
 

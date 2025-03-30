@@ -42,7 +42,7 @@ public:
 
   Finder &operator=(Finder &&other) = delete;
 
-  size_t find(T value) const
+  [[nodiscard]] size_t find(T value) const
   {
     debugassert(
         value >= this->atter->at(this->index_left) && value <= this->atter->at(this->index_right),
@@ -94,23 +94,11 @@ public:
         value >= this->value_left && value <= this->value_right, "Value outside of the domain"
     );
 
-    size_t index =
+    size_t const index =
         static_cast<size_t>((value - this->value_left) * this->step_size_inv) + this->degree;
     return std::min(index, max_index);
   }
 };
-
-// t_i = step_size * i + start_t
-//
-/*
-
-(begin + (atter.size - 1 - degree) * step_size - begin - degree * step_size) / step_size + degree
-((atter.size - 1 - degree) - degree) + degree
-atter.size - 1 - degree
-
-knots - 1 - degree = ctrl
-
-*/
 
 } // namespace bsplinex::knots
 

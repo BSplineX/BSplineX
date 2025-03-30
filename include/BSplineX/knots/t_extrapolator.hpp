@@ -18,7 +18,7 @@ template <typename T, Curve C, BoundaryCondition BC, Extrapolation EXT>
 class Extrapolator
 {
 public:
-  virtual size_t extrapolate(T value) const = 0;
+  [[nodiscard]] virtual size_t extrapolate(T value) const = 0;
 };
 
 template <typename T, Curve C, BoundaryCondition BC>
@@ -29,7 +29,7 @@ public:
 
   Extrapolator(Atter<T, C, BC> const & /*atter*/, size_t /*degree*/) {}
 
-  T extrapolate(T /*value*/) const
+  [[nodiscard]] T extrapolate(T /*value*/) const
   {
     throw std::runtime_error("Extrapolation explicitly set to NONE");
   }
@@ -91,7 +91,7 @@ public:
     return *this;
   }
 
-  T extrapolate(T value) const
+  [[nodiscard]] T extrapolate(T value) const
   {
     debugassert(
         value < this->value_left || value > this->value_right, "Value not outside of the domain"
@@ -160,7 +160,7 @@ public:
     return *this;
   }
 
-  T extrapolate(T value) const
+  [[nodiscard]] T extrapolate(T value) const
   {
     debugassert(
         value < this->value_left || value > this->value_right, "Value not outside of the domain"
@@ -189,17 +189,6 @@ public:
     return value;
   }
 };
-
-/*
-
-value_right = 1
-value = 2
-period = 1
-
-
-
-
-*/
 
 } // namespace bsplinex::knots
 

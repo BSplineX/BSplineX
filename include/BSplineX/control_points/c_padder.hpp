@@ -48,13 +48,14 @@ public:
     return *this;
   }
 
-  T right(size_t /*index*/) const
+  [[nodiscard]] T right(size_t /*index*/) const
   {
     releaseassert(
         false,
         "Generic control points padder has zero length, this function is here only for "
         "compatibility reasons."
     );
+    return constants::ZERO<T>;
   }
 
   [[nodiscard]] size_t size() const { return 0; }
@@ -103,7 +104,7 @@ public:
     return *this;
   }
 
-  T right(size_t index) const
+  [[nodiscard]] T right(size_t index) const
   {
     debugassert(index < this->pad_right.size(), "Out of bounds");
     return this->pad_right[index];

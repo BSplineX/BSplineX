@@ -6,6 +6,8 @@ repos:
       - id: end-of-file-fixer
       - id: check-yaml
       - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: mixed-line-ending
 
   - repo: local
     hooks:
@@ -32,3 +34,4 @@ repos:
           --std=c++17
         language: system
         files: ^(include/.*|tests/.*|benchmarks/.*)$
+exclude: ^third_party/

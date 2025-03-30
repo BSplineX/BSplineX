@@ -167,7 +167,7 @@ public:
    * @param derivative_order The order of the derivative to evaluate (0 is the function itself).
    * @return The value of the BSpline at the given value.
    */
-  T evaluate(T value, size_t derivative_order = 0)
+  [[nodiscard]] T evaluate(T value, size_t derivative_order = 0)
   {
     releaseassert(derivative_order <= this->degree, "derivative_order must be <= degree");
     if (0 == derivative_order)
@@ -193,7 +193,7 @@ public:
    * @param derivative_order The order of the derivative to evaluate (0 is the function itself).
    * @return The values of the BSpline at the given values.
    */
-  std::vector<T> evaluate(std::vector<T> const &values, size_t derivative_order = 0)
+  [[nodiscard]] std::vector<T> evaluate(std::vector<T> const &values, size_t derivative_order = 0)
   {
     std::vector<T> results;
     results.reserve(values.size());
@@ -218,9 +218,8 @@ public:
     auto [index, basis_functions] = this->nnz_basis(value, derivative_order);
 
     basis_functions.insert(basis_functions.begin(), index, ZERO<T>);
-    basis_functions.insert(
-        basis_functions.end(), this->control_points.size() - index - this->degree - 1, ZERO<T>
-    );
+    basis_functions
+        .insert(basis_functions.end(), this->control_points.size() - index - this->degree - 1, ZERO<T>);
 
     return basis_functions;
   }
@@ -233,10 +232,11 @@ public:
    * @return The index of the first non-zero basis function and the basis functions at the given
    * value of the requested derivative order.
    */
-  std::pair<size_t, std::vector<T>> nnz_basis(T value, size_t derivative_order = 0)
+  [[nodiscard]] std::pair<size_t, std::vector<T>> nnz_basis(T value, size_t derivative_order = 0)
   {
     std::vector<T> nnz(this->degree + 1, ZERO<T>);
-    size_t index = this->nnz_basis<vec_iter>(value, derivative_order, {nnz.begin(), nnz.end()});
+    size_t const index =
+        this->template nnz_basis<vec_iter>(value, derivative_order, {nnz.begin(), nnz.end()});
 
     return std::make_pair(index, std::move(nnz));
   }
@@ -256,19 +256,15 @@ public:
   {
     releaseassert(x.size() == y.size(), "x and y must have the same size");
 
-    this->control_points = std::move(
-        lsq::lsq<T, vec_const_iter, BC>(
-            degree,
-            knots.size(),
-            [this](T value, size_t derivative_order, std::vector<T> &vec) -> size_t
-            {
-              return this->nnz_basis<vec_iter>(value, derivative_order, {vec.begin(), vec.end()});
-            },
-            vec_const_view{x.begin(), x.end()},
-            vec_const_view{y.begin(), y.end()},
-            {}
-        )
-    );
+    this->control_points = std::move(lsq::lsq<T, vec_const_iter, BC>(
+        degree,
+        knots.size(),
+        [this](T value, size_t derivative_order, std::vector<T> &vec) -> size_t
+        { return this->nnz_basis<vec_iter>(value, derivative_order, {vec.begin(), vec.end()}); },
+        vec_const_view{x.begin(), x.end()},
+        vec_const_view{y.begin(), y.end()},
+        {}
+    ));
     this->invalidate_derivative();
   }
 
@@ -371,23 +367,19 @@ public:
       static_assert(false, "Unknown boundary condition, you should never get here!");
     }
 
-    this->control_points = std::move(
-        lsq::lsq<T, vec_const_iter, BC>(
-            this->degree,
-            this->knots.size(),
-            [this](T value, size_t derivative_order, std::vector<T> &vec) -> size_t
-            {
-              return this->nnz_basis<vec_iter>(value, derivative_order, {vec.begin(), vec.end()});
-            },
-            x_view,
-            y_view,
-            additional_conditions
-        )
-    );
+    this->control_points = std::move(lsq::lsq<T, vec_const_iter, BC>(
+        this->degree,
+        this->knots.size(),
+        [this](T value, size_t derivative_order, std::vector<T> &vec) -> size_t
+        { return this->nnz_basis<vec_iter>(value, derivative_order, {vec.begin(), vec.end()}); },
+        x_view,
+        y_view,
+        additional_conditions
+    ));
     this->invalidate_derivative();
   }
 
-  std::vector<T> get_control_points() const
+  [[nodiscard]] std::vector<T> get_control_points() const
   {
     std::vector<T> ctrl_pts{};
     ctrl_pts.reserve(this->control_points.size());
@@ -400,7 +392,7 @@ public:
     return ctrl_pts;
   }
 
-  std::vector<T> get_knots() const
+  [[nodiscard]] std::vector<T> get_knots() const
   {
     std::vector<T> knots{};
     knots.reserve(this->knots.size());

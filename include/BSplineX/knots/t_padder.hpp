@@ -16,12 +16,12 @@ template <typename T, Curve C, BoundaryCondition BC>
 class Padder
 {
 public:
-  virtual T left(size_t index) const              = 0;
-  virtual T right(size_t index) const             = 0;
-  [[nodiscard]] virtual size_t size() const       = 0;
-  [[nodiscard]] virtual size_t size_left() const  = 0;
-  [[nodiscard]] virtual size_t size_right() const = 0;
-  virtual void pop_tails()                        = 0;
+  [[nodiscard]] virtual T left(size_t index) const  = 0;
+  [[nodiscard]] virtual T right(size_t index) const = 0;
+  [[nodiscard]] virtual size_t size() const         = 0;
+  [[nodiscard]] virtual size_t size_left() const    = 0;
+  [[nodiscard]] virtual size_t size_right() const   = 0;
+  virtual void pop_tails()                          = 0;
 };
 
 template <typename T, Curve C>
@@ -60,20 +60,22 @@ public:
     return *this;
   }
 
-  T left(size_t /*index*/) const
+  [[nodiscard]] T left(size_t /*index*/) const
   {
     releaseassert(
         false,
         "OPEN knots padder has zero length, this function is here only for compatibility reasons."
     );
+    return constants::ZERO<T>;
   }
 
-  T right(size_t /*index*/) const
+  [[nodiscard]] T right(size_t /*index*/) const
   {
     releaseassert(
         false,
         "OPEN knots padder has zero length, this function is here only for compatibility reasons."
     );
+    return constants::ZERO<T>;
   }
 
   [[nodiscard]] size_t size() const { return 0; }
@@ -152,13 +154,13 @@ public:
     return *this;
   }
 
-  T left([[maybe_unused]] size_t index) const
+  [[nodiscard]] T left([[maybe_unused]] size_t index) const
   {
     debugassert(index < this->pad_size, "Out of bounds");
     return this->pad_left;
   }
 
-  T right([[maybe_unused]] size_t index) const
+  [[nodiscard]] T right([[maybe_unused]] size_t index) const
   {
     debugassert(index < this->pad_size, "Out of bounds");
     return this->pad_right;
@@ -235,13 +237,13 @@ public:
     return *this;
   }
 
-  T left(size_t index) const
+  [[nodiscard]] T left(size_t index) const
   {
     debugassert(index < this->pad_left.size(), "Out of bounds");
     return this->pad_left[index];
   }
 
-  T right(size_t index) const
+  [[nodiscard]] T right(size_t index) const
   {
     debugassert(index < this->pad_right.size(), "Out of bounds");
     return this->pad_right[index];

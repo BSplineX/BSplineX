@@ -18,10 +18,10 @@ template <typename T, Curve C>
 class Data
 {
 public:
-  virtual T at(size_t index) const                              = 0;
-  [[nodiscard]] virtual size_t size() const                     = 0;
-  virtual std::vector<T> slice(size_t first, size_t last) const = 0;
-  virtual void pop_tails()                                      = 0;
+  [[nodiscard]] virtual T at(size_t index) const                              = 0;
+  [[nodiscard]] virtual size_t size() const                                   = 0;
+  [[nodiscard]] virtual std::vector<T> slice(size_t first, size_t last) const = 0;
+  virtual void pop_tails()                                                    = 0;
 };
 
 template <typename T>
@@ -105,15 +105,15 @@ public:
     return *this;
   }
 
-  T at(size_t index) const
+  [[nodiscard]] T at(size_t index) const
   {
     debugassert(index < this->num_elems, "Out of bounds");
-    return this->begin + index * this->step_size;
+    return this->begin + (index * this->step_size);
   }
 
   [[nodiscard]] size_t size() const { return this->num_elems; }
 
-  std::vector<T> slice(size_t first, size_t last) const
+  [[nodiscard]] std::vector<T> slice(size_t first, size_t last) const
   {
     debugassert(first <= last, "Invalid range");
     debugassert(last <= this->num_elems, "Out of bounds");
@@ -188,7 +188,7 @@ public:
     return *this;
   }
 
-  T at(size_t index) const
+  [[nodiscard]] T at(size_t index) const
   {
     debugassert(index < this->raw_data.size(), "Out of bounds");
     return this->raw_data[index];
@@ -196,7 +196,7 @@ public:
 
   [[nodiscard]] size_t size() const { return this->raw_data.size(); }
 
-  std::vector<T> slice(size_t first, size_t last) const
+  [[nodiscard]] std::vector<T> slice(size_t first, size_t last) const
   {
     debugassert(first <= last, "Invalid range");
     debugassert(last <= this->raw_data.size(), "Out of bounds");

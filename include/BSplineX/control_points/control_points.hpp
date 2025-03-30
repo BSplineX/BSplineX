@@ -84,12 +84,13 @@ public:
     return *this;
   }
 
-  T at(size_t index) const { return this->atter.at(index); }
+  [[nodiscard]] T at(size_t index) const { return this->atter.at(index); }
 
   [[nodiscard]] size_t size() const { return this->atter.size(); }
 
   template <Curve C, Extrapolation EXT>
-  ControlPoints get_derivative_control_points(knots::Knots<T, C, BC, EXT> const &knots) const
+  [[nodiscard]] ControlPoints get_derivative_control_points(knots::Knots<T, C, BC, EXT> const &knots
+  ) const
   {
     size_t const d_num_ctrl_pts = this->atter.get_derivative_data_size();
     std::vector<T> d_ctrl_points;
