@@ -14,7 +14,7 @@ Checks: "*,
   -cppcoreguidelines-non-private-member-variables-in-classes,
   -misc-non-private-member-variables-in-classes"
 WarningsAsErrors: ""
-HeaderFilterRegex: ""
+HeaderFilterRegex: "include/.*\\.hpp$"
 FormatStyle: none
 
 CheckOptions:

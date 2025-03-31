@@ -244,7 +244,7 @@ public:
   /**
    * @brief Gives the (inclusive) boundary of the BSpline domain (i.e., [x_min, x_max])
    */
-  std::pair<T, T> domain() const { return this->knots.domain(); }
+  [[nodiscard]] std::pair<T, T> domain() const { return this->knots.domain(); }
 
   /**
    * @brief Fits the BSpline to some data.

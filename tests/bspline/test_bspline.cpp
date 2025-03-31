@@ -1,15 +1,18 @@
-// Third-party includes
+// Standard includes
 #include <algorithm>
-#include <catch2/catch_template_test_macros.hpp>
-#include <catch2/catch_test_macros.hpp>
-#include <catch2/generators/catch_generators.hpp>
-#include <catch2/matchers/catch_matchers.hpp>
-#include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include <cstddef>
 #include <random>
 #include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
+
+// Third-party includes
+#include <catch2/catch_template_test_macros.hpp>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 // BSplineX includes
 #include "BSplineX/bspline/bspline_lsq.hpp"

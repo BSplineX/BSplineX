@@ -1,11 +1,12 @@
 // Standard includes
+#include <cstddef>
+#include <stdexcept>
+#include <vector>
 
 // Third-party includes
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
-#include <stdexcept>
-#include <vector>
 
 // BSplineX includes
 #include "BSplineX/knots/t_data.hpp"

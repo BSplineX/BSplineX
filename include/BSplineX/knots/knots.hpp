@@ -120,7 +120,7 @@ public:
     return std::pair<size_t, T>{this->finder.find(value), value};
   }
 
-  [[nodiscard]] std::pair<T, T> domain() const { return {value_left, value_right}; }
+  [[nodiscard]] std::pair<T, T> domain() const { return std::make_pair(value_left, value_right); }
 
   [[nodiscard]] T at(size_t index) const { return this->atter.at(index); }
 

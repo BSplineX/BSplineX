@@ -1,8 +1,9 @@
 // Standard includes
+#include <cstddef>
+#include <vector>
 
 // Third-party includes
 #include <catch2/catch_test_macros.hpp>
-#include <vector>
 
 // BSplineX includes
 #include "BSplineX/knots/t_atter.hpp"

@@ -1,14 +1,18 @@
-// Third-party includes
+// Standard includes
 #include <algorithm>
+#include <cstddef>
+#include <filesystem>
+#include <fstream>
+#include <string>
+#include <utility>
+#include <vector>
+
+// Third-party includes
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
-#include <filesystem>
-#include <fstream>
-#include <iostream>
 #include <nlohmann/json.hpp>
-#include <string>
-#include <vector>
+#include <nlohmann/json_fwd.hpp>
 
 // BSplineX includes
 #include "BSplineX/bspline/bspline_lsq.hpp"
