@@ -7,7 +7,10 @@
 template <typename T>
 constexpr void debugassert(T exp, std::string const &msg)
 {
-  assert(((void)msg, exp)); // Preserve original behavior
+  assert(((void)msg, exp));
+  // Needed to avoid unused variable compilation error
+  (void)exp;
+  (void)msg;
 }
 
 template <typename T>
