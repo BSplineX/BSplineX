@@ -42,6 +42,7 @@ file(GLOB_RECURSE
   "${CMAKE_CURRENT_SOURCE_DIR}/bspline/matchers.hpp"
 )
 add_executable(test_bspline_with_data ${BSPLINE_TESTS_WITH_DATA})
+target_include_directories(test_bspline_with_data PRIVATE "${CMAKE_SOURCE_DIR}/tests/")
 target_link_libraries(test_bspline_with_data PRIVATE
   BSplineX Catch2::Catch2WithMain nlohmann_json::nlohmann_json
 )

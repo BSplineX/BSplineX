@@ -10,7 +10,6 @@
 // Third-party includes
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
-#include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 
@@ -26,6 +25,8 @@ using namespace Catch::Matchers;
 using namespace bsplinex;
 using namespace bsplinex::bspline;
 
+namespace
+{
 nlohmann::json load_test_data(std::filesystem::path const &filepath)
 {
   std::ifstream file(filepath);
@@ -43,6 +44,7 @@ std::string get_test_name(
   return "type=" + boundary_condition + "_" + curve_type + "_degree=" + std::to_string(degree) +
          "_knots=" + std::to_string(num_knots);
 }
+} // namespace
 
 TEST_CASE("BSpline", "[bspline]")
 {
@@ -69,17 +71,77 @@ TEST_CASE("BSpline", "[bspline]")
       auto x_eval = test_data["x_eval"].get<std::vector<real_t>>();
       SECTION("evaluate(...)")
       {
-        auto y_eval = test_data["bspline"]["y_eval"].get<std::vector<real_t>>();
-        for (size_t i{0}; i < x_eval.size(); i++)
+        SECTION("evaluate(..., derivative_order=0)")
         {
-          REQUIRE_THAT(bspline.evaluate(x_eval.at(i)), WithinRel(y_eval.at(i)));
+          auto y_eval = test_data["bspline"]["y_eval"].get<std::vector<real_t>>();
+          for (size_t i{0}; i < x_eval.size(); i++)
+          {
+            auto matcher = WithinAbsRel(y_eval.at(i));
+            REQUIRE_THAT(bspline.evaluate(x_eval.at(i)), matcher);
+          }
+          // test also vectorized evaluation
+          REQUIRE_THAT(bspline.evaluate(x_eval), VectorsWithinAbsRel(y_eval));
+          REQUIRE_THROWS_WITH(
+              bspline.evaluate(*std::min_element(x_eval.begin(), x_eval.end()) - 1),
+              "Extrapolation explicitly set to NONE"
+          );
         }
-        // test also vectorized evaluation
-        REQUIRE_THAT(bspline.evaluate(x_eval), VectorsWithinAbsRel(y_eval));
-        REQUIRE_THROWS_WITH(
-            bspline.evaluate(*std::min_element(x_eval.begin(), x_eval.end()) - 1),
-            "Extrapolation explicitly set to NONE"
-        );
+        for (size_t derivative_order{1}; derivative_order <= test_data["derivatives"].size();
+             derivative_order++)
+        {
+          SECTION("evaluate(..., derivative_order=" + std::to_string(derivative_order) + ")")
+          {
+            auto y_eval =
+                test_data["derivatives"][derivative_order - 1]["y_eval"].get<std::vector<real_t>>();
+            REQUIRE_THAT(bspline.evaluate(x_eval, derivative_order), VectorsWithinAbsRel(y_eval));
+            for (size_t i{0}; i < x_eval.size(); i++)
+            {
+              auto matcher = WithinAbsRel(y_eval.at(i));
+              REQUIRE_THAT(bspline.evaluate(x_eval.at(i), derivative_order), matcher);
+            }
+
+            REQUIRE_THROWS_WITH(
+                bspline.evaluate(
+                    *std::min_element(x_eval.begin(), x_eval.end()) - 1, derivative_order
+                ),
+                "Extrapolation explicitly set to NONE"
+            );
+          }
+        }
+        SECTION("evaluate(..., invalid derivative_order)")
+        {
+          REQUIRE_THROWS_WITH(
+              bspline.evaluate(x_eval[0], degree + 1), "derivative_order must be in [1, degree]"
+          );
+          REQUIRE_THROWS_WITH(
+              bspline.evaluate(x_eval, degree + 1), "derivative_order must be in [1, degree]"
+          );
+        }
+      }
+
+      SECTION("derivative(...)")
+      {
+        for (size_t derivative_order{1}; derivative_order <= test_data["derivatives"].size();
+             derivative_order++)
+        {
+          SECTION("derivative(derivative_order=" + std::to_string(derivative_order) + ")")
+          {
+            auto derivative = bspline.derivative(derivative_order);
+            REQUIRE(
+                derivative.get_degree() ==
+                test_data["derivatives"][derivative_order - 1]["degree"].get<size_t>()
+            );
+            auto y_eval =
+                test_data["derivatives"][derivative_order - 1]["y_eval"].get<std::vector<real_t>>();
+            REQUIRE_THAT(derivative.evaluate(x_eval), VectorsWithinAbsRel(y_eval));
+          }
+        }
+        SECTION("derivative(invalid derivative_order)")
+        {
+          REQUIRE_THROWS_WITH(
+              bspline.derivative(degree + 1), "derivative_order must be in [1, degree]"
+          );
+        }
       }
 
       SECTION("nnz_basis(...)")
@@ -168,7 +230,7 @@ TEST_CASE("BSpline", "[bspline]")
         bspline.interpolate(x_interp, y_interp, additional_conditions);
 
         REQUIRE_THAT(bspline.get_knots(), VectorsWithinAbsRel(knots_interp));
-        // REQUIRE_THAT(bspline.get_control_points(), VectorsWithinAbsRel(ctrl_pts_interp));
+        REQUIRE_THAT(bspline.get_control_points(), VectorsWithinAbsRel(ctrl_pts_interp));
         REQUIRE_THAT(bspline.evaluate(x_eval), VectorsWithinAbsRel(y_eval_interp));
       }
     }

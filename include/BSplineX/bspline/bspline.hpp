@@ -48,8 +48,8 @@ private:
   knots::Knots<T, C, BC, EXT> knots{};
   control_points::ControlPoints<T, BC> control_points{};
   size_t degree{};
-  std::vector<T> support{};
-  std::unique_ptr<BSpline> derivative;
+  std::vector<T> mutable support{};
+  std::unique_ptr<BSpline> mutable derivative_ptr;
 
 public:
   /**
@@ -157,6 +157,7 @@ public:
     control_points = std::move(other.control_points);
     degree         = other.degree;
     support        = std::move(other.support);
+
     return *this;
   }
 
@@ -167,9 +168,8 @@ public:
    * @param derivative_order The order of the derivative to evaluate (0 is the function itself).
    * @return The value of the BSpline at the given value.
    */
-  [[nodiscard]] T evaluate(T value, size_t derivative_order = 0)
+  [[nodiscard]] T evaluate(T value, size_t derivative_order = 0) const
   {
-    releaseassert(derivative_order <= this->degree, "derivative_order must be <= degree");
     if (0 == derivative_order)
     {
       auto [index, x_value] = this->knots.find(value);
@@ -177,12 +177,7 @@ public:
     }
     else
     {
-      if (not this->derivative)
-      {
-        this->compute_derivative();
-      }
-
-      return derivative->evaluate(value, derivative_order - 1);
+      return this->get_derivative(derivative_order).evaluate(value);
     }
   }
 
@@ -193,7 +188,8 @@ public:
    * @param derivative_order The order of the derivative to evaluate (0 is the function itself).
    * @return The values of the BSpline at the given values.
    */
-  [[nodiscard]] std::vector<T> evaluate(std::vector<T> const &values, size_t derivative_order = 0)
+  [[nodiscard]] std::vector<T>
+  evaluate(std::vector<T> const &values, size_t derivative_order = 0) const
   {
     std::vector<T> results;
     results.reserve(values.size());
@@ -204,6 +200,18 @@ public:
     }
 
     return results;
+  }
+
+  /**
+   * @brief Returns the nth-order derivative of this BSpline
+   *
+   * @param derivative_order The order of the derivative to evaluate. It must be in [1, degree).
+   * (default: 1).
+   * @return The bspline derivative
+   */
+  [[nodiscard]] BSpline derivative(size_t derivative_order = 1) const
+  {
+    return BSpline(get_derivative(derivative_order));
   }
 
   /**
@@ -284,7 +292,7 @@ public:
    * @param x The x values of the data. They must be sorted in ascending order.
    * @param y The y values of the data.
    * @param additional_conditions Additional conditions to impose on the BSpline.
-   * They must lie inside the knots interval. The number of additional conditions
+   * They must lie inside the knots' interval. The number of additional conditions
    * must be equal to `degree - 1` except for periodic BSplines where no
    * additional conditions can be provided.
    */
@@ -370,8 +378,11 @@ public:
     this->control_points = std::move(lsq::lsq<T, vec_const_iter, BC>(
         this->degree,
         this->knots.size(),
-        [this](T value, size_t derivative_order, std::vector<T> &vec) -> size_t
-        { return this->nnz_basis<vec_iter>(value, derivative_order, {vec.begin(), vec.end()}); },
+        [this](T value, size_t derivative_order, std::vector<T> &vec) -> size_t {
+          return this->template nnz_basis<vec_iter>(
+              value, derivative_order, {vec.begin(), vec.end()}
+          );
+        },
         x_view,
         y_view,
         additional_conditions
@@ -404,6 +415,8 @@ public:
     return knots;
   }
 
+  [[nodiscard]] size_t get_degree() const { return this->degree; }
+
 private:
   BSpline(
       knots::Knots<T, C, BC, EXT> const &knots,
@@ -429,7 +442,6 @@ private:
        << this->control_points.size() << " != " << this->knots.size() - this->degree - 1 << "). ";
 
     // clang-format off
-
     if constexpr (BC == BoundaryCondition::OPEN)
     {
       ss << "With BoundaryCondition::OPEN no padding is added, therefore you need to respect: control_points_data.size() = knots_data.size() - degree - 1";
@@ -443,9 +455,8 @@ private:
       ss << "With BoundaryCondition::PERIODIC padding is added to the knots and control points, therefore you need to respect: control_points_data.size() = knots_data.size() - 1";
     }
     else {
-     ss << "Unknown BoundaryCondition, you should not have arrived here ever!";
+      ss << "Unknown BoundaryCondition, you should not have arrived here ever!";
     }
-
     // clang-format on
 
     releaseassert(false, ss.str());
@@ -455,7 +466,7 @@ private:
   // - https://pages.mtu.edu/~shene/COURSES/cs3621/NOTES/spline/B-spline/bspline-curve-coef.html
   // - https://pages.mtu.edu/~shene/COURSES/cs3621/NOTES/spline/B-spline/bspline-derv.html
   template <typename Iter>
-  size_t nnz_basis(T value, size_t derivative_order, vec_view nnz)
+  size_t nnz_basis(T value, size_t derivative_order, vec_view nnz) const
   {
     debugassert(
         nnz.size() == this->degree + 1,
@@ -467,7 +478,7 @@ private:
         "Initial basis must be initialised to zero"
     );
 
-    releaseassert(this->degree > derivative_order, "Asked for derivative_order >= degree");
+    releaseassert(this->degree >= derivative_order, "Asked for derivative_order > degree");
 
     auto [index, val] = this->knots.find(value);
 
@@ -521,7 +532,7 @@ private:
     return index - this->degree;
   }
 
-  T deboor(size_t index, T value)
+  T deboor(size_t index, T value) const
   {
     for (size_t j = 0; j <= this->degree; j++)
     {
@@ -542,17 +553,37 @@ private:
     return this->support[this->degree];
   }
 
-  void compute_derivative()
+  BSpline const &get_derivative() const
   {
-    debugassert(this->degree > 0, "Cannot compute derivative of a 0-degree bspline");
-    this->derivative = std::unique_ptr<BSpline>(new BSpline(
-        this->knots.get_derivative_knots(),
-        this->control_points.get_derivative_control_points(this->knots),
-        this->degree - 1
-    ));
+    if (not this->derivative_ptr)
+    {
+      debugassert(this->degree > 0, "Cannot compute derivative of a 0-degree bspline");
+      this->derivative_ptr = std::unique_ptr<BSpline>(new BSpline(
+          this->knots.get_derivative_knots(),
+          this->control_points.get_derivative_control_points(this->knots),
+          this->degree - 1
+      ));
+    }
+
+    return *this->derivative_ptr;
   }
 
-  void invalidate_derivative() { this->derivative = nullptr; }
+  BSpline const &get_derivative(size_t derivative_order) const
+  {
+    releaseassert(
+        (0 < derivative_order) && (derivative_order <= this->degree),
+        "derivative_order must be in [1, degree]"
+    );
+    BSpline const *d = this;
+    for (size_t i{0}; i < derivative_order; i++)
+    {
+      d = &d->get_derivative();
+    }
+
+    return *d;
+  }
+
+  void invalidate_derivative() const { this->derivative_ptr = nullptr; }
 };
 
 } // namespace bsplinex::bspline

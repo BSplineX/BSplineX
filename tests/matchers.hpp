@@ -9,11 +9,43 @@
 #include <vector>
 
 // Third-party includes
+#include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
+// BSplineX includes
 #include "BSplineX/defines.hpp"
 
 using namespace bsplinex::constants;
+
+template <typename T>
+class WithinAbsRelMatcher : public Catch::Matchers::MatcherBase<T>
+{
+public:
+  WithinAbsRelMatcher(T const target, T const rtol, T const atol)
+      : target(target), rtol(rtol), atol(atol),
+        rel_matcher(Catch::Matchers::WithinRel(target, rtol)),
+        abs_matcher(Catch::Matchers::WithinAbs(target, atol)), matcher(rel_matcher || abs_matcher)
+  {
+  }
+
+  bool match(T const &actual) const { return matcher.match(actual); }
+
+  [[nodiscard]] std::string describe() const override { return matcher.describe(); }
+
+private:
+  T target;
+  T rtol;
+  T atol;
+  Catch::Matchers::WithinRelMatcher rel_matcher;
+  Catch::Matchers::WithinAbsMatcher abs_matcher;
+  Catch::Matchers::Detail::MatchAnyOf<T> matcher;
+};
+
+template <typename T>
+WithinAbsRelMatcher<T> WithinAbsRel(T expected, T rtol = RTOL<T>, T atol = ATOL<T>)
+{
+  return WithinAbsRelMatcher<T>(expected, rtol, atol);
+}
 
 template <typename T>
 struct WithinAbsRelVectorMatcher final : Catch::Matchers::MatcherBase<std::vector<T>>
@@ -23,7 +55,7 @@ struct WithinAbsRelVectorMatcher final : Catch::Matchers::MatcherBase<std::vecto
       "WithinRelVectorMatcher can only be used with floating-point types"
   );
 
-  WithinAbsRelVectorMatcher(std::vector<T> const &target, T rtol, T atol)
+  WithinAbsRelVectorMatcher(std::vector<T> const &target, T const rtol, T const atol)
       : target(target), rtol(rtol), atol(atol)
   {
   }
