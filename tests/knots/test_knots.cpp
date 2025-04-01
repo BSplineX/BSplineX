@@ -11,6 +11,7 @@
 #include "BSplineX/knots/knots.hpp"
 #include "BSplineX/knots/t_data.hpp"
 #include "BSplineX/types.hpp"
+#include "matchers.hpp"
 
 using namespace Catch::Matchers;
 using namespace bsplinex;
@@ -29,13 +30,13 @@ TEST_CASE("knots::Knots<T, C, BC, EXT> knots{knots::Data<T, C> data, degree}", "
   SECTION("knots.at(...)")
   {
     REQUIRE_THAT(
-        knots.at(0), WithinRel(data_vec.at(0) - (data_vec.at(n - 1) - data_vec.at(n - 4)))
+        knots.at(0), WithinAbsRel(data_vec.at(0) - (data_vec.at(n - 1) - data_vec.at(n - 4)))
     );
     REQUIRE_THAT(
-        knots.at(1), WithinRel(data_vec.at(0) - (data_vec.at(n - 1) - data_vec.at(n - 3)))
+        knots.at(1), WithinAbsRel(data_vec.at(0) - (data_vec.at(n - 1) - data_vec.at(n - 3)))
     );
     REQUIRE_THAT(
-        knots.at(2), WithinRel(data_vec.at(0) - (data_vec.at(n - 1) - data_vec.at(n - 2)))
+        knots.at(2), WithinAbsRel(data_vec.at(0) - (data_vec.at(n - 1) - data_vec.at(n - 2)))
     );
     for (size_t i{0}; i < data.size(); i++)
     {
@@ -43,15 +44,15 @@ TEST_CASE("knots::Knots<T, C, BC, EXT> knots{knots::Data<T, C> data, degree}", "
     }
     REQUIRE_THAT(
         knots.at(data.size() + degree),
-        WithinRel(data_vec.at(n - 1) + (data_vec.at(1) - data_vec.at(0)))
+        WithinAbsRel(data_vec.at(n - 1) + (data_vec.at(1) - data_vec.at(0)))
     );
     REQUIRE_THAT(
         knots.at(data.size() + degree + 1),
-        WithinRel(data_vec.at(n - 1) + (data_vec.at(2) - data_vec.at(0)))
+        WithinAbsRel(data_vec.at(n - 1) + (data_vec.at(2) - data_vec.at(0)))
     );
     REQUIRE_THAT(
         knots.at(data.size() + degree + 2),
-        WithinRel(data_vec.at(n - 1) + (data_vec.at(3) - data_vec.at(0)))
+        WithinAbsRel(data_vec.at(n - 1) + (data_vec.at(3) - data_vec.at(0)))
     );
   }
   // di

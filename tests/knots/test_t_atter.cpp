@@ -11,6 +11,7 @@
 #include "BSplineX/knots/t_atter.hpp"
 #include "BSplineX/knots/t_data.hpp"
 #include "BSplineX/types.hpp"
+#include "matchers.hpp"
 
 using namespace Catch::Matchers;
 using namespace bsplinex;
@@ -28,38 +29,40 @@ TEST_CASE("knots::Atter<T, C, BC> atter{knots::Data<T, C> data, degree}", "[t_at
   SECTION("atter.at(...)")
   {
     REQUIRE_THAT(
-        atter.at(0), WithinRel(data_vec.at(0) - (data_vec.at(n - 1) - data_vec.at(n - 4)))
+        atter.at(0), WithinAbsRel(data_vec.at(0) - (data_vec.at(n - 1) - data_vec.at(n - 4)))
     );
     REQUIRE_THAT(
-        atter.at(1), WithinRel(data_vec.at(0) - (data_vec.at(n - 1) - data_vec.at(n - 3)))
+        atter.at(1), WithinAbsRel(data_vec.at(0) - (data_vec.at(n - 1) - data_vec.at(n - 3)))
     );
     REQUIRE_THAT(
-        atter.at(2), WithinRel(data_vec.at(0) - (data_vec.at(n - 1) - data_vec.at(n - 2)))
+        atter.at(2), WithinAbsRel(data_vec.at(0) - (data_vec.at(n - 1) - data_vec.at(n - 2)))
     );
     for (size_t i{0}; i < n; i++)
     {
       REQUIRE(atter.at(i + degree) == data.at(i));
     }
     REQUIRE_THAT(
-        atter.at(n + degree), WithinRel(data_vec.at(n - 1) + (data_vec.at(1) - data_vec.at(0)))
+        atter.at(n + degree), WithinAbsRel(data_vec.at(n - 1) + (data_vec.at(1) - data_vec.at(0)))
     );
     REQUIRE_THAT(
-        atter.at(n + degree + 1), WithinRel(data_vec.at(n - 1) + (data_vec.at(2) - data_vec.at(0)))
+        atter.at(n + degree + 1),
+        WithinAbsRel(data_vec.at(n - 1) + (data_vec.at(2) - data_vec.at(0)))
     );
     REQUIRE_THAT(
-        atter.at(n + degree + 2), WithinRel(data_vec.at(n - 1) + (data_vec.at(3) - data_vec.at(0)))
+        atter.at(n + degree + 2),
+        WithinAbsRel(data_vec.at(n - 1) + (data_vec.at(3) - data_vec.at(0)))
     );
   }
   SECTION("atter.begin()")
   {
     auto it = atter.begin();
-    REQUIRE_THAT(*it, WithinRel(atter.at(0)));
+    REQUIRE(*it == atter.at(0));
   }
   SECTION("atter.end()")
   {
     auto it = atter.end();
     --it;
-    REQUIRE_THAT(*it, WithinRel(atter.at(n + degree + 2)));
+    REQUIRE(*it == atter.at(n + degree + 2));
   }
 }
 
@@ -73,57 +76,57 @@ TEST_CASE("knots::Atter::iterator", "[t_atter]")
   SECTION("*iterator")
   {
     auto it = atter.begin();
-    REQUIRE_THAT(*it, WithinRel(atter.at(0)));
+    REQUIRE(*it == atter.at(0));
   }
   SECTION("iterator++")
   {
     auto it = atter.begin();
-    REQUIRE_THAT(*(it++), WithinRel(atter.at(0)));
-    REQUIRE_THAT(*it, WithinRel(atter.at(1)));
+    REQUIRE(*(it++) == atter.at(0));
+    REQUIRE(*it == atter.at(1));
   }
   SECTION("++iterator")
   {
     auto it = atter.begin();
-    REQUIRE_THAT(*(++it), WithinRel(atter.at(1)));
-    REQUIRE_THAT(*it, WithinRel(atter.at(1)));
+    REQUIRE(*(++it) == atter.at(1));
+    REQUIRE(*it == atter.at(1));
   }
   SECTION("iterator--")
   {
     auto it = atter.end();
     --it;
-    REQUIRE_THAT(*(it--), WithinRel(atter.at(atter.size() - 1)));
-    REQUIRE_THAT(*it, WithinRel(atter.at(atter.size() - 2)));
+    REQUIRE(*(it--) == atter.at(atter.size() - 1));
+    REQUIRE(*it == atter.at(atter.size() - 2));
   }
   SECTION("--iterator")
   {
     auto it = atter.end();
-    REQUIRE_THAT(*(--it), WithinRel(atter.at(atter.size() - 1)));
-    REQUIRE_THAT(*it, WithinRel(atter.at(atter.size() - 1)));
+    REQUIRE(*(--it) == atter.at(atter.size() - 1));
+    REQUIRE(*it == atter.at(atter.size() - 1));
   }
   SECTION("iterator += 1")
   {
     auto it = atter.begin();
-    REQUIRE_THAT(*(it += 1), WithinRel(atter.at(1)));
-    REQUIRE_THAT(*it, WithinRel(atter.at(1)));
+    REQUIRE(*(it += 1) == atter.at(1));
+    REQUIRE(*it == atter.at(1));
   }
   SECTION("iterator + 1")
   {
     auto it = atter.begin();
-    REQUIRE_THAT(*(it + 1), WithinRel(atter.at(1)));
-    REQUIRE_THAT(*it, WithinRel(atter.at(0)));
+    REQUIRE(*(it + 1) == atter.at(1));
+    REQUIRE(*it == atter.at(0));
   }
   SECTION("iterator -= 1")
   {
     auto it = atter.end();
-    REQUIRE_THAT(*(it -= 1), WithinRel(atter.at(atter.size() - 1)));
-    REQUIRE_THAT(*it, WithinRel(atter.at(atter.size() - 1)));
+    REQUIRE(*(it -= 1) == atter.at(atter.size() - 1));
+    REQUIRE(*it == atter.at(atter.size() - 1));
   }
   SECTION("iterator - 1")
   {
     auto it = atter.end();
     --it;
-    REQUIRE_THAT(*(it - 1), WithinRel(atter.at(atter.size() - 2)));
-    REQUIRE_THAT(*it, WithinRel(atter.at(atter.size() - 1)));
+    REQUIRE(*(it - 1) == atter.at(atter.size() - 2));
+    REQUIRE(*it == atter.at(atter.size() - 1));
   }
   SECTION("iterator - iterator")
   {
@@ -146,7 +149,7 @@ TEST_CASE("knots::Atter::iterator", "[t_atter]")
   SECTION("iterator[]")
   {
     auto it = atter.begin();
-    REQUIRE_THAT(it[atter.size() - 2], WithinRel(atter.at(atter.size() - 2)));
+    REQUIRE(it[atter.size() - 2] == atter.at(atter.size() - 2));
   }
   SECTION("iterator > iterator")
   {

@@ -12,6 +12,7 @@
 #include "BSplineX/knots/t_data.hpp"
 #include "BSplineX/knots/t_padder.hpp"
 #include "BSplineX/types.hpp"
+#include "matchers.hpp"
 
 using namespace Catch::Matchers;
 using namespace bsplinex;
@@ -80,25 +81,25 @@ TEST_CASE(
   SECTION("padder.left(...)")
   {
     REQUIRE_THAT(
-        padder.left(0), WithinRel(data_vec.at(0) - (data_vec.at(n - 1) - data_vec.at(n - 4)))
+        padder.left(0), WithinAbsRel(data_vec.at(0) - (data_vec.at(n - 1) - data_vec.at(n - 4)))
     );
     REQUIRE_THAT(
-        padder.left(1), WithinRel(data_vec.at(0) - (data_vec.at(n - 1) - data_vec.at(n - 3)))
+        padder.left(1), WithinAbsRel(data_vec.at(0) - (data_vec.at(n - 1) - data_vec.at(n - 3)))
     );
     REQUIRE_THAT(
-        padder.left(2), WithinRel(data_vec.at(0) - (data_vec.at(n - 1) - data_vec.at(n - 2)))
+        padder.left(2), WithinAbsRel(data_vec.at(0) - (data_vec.at(n - 1) - data_vec.at(n - 2)))
     );
   }
   SECTION("padder.right(...)")
   {
     REQUIRE_THAT(
-        padder.right(0), WithinRel(data_vec.at(n - 1) + (data_vec.at(1) - data_vec.at(0)))
+        padder.right(0), WithinAbsRel(data_vec.at(n - 1) + (data_vec.at(1) - data_vec.at(0)))
     );
     REQUIRE_THAT(
-        padder.right(1), WithinRel(data_vec.at(n - 1) + (data_vec.at(2) - data_vec.at(0)))
+        padder.right(1), WithinAbsRel(data_vec.at(n - 1) + (data_vec.at(2) - data_vec.at(0)))
     );
     REQUIRE_THAT(
-        padder.right(2), WithinRel(data_vec.at(n - 1) + (data_vec.at(3) - data_vec.at(0)))
+        padder.right(2), WithinAbsRel(data_vec.at(n - 1) + (data_vec.at(3) - data_vec.at(0)))
     );
   }
 }

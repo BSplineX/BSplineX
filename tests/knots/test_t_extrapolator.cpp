@@ -13,6 +13,7 @@
 #include "BSplineX/knots/t_data.hpp"
 #include "BSplineX/knots/t_extrapolator.hpp"
 #include "BSplineX/types.hpp"
+#include "matchers.hpp"
 
 using namespace Catch::Matchers;
 using namespace bsplinex;
@@ -84,11 +85,13 @@ TEST_CASE(
   {
     double constexpr out_left{-1.0};
     double constexpr out_right{15.0};
-    REQUIRE_THAT(extrapolator.extrapolate(out_left - 2 * period), WithinRel(out_left + period));
-    REQUIRE_THAT(extrapolator.extrapolate(out_left - period), WithinRel(out_left + period));
-    REQUIRE_THAT(extrapolator.extrapolate(out_left), WithinRel(out_left + period));
-    REQUIRE_THAT(extrapolator.extrapolate(out_right), WithinRel(out_right - period));
-    REQUIRE_THAT(extrapolator.extrapolate(out_right + period), WithinRel(out_right - period));
-    REQUIRE_THAT(extrapolator.extrapolate(out_right + 2 * period), WithinRel(out_right - period));
+    REQUIRE_THAT(extrapolator.extrapolate(out_left - 2 * period), WithinAbsRel(out_left + period));
+    REQUIRE_THAT(extrapolator.extrapolate(out_left - period), WithinAbsRel(out_left + period));
+    REQUIRE_THAT(extrapolator.extrapolate(out_left), WithinAbsRel(out_left + period));
+    REQUIRE_THAT(extrapolator.extrapolate(out_right), WithinAbsRel(out_right - period));
+    REQUIRE_THAT(extrapolator.extrapolate(out_right + period), WithinAbsRel(out_right - period));
+    REQUIRE_THAT(
+        extrapolator.extrapolate(out_right + 2 * period), WithinAbsRel(out_right - period)
+    );
   }
 }

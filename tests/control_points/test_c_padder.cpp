@@ -43,8 +43,8 @@ TEST_CASE(
   SECTION("padder.size_right()") { REQUIRE(padder.size_right() == 3); }
   SECTION("padder.right(...)")
   {
-    REQUIRE_THAT(padder.right(0), WithinAbs(data_vec[0], 0));
-    REQUIRE_THAT(padder.right(1), WithinAbs(data_vec[1], 0));
-    REQUIRE_THAT(padder.right(2), WithinAbs(data_vec[2], 0));
+    REQUIRE(padder.right(0) == data_vec[0]);
+    REQUIRE(padder.right(1) == data_vec[1]);
+    REQUIRE(padder.right(2) == data_vec[2]);
   }
 }
