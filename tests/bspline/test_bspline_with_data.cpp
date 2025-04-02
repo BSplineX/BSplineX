@@ -8,6 +8,7 @@
 #include <vector>
 
 // Third-party includes
+#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <nlohmann/json.hpp>
@@ -24,6 +25,16 @@ using real_t = double;
 using namespace Catch::Matchers;
 using namespace bsplinex;
 using namespace bsplinex::bspline;
+
+// clang-format off
+#define BSPLINE_TEST_TYPES \
+types::OpenUniform<real_t>, \
+types::OpenNonUniform<real_t>, \
+types::ClampedUniform<real_t>, \
+types::ClampedNonUniform<real_t>, \
+types::PeriodicUniform<real_t>, \
+types::PeriodicNonUniform<real_t>
+// clang-format on
 
 namespace
 {
@@ -44,13 +55,76 @@ std::string get_test_name(
   return "type=" + boundary_condition + "_" + curve_type + "_degree=" + std::to_string(degree) +
          "_knots=" + std::to_string(num_knots);
 }
+
+template <typename BSplineType>
+std::string get_data_path()
+{
+  std::filesystem::path path(TEST_RESOURCES_DIR);
+  if constexpr (BoundaryCondition::OPEN == BSplineType::boundary_condition_type)
+  {
+    path /= "open";
+  }
+  if constexpr (BoundaryCondition::CLAMPED == BSplineType::boundary_condition_type)
+  {
+    path /= "clamped";
+  }
+  if constexpr (BoundaryCondition::PERIODIC == BSplineType::boundary_condition_type)
+  {
+    path /= "periodic";
+  }
+  // curve
+  if constexpr (Curve::UNIFORM == BSplineType::curve_type)
+  {
+    path /= "uniform";
+  }
+  if constexpr (Curve::NON_UNIFORM == BSplineType::curve_type)
+  {
+    path /= "non-uniform";
+  }
+  path += ".json";
+  return path;
+}
+
+template <typename BSplineType>
+BSplineType build_bspline(std::vector<real_t> knots, std::vector<real_t> ctrl_pts, size_t degree)
+{
+  if (BoundaryCondition::PERIODIC == BSplineType::boundary_condition_type)
+  {
+    ctrl_pts.resize(ctrl_pts.size() - degree);
+  }
+  if constexpr (Curve::UNIFORM == BSplineType::curve_type)
+  {
+    real_t knots_begin = knots.front();
+    real_t knots_end   = knots.back();
+    size_t num_knots   = knots.size();
+
+    if (BoundaryCondition::CLAMPED == BSplineType::boundary_condition_type ||
+        BoundaryCondition::PERIODIC == BSplineType::boundary_condition_type)
+    {
+      knots_begin = knots[degree];
+      knots_end   = knots[knots.size() - degree - 1];
+      num_knots   = knots.size() - 2 * degree;
+    }
+
+    return BSplineType({knots_begin, knots_end, num_knots}, {ctrl_pts}, degree);
+  }
+  else if constexpr (Curve::NON_UNIFORM == BSplineType::curve_type)
+  {
+    if (BoundaryCondition::CLAMPED == BSplineType::boundary_condition_type ||
+        BoundaryCondition::PERIODIC == BSplineType::boundary_condition_type)
+    {
+      knots = std::vector(std::next(knots.begin(), degree), std::prev(knots.end(), degree));
+    }
+    return BSplineType({knots}, {ctrl_pts}, degree);
+  }
+}
 } // namespace
 
-TEST_CASE("BSpline", "[bspline]")
+TEMPLATE_TEST_CASE("BSpline", "[bspline][template][product]", BSPLINE_TEST_TYPES)
 {
-  std::filesystem::path const data_path =
-      std::filesystem::path(TEST_RESOURCES_DIR) / "open" / "non-uniform.json";
-  nlohmann::json const data = load_test_data(data_path);
+  using BSplineType                     = TestType;
+  std::filesystem::path const data_path = get_data_path<BSplineType>();
+  nlohmann::json const data             = load_test_data(data_path);
   for (auto const &test_data : data)
   {
     auto const boundary_condition = test_data["bspline"]["boundary_condition"].get<std::string>();
@@ -61,12 +135,11 @@ TEST_CASE("BSpline", "[bspline]")
 
     SECTION(test_name)
     {
-
-      types::OpenNonUniform<real_t> bspline{
+      auto bspline = build_bspline<BSplineType>(
           {test_data["bspline"]["knots"].get<std::vector<real_t>>()},
           {test_data["bspline"]["ctrl"].get<std::vector<real_t>>()},
-          degree,
-      };
+          degree
+      );
 
       auto x_eval = test_data["x_eval"].get<std::vector<real_t>>();
       SECTION("evaluate(...)")
@@ -81,10 +154,13 @@ TEST_CASE("BSpline", "[bspline]")
           }
           // test also vectorized evaluation
           REQUIRE_THAT(bspline.evaluate(x_eval), VectorsWithinAbsRel(y_eval));
-          REQUIRE_THROWS_WITH(
-              bspline.evaluate(*std::min_element(x_eval.begin(), x_eval.end()) - 1),
-              "Extrapolation explicitly set to NONE"
-          );
+          if constexpr (BoundaryCondition::PERIODIC != BSplineType::boundary_condition_type)
+          {
+            REQUIRE_THROWS_WITH(
+                bspline.evaluate(*std::min_element(x_eval.begin(), x_eval.end()) - 1),
+                "Extrapolation explicitly set to NONE"
+            );
+          }
         }
         for (size_t derivative_order{1}; derivative_order <= test_data["derivatives"].size();
              derivative_order++)
@@ -99,13 +175,15 @@ TEST_CASE("BSpline", "[bspline]")
               auto matcher = WithinAbsRel(y_eval.at(i));
               REQUIRE_THAT(bspline.evaluate(x_eval.at(i), derivative_order), matcher);
             }
-
-            REQUIRE_THROWS_WITH(
-                bspline.evaluate(
-                    *std::min_element(x_eval.begin(), x_eval.end()) - 1, derivative_order
-                ),
-                "Extrapolation explicitly set to NONE"
-            );
+            if constexpr (BoundaryCondition::PERIODIC != BSplineType::boundary_condition_type)
+            {
+              REQUIRE_THROWS_WITH(
+                  bspline.evaluate(
+                      *std::min_element(x_eval.begin(), x_eval.end()) - 1, derivative_order
+                  ),
+                  "Extrapolation explicitly set to NONE"
+              );
+            }
           }
         }
         SECTION("evaluate(..., invalid derivative_order)")
@@ -206,14 +284,17 @@ TEST_CASE("BSpline", "[bspline]")
                                                  std::vector<std::pair<real_t, real_t>>,
                                                  std::vector<std::pair<real_t, real_t>>>>();
         std::vector<lsq::Condition<real_t>> additional_conditions{};
-        additional_conditions.reserve(conds_left.size() + conds_right.size());
-        for (auto [derivative_order, value] : conds_left)
+        if constexpr (BoundaryCondition::PERIODIC != BSplineType::boundary_condition_type)
         {
-          additional_conditions.emplace_back(x_interp.front(), value, derivative_order);
-        }
-        for (auto [derivative_order, value] : conds_right)
-        {
-          additional_conditions.emplace_back(x_interp.back(), value, derivative_order);
+          additional_conditions.reserve(conds_left.size() + conds_right.size());
+          for (auto [derivative_order, value] : conds_left)
+          {
+            additional_conditions.emplace_back(x_interp.front(), value, derivative_order);
+          }
+          for (auto [derivative_order, value] : conds_right)
+          {
+            additional_conditions.emplace_back(x_interp.back(), value, derivative_order);
+          }
         }
 
         auto y_eval_interp   = test_data["bspline_interp"]["y_eval"].get<std::vector<real_t>>();
