@@ -2,25 +2,14 @@
 #define BSPLINEX_DEFINES_HPP
 
 #include <cassert>
+#include <cstddef>
 #include <limits>
 
-template <typename T>
-constexpr void debugassert(T exp, std::string const &msg)
-{
-  assert(((void)msg, exp));
-  // Needed to avoid unused variable compilation error
-  (void)exp;
-  (void)msg;
-}
-
-template <typename T>
-constexpr void releaseassert(T exp, std::string const &msg)
-{
-  if (!exp)
-  {
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
+#define debugassert(exp, msg) assert(((void)(msg), exp))
+#define releaseassert(exp, msg)                                                                    \
+  if (!(exp))                                                                                      \
     throw std::runtime_error(msg);
-  }
-}
 
 #ifdef BSPLINEX_DEBUG_LOG_CALL
 #include <cstdio>
@@ -28,6 +17,7 @@ constexpr void releaseassert(T exp, std::string const &msg)
 #else
 #define DEBUG_LOG_CALL() ;
 #endif
+// NOLINTEND(cppcoreguidelines-macro-usage)
 
 namespace bsplinex::constants
 {
