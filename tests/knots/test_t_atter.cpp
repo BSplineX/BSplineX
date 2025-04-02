@@ -5,7 +5,6 @@
 // Third-party includes
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
-#include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 // BSplineX includes
 #include "BSplineX/knots/t_atter.hpp"
@@ -25,7 +24,7 @@ TEST_CASE("knots::Atter<T, C, BC> atter{knots::Data<T, C> data, degree}", "[t_at
   size_t constexpr degree{3};
   Atter<double, Curve::NON_UNIFORM, BoundaryCondition::PERIODIC> const atter{data, degree};
 
-  SECTION("atter.size()") { REQUIRE(atter.size() == n + 2 * degree); }
+  SECTION("atter.size()") { REQUIRE(atter.size() == n + (2 * degree)); }
   SECTION("atter.at(...)")
   {
     REQUIRE_THAT(

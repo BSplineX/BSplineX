@@ -28,7 +28,7 @@ public:
   {
   }
 
-  bool match(T const &actual) const { return matcher.match(actual); }
+  bool match(T const &actual) const override { return matcher.match(actual); }
 
   [[nodiscard]] std::string describe() const override { return matcher.describe(); }
 

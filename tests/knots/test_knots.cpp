@@ -5,7 +5,6 @@
 // Third-party includes
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
-#include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 // BSplineX includes
 #include "BSplineX/knots/knots.hpp"
@@ -26,7 +25,7 @@ TEST_CASE("knots::Knots<T, C, BC, EXT> knots{knots::Data<T, C> data, degree}", "
   Knots<double, Curve::NON_UNIFORM, BoundaryCondition::PERIODIC, Extrapolation::PERIODIC> const
       knots{data, degree};
 
-  SECTION("knots.size()") { REQUIRE(knots.size() == data.size() + 2 * degree); }
+  SECTION("knots.size()") { REQUIRE(knots.size() == data.size() + (2 * degree)); }
   SECTION("knots.at(...)")
   {
     REQUIRE_THAT(

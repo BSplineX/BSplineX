@@ -6,7 +6,6 @@
 // Third-party includes
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
-#include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 // BSplineX includes
 #include "BSplineX/knots/t_atter.hpp"
@@ -85,13 +84,15 @@ TEST_CASE(
   {
     double constexpr out_left{-1.0};
     double constexpr out_right{15.0};
-    REQUIRE_THAT(extrapolator.extrapolate(out_left - 2 * period), WithinAbsRel(out_left + period));
+    REQUIRE_THAT(
+        extrapolator.extrapolate(out_left - (2 * period)), WithinAbsRel(out_left + period)
+    );
     REQUIRE_THAT(extrapolator.extrapolate(out_left - period), WithinAbsRel(out_left + period));
     REQUIRE_THAT(extrapolator.extrapolate(out_left), WithinAbsRel(out_left + period));
     REQUIRE_THAT(extrapolator.extrapolate(out_right), WithinAbsRel(out_right - period));
     REQUIRE_THAT(extrapolator.extrapolate(out_right + period), WithinAbsRel(out_right - period));
     REQUIRE_THAT(
-        extrapolator.extrapolate(out_right + 2 * period), WithinAbsRel(out_right - period)
+        extrapolator.extrapolate(out_right + (2 * period)), WithinAbsRel(out_right - period)
     );
   }
 }
