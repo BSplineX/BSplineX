@@ -226,8 +226,9 @@ public:
     auto [index, basis_functions] = this->nnz_basis(value, derivative_order);
 
     basis_functions.insert(basis_functions.begin(), index, ZERO<T>);
-    basis_functions
-        .insert(basis_functions.end(), this->control_points.size() - index - this->degree - 1, ZERO<T>);
+    basis_functions.insert(
+        basis_functions.end(), this->control_points.size() - index - this->degree - 1, ZERO<T>
+    );
 
     return basis_functions;
   }
@@ -264,15 +265,19 @@ public:
   {
     releaseassert(x.size() == y.size(), "x and y must have the same size");
 
-    this->control_points = std::move(lsq::lsq<T, vec_const_iter, BC>(
-        degree,
-        knots.size(),
-        [this](T value, size_t derivative_order, std::vector<T> &vec) -> size_t
-        { return this->nnz_basis<vec_iter>(value, derivative_order, {vec.begin(), vec.end()}); },
-        vec_const_view{x.begin(), x.end()},
-        vec_const_view{y.begin(), y.end()},
-        {}
-    ));
+    this->control_points = std::move(
+        lsq::lsq<T, vec_const_iter, BC>(
+            this->degree,
+            this->knots.size(),
+            [this](T value, size_t derivative_order, std::vector<T> &vec) -> size_t
+            {
+              return this->nnz_basis<vec_iter>(value, derivative_order, {vec.begin(), vec.end()});
+            },
+            vec_const_view{x.begin(), x.end()},
+            vec_const_view{y.begin(), y.end()},
+            {}
+        )
+    );
     this->invalidate_derivative();
   }
 
@@ -323,15 +328,12 @@ public:
     knots::Knots<T, C, BC, EXT> new_knots;
     if constexpr (Curve::UNIFORM == C)
     {
-      T step = x.at(1) - x.at(0);
+      T const step = std::abs(x.at(1) - x.at(0));
       for (size_t i{0}; i < x.size() - 1; i++)
       {
-        releaseassert(
-            std::abs(x.at(i + 1) - x.at(i) - step) <=
-                    RTOL<T> * std::max(std::abs(x.at(i + 1) - x.at(i)), std::abs(step)) or
-                std::abs(x.at(i + 1) - x.at(i) - step) <= ATOL<T>,
-            "x is not uniform."
-        );
+        T const diff = std::abs(x.at(i + 1) - x.at(i) - step);
+        T const max  = (std::max)(std::abs(x.at(i + 1) - x.at(i)), step);
+        releaseassert(diff <= RTOL<T> * max or diff <= ATOL<T>, "x is not uniform.");
       }
       new_knots = std::move(knots::Knots<T, C, BC, EXT>{{x.front(), x.back(), x.size()}, degree});
     }
@@ -375,24 +377,27 @@ public:
       static_assert(false, "Unknown boundary condition, you should never get here!");
     }
 
-    this->control_points = std::move(lsq::lsq<T, vec_const_iter, BC>(
-        this->degree,
-        this->knots.size(),
-        [this](T value, size_t derivative_order, std::vector<T> &vec) -> size_t {
-          return this->template nnz_basis<vec_iter>(
-              value, derivative_order, {vec.begin(), vec.end()}
-          );
-        },
-        x_view,
-        y_view,
-        additional_conditions
-    ));
+    this->control_points = std::move(
+        lsq::lsq<T, vec_const_iter, BC>(
+            this->degree,
+            this->knots.size(),
+            [this](T value, size_t derivative_order, std::vector<T> &vec) -> size_t
+            {
+              return this->template nnz_basis<vec_iter>(
+                  value, derivative_order, {vec.begin(), vec.end()}
+              );
+            },
+            x_view,
+            y_view,
+            additional_conditions
+        )
+    );
     this->invalidate_derivative();
   }
 
   [[nodiscard]] std::vector<T> get_control_points() const
   {
-    std::vector<T> ctrl_pts{};
+    std::vector<T> ctrl_pts;
     ctrl_pts.reserve(this->control_points.size());
 
     for (size_t i{0}; i < this->control_points.size(); i++)
@@ -405,7 +410,7 @@ public:
 
   [[nodiscard]] std::vector<T> get_knots() const
   {
-    std::vector<T> knots{};
+    std::vector<T> knots;
     knots.reserve(this->knots.size());
     for (size_t i{0}; i < this->knots.size(); i++)
     {

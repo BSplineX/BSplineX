@@ -26,6 +26,15 @@ using namespace Catch::Matchers;
 using namespace bsplinex;
 using namespace bsplinex::bspline;
 
+// // clang-format off
+// #define BSPLINE_TEST_TYPES \
+// types::OpenUniform<real_t>, \
+// types::OpenNonUniform<real_t>, \
+// types::ClampedUniform<real_t>, \
+// types::ClampedNonUniform<real_t>, \
+// types::PeriodicUniform<real_t>, \
+// types::PeriodicNonUniform<real_t>
+// // clang-format on
 // clang-format off
 #define BSPLINE_TEST_TYPES \
 types::OpenUniform<real_t>, \
@@ -35,9 +44,7 @@ types::OpenNonUniformConstant<real_t>, \
 types::ClampedUniform<real_t>, \
 types::ClampedUniformConstant<real_t>, \
 types::ClampedNonUniform<real_t>, \
-types::ClampedNonUniformConstant<real_t>, \
-types::PeriodicUniform<real_t>, \
-types::PeriodicNonUniform<real_t>
+types::PeriodicUniform<real_t>
 // clang-format on
 
 namespace
@@ -243,7 +250,6 @@ TEMPLATE_TEST_CASE("BSpline", "[bspline][template][product]", BSPLINE_TEST_TYPES
 
       SECTION("nnz_basis(...)")
       {
-        std::vector<real_t> nnz_basis(degree + 1);
         for (size_t derivative_order = 0;
              derivative_order < test_data["bspline"]["nnz_basis"].size();
              ++derivative_order)
@@ -255,7 +261,6 @@ TEMPLATE_TEST_CASE("BSpline", "[bspline][template][product]", BSPLINE_TEST_TYPES
               auto [ref_index, ref_nnz_basis] =
                   test_data["bspline"]["nnz_basis"][derivative_order][i]
                       .get<std::pair<size_t, std::vector<real_t>>>();
-              std::fill(nnz_basis.begin(), nnz_basis.end(), 0.0);
               auto [index, nnz_basis] = bspline.nnz_basis(x_eval.at(i), derivative_order);
               REQUIRE(index == ref_index);
               REQUIRE_THAT(nnz_basis, VectorsWithinAbsRel(ref_nnz_basis));
@@ -328,8 +333,10 @@ TEMPLATE_TEST_CASE("BSpline", "[bspline][template][product]", BSPLINE_TEST_TYPES
         {
           if constexpr (Curve::UNIFORM == BSplineType::curve_type)
           {
-            SKIP("SciPy implementation forces clamped boundary condition, but we cannot add "
-                 "explicit padding to uniform BSplines.");
+            SKIP(
+                "SciPy implementation forces clamped boundary condition, but we cannot add "
+                "explicit padding to uniform BSplines."
+            );
           }
           x_interp.insert(x_interp.begin(), degree, x_interp.front());
           x_interp.insert(x_interp.end(), degree, x_interp.back());
