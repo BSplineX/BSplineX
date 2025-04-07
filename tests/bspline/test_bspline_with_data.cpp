@@ -117,6 +117,10 @@ BSplineType build_bspline(std::vector<real_t> knots, std::vector<real_t> ctrl_pt
     }
     return BSplineType({knots}, {ctrl_pts}, degree);
   }
+  else
+  {
+    static_assert(false);
+  }
 }
 } // namespace
 
@@ -270,6 +274,12 @@ TEMPLATE_TEST_CASE("BSpline", "[bspline][template][product]", BSPLINE_TEST_TYPES
         bspline.fit(x_fit, y_fit);
 
         REQUIRE_THAT(bspline.get_knots(), VectorsWithinAbsRel(knots_fit));
+
+        if (BoundaryCondition::PERIODIC == BSplineType::boundary_condition_type)
+        {
+          SKIP("SciPy currently does not support fitting for periodic BSplines");
+        }
+
         REQUIRE_THAT(bspline.get_control_points(), VectorsWithinAbsRel(ctrl_pts_fit));
         REQUIRE_THAT(bspline.evaluate(x_eval), VectorsWithinAbsRel(y_eval_fit));
       }
@@ -284,24 +294,26 @@ TEMPLATE_TEST_CASE("BSpline", "[bspline][template][product]", BSPLINE_TEST_TYPES
                                                  std::vector<std::pair<real_t, real_t>>,
                                                  std::vector<std::pair<real_t, real_t>>>>();
         std::vector<lsq::Condition<real_t>> additional_conditions{};
-        if constexpr (BoundaryCondition::PERIODIC != BSplineType::boundary_condition_type)
+        additional_conditions.reserve(conds_left.size() + conds_right.size());
+        for (auto [derivative_order, value] : conds_left)
         {
-          additional_conditions.reserve(conds_left.size() + conds_right.size());
-          for (auto [derivative_order, value] : conds_left)
-          {
-            additional_conditions.emplace_back(x_interp.front(), value, derivative_order);
-          }
-          for (auto [derivative_order, value] : conds_right)
-          {
-            additional_conditions.emplace_back(x_interp.back(), value, derivative_order);
-          }
+          additional_conditions.emplace_back(x_interp.front(), value, derivative_order);
+        }
+        for (auto [derivative_order, value] : conds_right)
+        {
+          additional_conditions.emplace_back(x_interp.back(), value, derivative_order);
         }
 
         auto y_eval_interp   = test_data["bspline_interp"]["y_eval"].get<std::vector<real_t>>();
         auto knots_interp    = test_data["bspline_interp"]["knots"].get<std::vector<real_t>>();
         auto ctrl_pts_interp = test_data["bspline_interp"]["ctrl"].get<std::vector<real_t>>();
-        if constexpr (BoundaryCondition::OPEN == bspline.boundary_condition_type)
+        if constexpr (BoundaryCondition::OPEN == BSplineType::boundary_condition_type)
         {
+          if constexpr (Curve::UNIFORM == BSplineType::curve_type)
+          {
+            SKIP("SciPy implementation forces clamped boundary condition, but we cannot add "
+                 "explicit padding to uniform BSplines.");
+          }
           x_interp.insert(x_interp.begin(), degree, x_interp.front());
           x_interp.insert(x_interp.end(), degree, x_interp.back());
           y_interp.insert(y_interp.begin(), degree, y_interp.front());
@@ -309,6 +321,12 @@ TEMPLATE_TEST_CASE("BSpline", "[bspline][template][product]", BSPLINE_TEST_TYPES
         }
 
         bspline.interpolate(x_interp, y_interp, additional_conditions);
+
+        if (BoundaryCondition::PERIODIC == BSplineType::boundary_condition_type and
+            (degree == 1 or degree % 2 == 0))
+        {
+          SKIP("SciPy implementation is similar only for odd degrees > 1");
+        }
 
         REQUIRE_THAT(bspline.get_knots(), VectorsWithinAbsRel(knots_interp));
         REQUIRE_THAT(bspline.get_control_points(), VectorsWithinAbsRel(ctrl_pts_interp));
