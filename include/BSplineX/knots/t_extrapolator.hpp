@@ -166,27 +166,14 @@ public:
         value < this->value_left || value > this->value_right, "Value not outside of the domain"
     );
 
-    // TODO: Figure out how to prevent numerical errors
+    T wrapped = std::fmod<T>(value - this->value_left, this->period);
 
-    if (value < this->value_left)
+    if (wrapped < constants::ZERO<T>)
     {
-      value += this->period * (std::floor((this->value_left - value) / this->period) + 1);
-    }
-    else if (value > this->value_right)
-    {
-      value -= this->period * (std::floor((value - this->value_right) / this->period) + 1);
+      wrapped += this->period;
     }
 
-    if (value < this->value_left)
-    {
-      value = this->value_left;
-    }
-    else if (value > this->value_right)
-    {
-      value = this->value_right;
-    }
-
-    return value;
+    return wrapped + this->value_left;
   }
 };
 
