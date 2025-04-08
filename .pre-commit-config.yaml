@@ -23,14 +23,6 @@ repos:
           cppcheck
           --template=gcc
           --enable=style,performance,warning,portability
-          --inline-suppr
-          --suppress=cppcheckError
-          --suppress=internalAstError
-          --suppress=unmatchedSuppression
-          --suppress=passedByValue
-          --suppress=syntaxError
-          --suppress=preprocessorErrorDirective
-          --inconclusive
           --std=c++17
         language: system
         files: ^(include/.*|tests/.*|benchmarks/.*)$
