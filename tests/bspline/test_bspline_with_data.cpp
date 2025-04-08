@@ -285,7 +285,11 @@ TEMPLATE_TEST_CASE("BSpline", "[bspline][template][product]", BSPLINE_TEST_TYPES
         auto ctrl_pts_fit = test_data["bspline_fit"]["ctrl"].get<std::vector<real_t>>();
 
         bspline.fit(x_fit, y_fit);
+        // test fitting
+        real_t fit_tol = 1e-2;
+        REQUIRE_THAT(bspline.evaluate(x_fit), VectorsWithinAbsRel(y_fit, fit_tol, fit_tol));
 
+        // test against reference data
         REQUIRE_THAT(bspline.get_knots(), VectorsWithinAbsRel(knots_fit));
 
         if (BoundaryCondition::PERIODIC == BSplineType::boundary_condition_type)
@@ -334,6 +338,7 @@ TEMPLATE_TEST_CASE("BSpline", "[bspline][template][product]", BSPLINE_TEST_TYPES
         }
 
         bspline.interpolate(x_interp, y_interp, additional_conditions);
+        REQUIRE_THAT(bspline.evaluate(x_interp), VectorsWithinAbsRel(y_interp));
 
         if (BoundaryCondition::PERIODIC == BSplineType::boundary_condition_type and
             (degree == 1 or degree % 2 == 0))
