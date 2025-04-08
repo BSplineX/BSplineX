@@ -58,7 +58,6 @@ TEST_CASE(
     }
   };
 
-  size_t knots_num{0};
   std::vector<double> ctrl_pts{};
   std::vector<double> x_data{};
   std::vector<double> y_data{};
@@ -68,7 +67,7 @@ TEST_CASE(
   double stop{49.0};
   for (size_t j{3}; j < 12; j++)
   {
-    knots_num = (size_t)std::pow(2.0, j);
+    size_t knots_num = static_cast<size_t>(std::pow(2.0, j));
     fill(start, stop, knots_num - degree - 1, ctrl_pts);
     BSpline<double, Curve::UNIFORM, BoundaryCondition::OPEN, Extrapolation::NONE> bspline{
         {0.0, 100.0, knots_num}, {ctrl_pts}, degree
@@ -141,10 +140,6 @@ TEST_CASE(
     meter.measure([&](int i) { storage[i].destruct(); });
   };
 
-  BSpline<double, Curve::NON_UNIFORM, BoundaryCondition::OPEN, Extrapolation::NONE> bspline{
-      t_data, c_data, degree
-  };
-
   auto fill = [](double start, double stop, size_t steps, std::vector<double> &vec)
   {
     double step = (stop - start) / (double)steps;
@@ -155,7 +150,6 @@ TEST_CASE(
     }
   };
 
-  size_t knots_num{0};
   std::vector<double> knots{};
   std::vector<double> ctrl_pts{};
   std::vector<double> x_data{};
@@ -165,7 +159,7 @@ TEST_CASE(
   double stop{49.0};
   for (size_t j{3}; j < 11; j++)
   {
-    knots_num = (size_t)std::pow(2.0, j);
+    size_t knots_num = static_cast<size_t>(std::pow(2.0, j));
     fill(0.0, 100.0, knots_num, knots);
     fill(start, stop, knots_num - degree - 1, ctrl_pts);
     BSpline<double, Curve::NON_UNIFORM, BoundaryCondition::OPEN, Extrapolation::NONE> bspline{

@@ -226,9 +226,8 @@ public:
     auto [index, basis_functions] = this->nnz_basis(value, derivative_order);
 
     basis_functions.insert(basis_functions.begin(), index, ZERO<T>);
-    basis_functions.insert(
-        basis_functions.end(), this->control_points.size() - index - this->degree - 1, ZERO<T>
-    );
+    basis_functions
+        .insert(basis_functions.end(), this->control_points.size() - index - this->degree - 1, ZERO<T>);
 
     return basis_functions;
   }
@@ -265,19 +264,15 @@ public:
   {
     releaseassert(x.size() == y.size(), "x and y must have the same size");
 
-    this->control_points = std::move(
-        lsq::lsq<T, vec_const_iter, BC>(
-            this->degree,
-            this->knots.size(),
-            [this](T value, size_t derivative_order, std::vector<T> &vec) -> size_t
-            {
-              return this->nnz_basis<vec_iter>(value, derivative_order, {vec.begin(), vec.end()});
-            },
-            vec_const_view{x.begin(), x.end()},
-            vec_const_view{y.begin(), y.end()},
-            {}
-        )
-    );
+    this->control_points = std::move(lsq::lsq<T, vec_const_iter, BC>(
+        this->degree,
+        this->knots.size(),
+        [this](T value, size_t derivative_order, std::vector<T> &vec) -> size_t
+        { return this->nnz_basis<vec_iter>(value, derivative_order, {vec.begin(), vec.end()}); },
+        vec_const_view{x.begin(), x.end()},
+        vec_const_view{y.begin(), y.end()},
+        {}
+    ));
     this->invalidate_derivative();
   }
 
@@ -342,13 +337,13 @@ public:
       new_knots = std::move(knots::Knots<T, C, BC, EXT>{{x}, degree});
     }
 
-    auto const domain = new_knots.domain();
+    auto const knots_domain = new_knots.domain();
     releaseassert(
         std::all_of(
             additional_conditions.begin(),
             additional_conditions.end(),
-            [&domain](auto const &elem)
-            { return elem.x_value >= domain.first and elem.x_value <= domain.second; }
+            [&knots_domain](auto const &elem)
+            { return elem.x_value >= knots_domain.first and elem.x_value <= knots_domain.second; }
         ),
         "Additional conditions must lie inside the knots interval."
     );
@@ -377,21 +372,18 @@ public:
       static_assert(false, "Unknown boundary condition, you should never get here!");
     }
 
-    this->control_points = std::move(
-        lsq::lsq<T, vec_const_iter, BC>(
-            this->degree,
-            this->knots.size(),
-            [this](T value, size_t derivative_order, std::vector<T> &vec) -> size_t
-            {
-              return this->template nnz_basis<vec_iter>(
-                  value, derivative_order, {vec.begin(), vec.end()}
-              );
-            },
-            x_view,
-            y_view,
-            additional_conditions
-        )
-    );
+    this->control_points = std::move(lsq::lsq<T, vec_const_iter, BC>(
+        this->degree,
+        this->knots.size(),
+        [this](T value, size_t derivative_order, std::vector<T> &vec) -> size_t {
+          return this->template nnz_basis<vec_iter>(
+              value, derivative_order, {vec.begin(), vec.end()}
+          );
+        },
+        x_view,
+        y_view,
+        additional_conditions
+    ));
     this->invalidate_derivative();
   }
 
@@ -410,14 +402,14 @@ public:
 
   [[nodiscard]] std::vector<T> get_knots() const
   {
-    std::vector<T> knots;
-    knots.reserve(this->knots.size());
+    std::vector<T> knots_vec;
+    knots_vec.reserve(this->knots.size());
     for (size_t i{0}; i < this->knots.size(); i++)
     {
-      knots.push_back(this->knots.at(i));
+      knots_vec.push_back(this->knots.at(i));
     }
 
-    return knots;
+    return knots_vec;
   }
 
   [[nodiscard]] size_t get_degree() const { return this->degree; }

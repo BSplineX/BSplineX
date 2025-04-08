@@ -390,10 +390,8 @@ TEMPLATE_TEST_CASE("BSpline", "[bspline][template][product]", BSPLINE_TEST_TYPES
         {
           if constexpr (Curve::UNIFORM == BSplineType::curve_type)
           {
-            SKIP(
-                "SciPy implementation forces clamped boundary condition, but we cannot add "
-                "explicit padding to uniform BSplines."
-            );
+            SKIP("SciPy implementation forces clamped boundary condition, but we cannot add "
+                 "explicit padding to uniform BSplines.");
           }
           x_interp.insert(x_interp.begin(), degree, x_interp.front());
           x_interp.insert(x_interp.end(), degree, x_interp.back());

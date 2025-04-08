@@ -24,6 +24,10 @@ repos:
           --template=gcc
           --enable=style,performance,warning,portability
           --std=c++17
+          --suppress=useStlAlgorithm
+          --suppress=noExplicitConstructor
+          --suppress=operatorEqVarError
+          --error-exitcode=1
         language: system
-        files: ^(include/.*|tests/.*|benchmarks/.*)$
+        files: \.(h|hpp|hh|c|cpp|cc)$
 exclude: ^third_party/
