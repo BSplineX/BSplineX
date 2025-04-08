@@ -1,6 +1,8 @@
 #ifndef BSPLINEX_TYPES_HPP
 #define BSPLINEX_TYPES_HPP
 
+#include <cstdint>
+
 namespace bsplinex
 {
 

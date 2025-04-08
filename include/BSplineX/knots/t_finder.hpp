@@ -88,7 +88,7 @@ public:
 
   Finder &operator=(Finder &&other) = delete;
 
-  size_t find(T value) const
+  [[nodiscard]] size_t find(T value) const
   {
     debugassert(
         value >= this->value_left && value <= this->value_right, "Value outside of the domain"

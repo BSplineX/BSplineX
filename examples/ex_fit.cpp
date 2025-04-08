@@ -1,5 +1,7 @@
 #include "BSplineX/bsplinex.hpp"
+#include <cstddef>
 #include <iostream>
+#include <vector>
 
 int main()
 {
@@ -24,6 +26,6 @@ int main()
   std::vector<double> const eval_x{-10.5, 3.0, 3.4, 5.1, 6.2, 15.0, 22.0};
   for (auto const &x : eval_x)
   {
-    std::cout << "bspline.evaluate(" << x << ") = " << bspline.evaluate(x) << std::endl;
+    std::cout << "bspline.evaluate(" << x << ") = " << bspline.evaluate(x) << "\n";
   }
 }

@@ -2,6 +2,7 @@
 #include <cstddef>
 #include <filesystem>
 #include <fstream>
+#include <iterator>
 #include <string>
 #include <utility>
 #include <vector>
@@ -212,8 +213,7 @@ TEMPLATE_TEST_CASE("BSpline", "[bspline][template][product]", BSPLINE_TEST_TYPES
                   );
                 }
                 real_t const period = domain_r - domain_l;
-                constexpr real_t periodic_extrapolation_tol{
-                    1e-8
+                constexpr real_t periodic_extrapolation_tol{1e-8
                 }; // HACK: this may be correct, but requires an in-depth analysis
                 for (real_t const x : x_eval)
                 {
@@ -380,10 +380,8 @@ TEMPLATE_TEST_CASE("BSpline", "[bspline][template][product]", BSPLINE_TEST_TYPES
         {
           if constexpr (Curve::UNIFORM == BSplineType::curve_type)
           {
-            SKIP(
-                "SciPy implementation forces clamped boundary condition, but we cannot add "
-                "explicit padding to uniform BSplines."
-            );
+            SKIP("SciPy implementation forces clamped boundary condition, but we cannot add "
+                 "explicit padding to uniform BSplines.");
           }
           x_interp.insert(x_interp.begin(), degree, x_interp.front());
           x_interp.insert(x_interp.end(), degree, x_interp.back());

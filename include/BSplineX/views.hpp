@@ -135,7 +135,7 @@ public:
    * @return A const reference to the element at the specified index.
    * @throw in debug mode if the index is out of bounds.
    */
-  const_reference at(difference_type index) const
+  [[nodiscard]] const_reference at(difference_type index) const
   {
     debugassert(std::distance(this->_begin, this->_end) > index, "Out of bounds.");
     debugassert(index >= 0, "Negative indices are not supported.");
@@ -157,7 +157,7 @@ public:
    * @param index The index of the element to access.
    * @return A const reference to the element at the specified index.
    */
-  const_reference operator[](difference_type index) const
+  [[nodiscard]] const_reference operator[](difference_type index) const
   {
     return *std::next(this->_begin, index);
   }
@@ -174,7 +174,7 @@ public:
    *
    * @return a const reference to the first element of the view
    */
-  const_reference front() const { return *(this->_begin); }
+  [[nodiscard]] const_reference front() const { return *(this->_begin); }
 
   /**
    * @brief Get the last element of the view
@@ -188,7 +188,7 @@ public:
    *
    * @return a const reference to the last element of the view
    */
-  const_reference back() const { return *std::prev(this->_end, 1); }
+  [[nodiscard]] const_reference back() const { return *std::prev(this->_end, 1); }
 
   /**
    * @brief Get the number of elements in the view.
@@ -205,14 +205,14 @@ public:
    *
    * @return the begin iterator
    */
-  Iter begin() { return this->_begin; }
+  [[nodiscard]] Iter begin() { return this->_begin; }
 
   /**
    * @brief Get the end iterator
    *
    * @return the end iterator
    */
-  Iter end() { return this->_end; }
+  [[nodiscard]] Iter end() { return this->_end; }
 };
 
 } // namespace bsplinex::views

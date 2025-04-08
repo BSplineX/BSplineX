@@ -1,13 +1,21 @@
 // Standard includes
 #include <cmath>
+#include <cstddef>
 #include <string>
+#include <vector>
 
 // Third-party includes
 #include <catch2/benchmark/catch_benchmark_all.hpp>
+#include <catch2/benchmark/catch_chronometer.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 // BSplineX includes
 #include "BSplineX/bspline/bspline.hpp"
+#include "BSplineX/control_points/c_data.hpp"
+#include "BSplineX/knots/t_data.hpp"
+#include "BSplineX/types.hpp"
+#include "catch2/benchmark/catch_benchmark.hpp"
+#include "catch2/benchmark/catch_constructor.hpp"
 
 using namespace bsplinex;
 using namespace bsplinex::bspline;
@@ -24,8 +32,8 @@ TEST_CASE(
 )
 {
   size_t degree{3};
-  knots::Data<double, Curve::UNIFORM> t_data{0.1, 13.2, static_cast<size_t>(9)};
-  control_points::Data<double> c_data{{0.1, 1.3, 2.2, 4.9, 13.2}};
+  knots::Data<double, Curve::UNIFORM> const t_data{0.1, 13.2, static_cast<size_t>(9)};
+  control_points::Data<double> const c_data{{0.1, 1.3, 2.2, 4.9, 13.2}};
 
   BENCHMARK_ADVANCED("bspline.construct")(Catch::Benchmark::Chronometer meter)
   {
@@ -50,7 +58,7 @@ TEST_CASE(
 
   auto fill = [](double start, double stop, size_t steps, std::vector<double> &vec)
   {
-    double step = (stop - start) / (double)steps;
+    double const step = (stop - start) / (double)steps;
     vec.resize(steps);
     for (size_t i{0}; i < steps; i++)
     {
@@ -61,23 +69,26 @@ TEST_CASE(
   std::vector<double> ctrl_pts{};
   std::vector<double> x_data{};
   std::vector<double> y_data{};
-  double res{0.0};
-  double eval_elems{0.0};
-  double start{45.0};
-  double stop{49.0};
-  for (size_t j{3}; j < 12; j++)
+  double const start{45.0};
+  double const stop{49.0};
+  size_t const min_knots_pow{3};
+  size_t const max_knots_pow{12};
+  for (size_t j{min_knots_pow}; j < max_knots_pow; j++)
   {
-    size_t knots_num = static_cast<size_t>(std::pow(2.0, j));
+    auto const knots_num = static_cast<size_t>(std::pow(2.0, j));
     fill(start, stop, knots_num - degree - 1, ctrl_pts);
     BSpline<double, Curve::UNIFORM, BoundaryCondition::OPEN, Extrapolation::NONE> bspline{
         {0.0, 100.0, knots_num}, {ctrl_pts}, degree
     };
 
-    for (size_t i{4}; i < 5; i++)
+    size_t const min_eval_pow{4};
+    size_t const max_eval_pow{5};
+    double const eval_pow_base{10.0};
+    for (size_t i{min_eval_pow}; i < max_eval_pow; i++)
     {
-      eval_elems = std::pow(10.0, i);
+      double const eval_elems{std::pow(eval_pow_base, i)};
       fill(start, stop, static_cast<size_t>(eval_elems), x_data);
-      res = 0.0;
+      double res{0.0};
 
       BENCHMARK(
           "bspline.evaluate - knots: " + std::to_string(knots_num) +
@@ -103,7 +114,7 @@ TEST_CASE(
           " points: " + std::to_string((size_t)eval_elems)
       )
       {
-        return bspline.fit(x_data, y_data);
+        bspline.fit(x_data, y_data);
       };
     }
   }
@@ -116,8 +127,10 @@ TEST_CASE(
 )
 {
   size_t degree{3};
-  knots::Data<double, Curve::NON_UNIFORM> t_data{{0.1, 1.3, 2.2, 2.2, 4.9, 6.3, 6.3, 6.3, 13.2}};
-  control_points::Data<double> c_data{{0.1, 1.3, 2.2, 4.9, 13.2}};
+  knots::Data<double, Curve::NON_UNIFORM> const t_data{
+      {0.1, 1.3, 2.2, 2.2, 4.9, 6.3, 6.3, 6.3, 13.2}
+  };
+  control_points::Data<double> const c_data{{0.1, 1.3, 2.2, 4.9, 13.2}};
 
   BENCHMARK_ADVANCED("bspline.construct")(Catch::Benchmark::Chronometer meter)
   {
@@ -142,7 +155,7 @@ TEST_CASE(
 
   auto fill = [](double start, double stop, size_t steps, std::vector<double> &vec)
   {
-    double step = (stop - start) / (double)steps;
+    double const step = (stop - start) / (double)steps;
     vec.resize(steps);
     for (size_t i{0}; i < steps; i++)
     {
@@ -153,24 +166,27 @@ TEST_CASE(
   std::vector<double> knots{};
   std::vector<double> ctrl_pts{};
   std::vector<double> x_data{};
-  double res{0.0};
-  double eval_elems{0.0};
-  double start{45.0};
-  double stop{49.0};
-  for (size_t j{3}; j < 11; j++)
+  double const start{45.0};
+  double const stop{49.0};
+  size_t const min_knots_pow{3};
+  size_t const max_knots_pow{11};
+  for (size_t j{min_knots_pow}; j < max_knots_pow; j++)
   {
-    size_t knots_num = static_cast<size_t>(std::pow(2.0, j));
+    auto const knots_num = static_cast<size_t>(std::pow(2.0, j));
     fill(0.0, 100.0, knots_num, knots);
     fill(start, stop, knots_num - degree - 1, ctrl_pts);
     BSpline<double, Curve::NON_UNIFORM, BoundaryCondition::OPEN, Extrapolation::NONE> bspline{
         {knots}, {ctrl_pts}, degree
     };
 
-    for (size_t i{4}; i < 5; i++)
+    size_t const min_eval_pow{4};
+    size_t const max_eval_pow{5};
+    double const eval_pow_base{10.0};
+    for (size_t i{min_eval_pow}; i < max_eval_pow; i++)
     {
-      eval_elems = std::pow(10.0, i);
+      double const eval_elems{std::pow(eval_pow_base, i)};
       fill(start, stop, static_cast<size_t>(eval_elems), x_data);
-      res = 0.0;
+      double res{0.0};
       BENCHMARK(
           "bspline.evaluate - knots: " + std::to_string(knots_num) +
           " evals: " + std::to_string(static_cast<size_t>(eval_elems))

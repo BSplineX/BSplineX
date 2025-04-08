@@ -170,15 +170,14 @@ public:
    */
   [[nodiscard]] T evaluate(T value, size_t derivative_order = 0) const
   {
-    if (0 == derivative_order)
+    BSpline const *bspline = this;
+    if (0 < derivative_order)
     {
-      auto [index, x_value] = this->knots.find(value);
-      return this->deboor(index, x_value);
+      bspline = this->get_derivative(derivative_order);
     }
-    else
-    {
-      return this->get_derivative(derivative_order).evaluate(value);
-    }
+
+    auto [index, x_value] = bspline->knots.find(value);
+    return bspline->deboor(index, x_value);
   }
 
   /**
@@ -190,6 +189,7 @@ public:
    */
   [[nodiscard]] std::vector<T>
   evaluate(std::vector<T> const &values, size_t derivative_order = 0) const
+
   {
     std::vector<T> results;
     results.reserve(values.size());
@@ -211,7 +211,7 @@ public:
    */
   [[nodiscard]] BSpline derivative(size_t derivative_order = 1) const
   {
-    return BSpline(get_derivative(derivative_order));
+    return BSpline(*get_derivative(derivative_order));
   }
 
   /**
@@ -550,7 +550,7 @@ private:
     return this->support[this->degree];
   }
 
-  BSpline const &get_derivative() const
+  BSpline const *get_derivative() const
   {
     if (not this->derivative_ptr)
     {
@@ -562,10 +562,10 @@ private:
       ));
     }
 
-    return *this->derivative_ptr;
+    return this->derivative_ptr.get();
   }
 
-  BSpline const &get_derivative(size_t derivative_order) const
+  BSpline const *get_derivative(size_t derivative_order) const
   {
     releaseassert(
         (0 < derivative_order) && (derivative_order <= this->degree),
@@ -574,10 +574,10 @@ private:
     BSpline const *d = this;
     for (size_t i{0}; i < derivative_order; i++)
     {
-      d = &d->get_derivative();
+      d = d->get_derivative();
     }
 
-    return *d;
+    return d;
   }
 
   void invalidate_derivative() const { this->derivative_ptr = nullptr; }

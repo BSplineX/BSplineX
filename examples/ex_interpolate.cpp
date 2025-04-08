@@ -1,5 +1,6 @@
 #include "BSplineX/bsplinex.hpp"
 #include <cmath>
+#include <cstddef>
 #include <iostream>
 #include <vector>
 
@@ -14,13 +15,17 @@ int main()
   auto bspline = bsplinex::factory::open_nonuniform(degree);
 
   // interpolate the curve to the points
-  bspline.interpolate(x_interp, y_interp, {{6.7, 25.6, 0}});
+  // additional condition: first derivative at x=6.7 must value 25.6
+  double const cond_x = 6.7;
+  double const cond_y = 25.6;
+  size_t const cond_d = 1;
+  bspline.interpolate(x_interp, y_interp, {{cond_x, cond_y, cond_d}});
 
   for (size_t i{degree}; i < x_interp.size() - degree; i++)
   {
     double const x = x_interp.at(i);
     double const y = y_interp.at(i);
     std::cout << "bspline.evaluate(" << x << ") = " << bspline.evaluate(x) << " == " << y
-              << " -> abs(error) = " << std::abs(bspline.evaluate(x) - y) << std::endl;
+              << " -> abs(error) = " << std::abs(bspline.evaluate(x) - y) << "\n";
   }
 }
