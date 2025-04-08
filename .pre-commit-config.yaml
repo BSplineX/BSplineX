@@ -28,6 +28,7 @@ repos:
           --suppress=noExplicitConstructor
           --suppress=operatorEqVarError
           --error-exitcode=1
+          --check-level=exhaustive
         language: system
         files: \.(h|hpp|hh|c|cpp|cc)$
 exclude: ^third_party/
