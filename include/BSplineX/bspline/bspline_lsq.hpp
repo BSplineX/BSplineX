@@ -3,8 +3,11 @@
 
 // Standard includes
 #include <functional>
-#include <iostream>
 #include <vector>
+
+// #ifndef NDEBUG
+// #include <iostream>
+// #endif
 
 // Third-party includes
 #include <Eigen/Dense>
@@ -76,15 +79,15 @@ public:
     lscg.compute(this->A);
     vec_t x = lscg.solve(b);
 
-#ifndef NDEBUG
-    std::cout << "DENSE" << "\n";
-    std::cout << "iterations: " << lscg.iterations() << "\n";
-    std::cout << "error: " << lscg.error() << "\n";
-    std::cout << "|Ax - b| = " << (this->A * x - b).norm() << "\n";
-    std::cout << "|b| = " << b.norm() << "\n";
-    std::cout << "|Ax - b| / |b| = " << (this->A * x - b).norm() / b.norm() << "\n";
-    std::cout << "condition number = " << this->conditioning_number() << std::endl;
-#endif
+    // #ifndef NDEBUG
+    //     std::cout << "DENSE" << "\n";
+    //     std::cout << "iterations: " << lscg.iterations() << "\n";
+    //     std::cout << "error: " << lscg.error() << "\n";
+    //     std::cout << "|Ax - b| = " << (this->A * x - b).norm() << "\n";
+    //     std::cout << "|b| = " << b.norm() << "\n";
+    //     std::cout << "|Ax - b| / |b| = " << (this->A * x - b).norm() / b.norm() << "\n";
+    //     std::cout << "condition number = " << this->conditioning_number() << std::endl;
+    // #endif
     return x;
   }
 
@@ -125,14 +128,14 @@ public:
     lscg.compute(this->A);
     vec_t x = lscg.solve(b);
 
-#ifndef NDEBUG
-    std::cout << "SPARSE\n";
-    std::cout << "iterations: " << lscg.iterations() << "\n";
-    std::cout << "error: " << lscg.error() << "\n";
-    std::cout << "|Ax - b| = " << (this->A * x - b).norm() << "\n";
-    std::cout << "|b| = " << b.norm() << "\n";
-    std::cout << "|Ax - b| / |b| = " << (this->A * x - b).norm() / b.norm() << std::endl;
-#endif
+    // #ifndef NDEBUG
+    //     std::cout << "SPARSE\n";
+    //     std::cout << "iterations: " << lscg.iterations() << "\n";
+    //     std::cout << "error: " << lscg.error() << "\n";
+    //     std::cout << "|Ax - b| = " << (this->A * x - b).norm() << "\n";
+    //     std::cout << "|b| = " << b.norm() << "\n";
+    //     std::cout << "|Ax - b| / |b| = " << (this->A * x - b).norm() / b.norm() << std::endl;
+    // #endif
 
     return x;
   }
