@@ -35,6 +35,7 @@ types::OpenNonUniformConstant<real_t>, \
 types::ClampedUniform<real_t>, \
 types::ClampedUniformConstant<real_t>, \
 types::ClampedNonUniform<real_t>, \
+types::ClampedNonUniformConstant<real_t>, \
 types::PeriodicUniform<real_t>, \
 types::PeriodicNonUniform<real_t>
 // clang-format on
@@ -148,35 +149,15 @@ TEMPLATE_TEST_CASE("BSpline", "[bspline][template][product]", BSPLINE_TEST_TYPES
       auto x_eval = test_data["x_eval"].get<std::vector<real_t>>();
 
       auto [domain_l, domain_r] = test_data["bspline"]["domain"].get<std::pair<real_t, real_t>>();
+      SECTION("domain()")
+      {
+        auto [domain_left, domain_right] = bspline.domain();
+        REQUIRE(domain_left == domain_l);
+        REQUIRE(domain_right == domain_r);
+      }
       SECTION("evaluate(...)")
       {
-        SECTION("evaluate(..., derivative_order=0)")
-        {
-          auto y_eval = test_data["bspline"]["y_eval"].get<std::vector<real_t>>();
-          for (size_t i{0}; i < x_eval.size(); i++)
-          {
-            auto matcher = WithinAbsRel(y_eval.at(i));
-            REQUIRE_THAT(bspline.evaluate(x_eval.at(i)), matcher);
-          }
-          // test also vectorized evaluation
-          REQUIRE_THAT(bspline.evaluate(x_eval), VectorsWithinAbsRel(y_eval));
-          if constexpr (BoundaryCondition::PERIODIC != BSplineType::boundary_condition_type)
-          {
-            REQUIRE_THROWS_WITH(
-                bspline.evaluate(*std::min_element(x_eval.begin(), x_eval.end()) - 1),
-                "Extrapolation explicitly set to NONE"
-            );
-          }
-          // Periodic BSpline must match at the extremes
-          if constexpr (BoundaryCondition::PERIODIC == BSplineType::boundary_condition_type)
-          {
-            auto [domain_left, domain_right] = bspline.domain();
-            REQUIRE_THAT(
-                bspline.evaluate(domain_left), WithinAbsRel(bspline.evaluate(domain_right))
-            );
-          }
-        }
-        for (size_t derivative_order{1}; derivative_order <= test_data["derivatives"].size();
+        for (size_t derivative_order{0}; derivative_order <= test_data["derivatives"].size();
              derivative_order++)
         {
           SECTION("evaluate(..., derivative_order=" + std::to_string(derivative_order) + ")")
@@ -196,51 +177,54 @@ TEMPLATE_TEST_CASE("BSpline", "[bspline][template][product]", BSPLINE_TEST_TYPES
               if constexpr (Extrapolation::NONE == BSplineType::extrapolation_type)
               {
                 REQUIRE_THROWS_WITH(
-                    bspline.evaluate(domain_l - 1), "Extrapolation explicitly set to NONE"
+                    bspline.evaluate(domain_l - 1, derivative_order),
+                    "Extrapolation explicitly set to NONE"
                 );
                 REQUIRE_THROWS_WITH(
-                    bspline.evaluate(domain_r + 1), "Extrapolation explicitly set to NONE"
+                    bspline.evaluate(domain_r + 1, derivative_order),
+                    "Extrapolation explicitly set to NONE"
                 );
               }
               else if constexpr (Extrapolation::CONSTANT == BSplineType::extrapolation_type)
               {
-                real_t const y_left  = bspline.evaluate(domain_l);
-                real_t const y_right = bspline.evaluate(domain_r);
+                real_t const y_left  = bspline.evaluate(domain_l, derivative_order);
+                real_t const y_right = bspline.evaluate(domain_r, derivative_order);
                 constexpr size_t extrapolation_elems{50};
                 for (size_t i{0}; i < extrapolation_elems; i++)
                 {
                   REQUIRE_THAT(
-                      bspline.evaluate(domain_l - static_cast<real_t>(i)), WithinAbsRel(y_left)
+                      bspline.evaluate(domain_l - static_cast<real_t>(i), derivative_order),
+                      WithinAbsRel(y_left)
                   );
                   REQUIRE_THAT(
-                      bspline.evaluate(domain_r + static_cast<real_t>(i)), WithinAbsRel(y_right)
+                      bspline.evaluate(domain_r + static_cast<real_t>(i), derivative_order),
+                      WithinAbsRel(y_right)
                   );
                 }
               }
               else if constexpr (Extrapolation::PERIODIC == BSplineType::extrapolation_type)
               {
+                if (derivative_order < degree)
+                {
+                  REQUIRE_THAT(
+                      bspline.evaluate(domain_l, derivative_order),
+                      WithinAbsRel(bspline.evaluate(domain_r, derivative_order))
+                  );
+                }
                 real_t const period = domain_r - domain_l;
                 for (real_t const x : x_eval)
                 {
-                  real_t const y = bspline.evaluate(x);
+                  real_t const y = bspline.evaluate(x, derivative_order);
                   for (size_t p{1}; p <= 3; ++p)
                   {
-                    REQUIRE_THAT(bspline.evaluate(x + p * period), WithinAbsRel(y));
-                    REQUIRE_THAT(bspline.evaluate(x - p * period), WithinAbsRel(y));
+                    REQUIRE_THAT(
+                        bspline.evaluate(x + p * period, derivative_order), WithinAbsRel(y)
+                    );
+                    REQUIRE_THAT(
+                        bspline.evaluate(x - p * period, derivative_order), WithinAbsRel(y)
+                    );
                   }
                 }
-              }
-            }
-            // Periodic BSpline k-1 derivatives must match at the extremes
-            if constexpr (BoundaryCondition::PERIODIC == BSplineType::boundary_condition_type)
-            {
-              if (derivative_order < degree)
-              {
-                auto [domain_left, domain_right] = bspline.domain();
-                REQUIRE_THAT(
-                    bspline.evaluate(domain_left, derivative_order),
-                    WithinAbsRel(bspline.evaluate(domain_right, derivative_order))
-                );
               }
             }
           }
@@ -263,9 +247,9 @@ TEMPLATE_TEST_CASE("BSpline", "[bspline][template][product]", BSPLINE_TEST_TYPES
         {
           SECTION("derivative(derivative_order=" + std::to_string(derivative_order) + ")")
           {
-            BSplineType derivative = bspline.derivative(derivative_order);
-            auto derivative_data   = test_data["derivatives"][derivative_order - 1];
-            auto y_eval_d          = derivative_data["y_eval"].get<std::vector<real_t>>();
+            BSplineType const derivative = bspline.derivative(derivative_order);
+            auto derivative_data         = test_data["derivatives"][derivative_order - 1];
+            auto y_eval_d                = derivative_data["y_eval"].get<std::vector<real_t>>();
             REQUIRE(derivative.get_degree() == derivative_data["degree"].get<size_t>());
             REQUIRE_THAT(derivative.evaluate(x_eval), VectorsWithinAbsRel(y_eval_d));
           }
@@ -287,15 +271,13 @@ TEMPLATE_TEST_CASE("BSpline", "[bspline][template][product]", BSPLINE_TEST_TYPES
         {
           SECTION("nnz_basis(..., derivative_order=" + std::to_string(derivative_order) + ")")
           {
-            auto [domain_left, domain_right] =
-                test_data["bspline"]["domain"].get<std::pair<real_t, real_t>>();
             std::vector<real_t> x_nnz;
             x_nnz.reserve(x_eval.size());
-            for (size_t i{0}; i < x_eval.size(); i++)
+            for (real_t const x : x_eval)
             {
-              if (domain_left <= x_eval.at(i) && x_eval.at(i) <= domain_right)
+              if (domain_l <= x && x <= domain_r)
               {
-                x_nnz.push_back(x_eval.at(i));
+                x_nnz.push_back(x);
               }
             }
             REQUIRE(x_nnz.size() == test_data["bspline"]["nnz_basis"][derivative_order].size());
