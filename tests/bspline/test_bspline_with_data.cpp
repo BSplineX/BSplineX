@@ -206,7 +206,8 @@ TEMPLATE_TEST_CASE("BSpline", "[bspline][template][product]", BSPLINE_TEST_TYPES
               {
                 real_t const y_left  = bspline.evaluate(domain_l);
                 real_t const y_right = bspline.evaluate(domain_r);
-                for (size_t i{0}; i < 50; i++)
+                constexpr size_t extrapolation_elems{50};
+                for (size_t i{0}; i < extrapolation_elems; i++)
                 {
                   REQUIRE_THAT(
                       bspline.evaluate(domain_l - static_cast<real_t>(i)), WithinAbsRel(y_left)
@@ -334,7 +335,7 @@ TEMPLATE_TEST_CASE("BSpline", "[bspline][template][product]", BSPLINE_TEST_TYPES
 
         bspline.fit(x_fit, y_fit);
         // test fitting
-        real_t fit_tol = 1e-2;
+        constexpr real_t fit_tol = 1e-2;
         REQUIRE_THAT(bspline.evaluate(x_fit), VectorsWithinAbsRel(y_fit, fit_tol, fit_tol));
 
         // test against reference data
