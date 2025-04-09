@@ -31,7 +31,7 @@ template <typename T>
 constexpr auto ONE = static_cast<T>(1);
 
 template <typename T>
-constexpr auto TOL_MULTIPLIER = static_cast<T>(100000);
+constexpr auto TOL_MULTIPLIER = static_cast<T>(1'000'000);
 
 template <typename T>
 constexpr auto RTOL = std::numeric_limits<T>::epsilon() * TOL_MULTIPLIER<T>;
