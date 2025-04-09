@@ -36,7 +36,7 @@ jobs:
       - name: Generate test data
         run: |
           pip3 install -r test-data/requirements.txt
-          python3 test-data/gen_data.py --degrees 1 2 3 --output-dir BSplineX/tests/bspline/data
+          python3 test-data/gen_data.py --degrees 1 2 3 --output-dir tests/bspline/data
 
       - name: ctest
         run: ctest --test-dir build/tests --output-on-failure -V
