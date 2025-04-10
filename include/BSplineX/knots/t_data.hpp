@@ -108,7 +108,7 @@ public:
   [[nodiscard]] T at(size_t index) const
   {
     debugassert(index < this->num_elems, "Out of bounds");
-    return this->begin + (index * this->step_size);
+    return std::fma<T>(static_cast<T>(index), this->step_size, this->begin);
   }
 
   [[nodiscard]] size_t size() const { return this->num_elems; }

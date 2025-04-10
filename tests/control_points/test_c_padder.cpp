@@ -40,8 +40,8 @@ TEST_CASE(
   SECTION("padder.size_right()") { REQUIRE(padder.size_right() == 3); }
   SECTION("padder.right(...)")
   {
-    REQUIRE(padder.right(0) == data_vec[0]);
-    REQUIRE(padder.right(1) == data_vec[1]);
-    REQUIRE(padder.right(2) == data_vec[2]);
+    REQUIRE(padder.right(0) == data_vec.at(0));
+    REQUIRE(padder.right(1) == data_vec.at(1));
+    REQUIRE(padder.right(2) == data_vec.at(2));
   }
 }

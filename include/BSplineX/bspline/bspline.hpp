@@ -211,7 +211,7 @@ public:
    */
   [[nodiscard]] BSpline derivative(size_t derivative_order = 1) const
   {
-    return BSpline(*get_derivative(derivative_order));
+    return BSpline(*(this->get_derivative(derivative_order)));
   }
 
   /**

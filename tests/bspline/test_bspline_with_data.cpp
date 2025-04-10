@@ -240,7 +240,7 @@ TEMPLATE_TEST_CASE("BSpline", "[bspline][template][product]", BSPLINE_TEST_TYPES
         SECTION("evaluate(..., invalid derivative_order)")
         {
           REQUIRE_THROWS_WITH(
-              bspline.evaluate(x_eval[0], degree + 1), "derivative_order must be in [1, degree]"
+              bspline.evaluate(x_eval.at(0), degree + 1), "derivative_order must be in [1, degree]"
           );
           REQUIRE_THROWS_WITH(
               bspline.evaluate(x_eval, degree + 1), "derivative_order must be in [1, degree]"
@@ -325,7 +325,7 @@ TEMPLATE_TEST_CASE("BSpline", "[bspline][template][product]", BSPLINE_TEST_TYPES
 
         bspline.fit(x_fit, y_fit);
         // test fitting
-        constexpr real_t fit_tol = 1e-2;
+        constexpr real_t fit_tol{1e-2};
         REQUIRE_THAT(bspline.evaluate(x_fit), VectorsWithinAbsRel(y_fit, fit_tol, fit_tol));
 
         // test against reference data

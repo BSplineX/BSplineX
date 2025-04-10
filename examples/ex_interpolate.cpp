@@ -30,5 +30,5 @@ int main()
   }
   std::cout << "bspline.evaluate(" << cond_x << ", derivative_order=" << cond_d
             << ") = " << bspline.evaluate(cond_x, cond_d) << " == " << cond_y
-            << " -> abs(error) = " << std::abs(bspline.evaluate(cond_x) - cond_y) << "\n";
+            << " -> abs(error) = " << std::abs(bspline.evaluate(cond_x, cond_d) - cond_y) << "\n";
 }

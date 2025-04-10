@@ -31,7 +31,9 @@ public:
 
   [[nodiscard]] T extrapolate(T /*value*/) const
   {
-    throw std::runtime_error("Extrapolation explicitly set to NONE");
+    releaseassert(false, "Extrapolation explicitly set to NONE");
+
+    return constants::ZERO<T>;
   }
 };
 
