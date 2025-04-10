@@ -318,7 +318,6 @@ public:
           "There must be exactly degree - 1 additional conditions."
       );
     }
-    this->invalidate_derivative();
 
     knots::Knots<T, C, BC, EXT> new_knots;
     if constexpr (Curve::UNIFORM == C)
@@ -384,6 +383,7 @@ public:
         y_view,
         additional_conditions
     ));
+
     this->invalidate_derivative();
   }
 
