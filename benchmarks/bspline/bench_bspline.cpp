@@ -7,8 +7,9 @@
 #include <vector>
 
 // Third-party includes
-#include <catch2/benchmark/catch_benchmark_all.hpp>
+#include <catch2/benchmark/catch_benchmark.hpp>
 #include <catch2/benchmark/catch_chronometer.hpp>
+#include <catch2/benchmark/catch_constructor.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 // BSplineX includes
@@ -16,8 +17,6 @@
 #include "BSplineX/control_points/c_data.hpp"
 #include "BSplineX/knots/t_data.hpp"
 #include "BSplineX/types.hpp"
-#include "catch2/benchmark/catch_benchmark.hpp"
-#include "catch2/benchmark/catch_constructor.hpp"
 
 using namespace bsplinex;
 using namespace bsplinex::bspline;
