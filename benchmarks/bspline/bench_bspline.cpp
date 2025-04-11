@@ -104,10 +104,12 @@ TEST_CASE(
 
       y_data.clear();
       y_data.reserve(x_data.size());
-      for (auto x : x_data)
-      {
-        y_data.push_back(bspline.evaluate(x));
-      }
+      std::transform(
+          x_data.begin(),
+          x_data.end(),
+          std::back_inserter(y_data),
+          [&bspline](double x) { return bspline.evaluate(x); }
+      );
 
       BENCHMARK(
           "bspline.fit - knots: " + std::to_string(knots_num) +

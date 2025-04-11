@@ -281,13 +281,12 @@ TEMPLATE_TEST_CASE("BSpline", "[bspline][template][product]", BSPLINE_TEST_TYPES
           {
             std::vector<real_t> x_nnz;
             x_nnz.reserve(x_eval.size());
-            for (real_t const x : x_eval)
-            {
-              if (domain_l <= x && x <= domain_r)
-              {
-                x_nnz.push_back(x);
-              }
-            }
+            std::copy_if(
+                x_eval.begin(),
+                x_eval.end(),
+                std::back_inserter(x_nnz),
+                [domain_l, domain_r](real_t x) { return domain_l <= x && x <= domain_r; }
+            );
             REQUIRE(x_nnz.size() == test_data["bspline"]["nnz_basis"][derivative_order].size());
 
             for (size_t i = 0; i < x_nnz.size(); ++i)

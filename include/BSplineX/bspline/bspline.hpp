@@ -189,15 +189,15 @@ public:
    */
   [[nodiscard]] std::vector<T>
   evaluate(std::vector<T> const &values, size_t derivative_order = 0) const
-
   {
     std::vector<T> results;
     results.reserve(values.size());
-
-    for (auto const &value : values)
-    {
-      results.push_back(this->evaluate(value, derivative_order));
-    }
+    std::transform(
+        values.begin(),
+        values.end(),
+        std::back_inserter(results),
+        [this, derivative_order](T x) { return this->evaluate(x, derivative_order); }
+    );
 
     return results;
   }
@@ -389,25 +389,25 @@ public:
 
   [[nodiscard]] std::vector<T> get_control_points() const
   {
-    std::vector<T> ctrl_pts;
-    ctrl_pts.reserve(this->control_points.size());
-
-    for (size_t i{0}; i < this->control_points.size(); i++)
-    {
-      ctrl_pts.push_back(this->control_points.at(i));
-    }
-
-    return ctrl_pts;
+    std::vector<T> control_points_vec;
+    control_points_vec.reserve(this->control_points.size());
+    std::generate_n(
+        std::back_inserter(control_points_vec),
+        this->control_points.size(),
+        [this, i = 0]() mutable { return this->control_points.at(i++); }
+    );
+    return control_points_vec;
   }
 
   [[nodiscard]] std::vector<T> get_knots() const
   {
     std::vector<T> knots_vec;
     knots_vec.reserve(this->knots.size());
-    for (size_t i{0}; i < this->knots.size(); i++)
-    {
-      knots_vec.push_back(this->knots.at(i));
-    }
+    std::generate_n(
+        std::back_inserter(knots_vec),
+        this->knots.size(),
+        [this, i = 0]() mutable { return this->knots.at(i++); }
+    );
 
     return knots_vec;
   }

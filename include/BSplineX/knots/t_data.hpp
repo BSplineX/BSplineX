@@ -121,11 +121,9 @@ public:
 
     std::vector<T> tmp{};
     tmp.reserve(last - first);
-
-    for (size_t i{first}; i < last; i++)
-    {
-      tmp.push_back(this->at(i));
-    }
+    std::generate_n(
+        std::back_inserter(tmp), last - first, [this, i = first]() mutable { return this->at(i++); }
+    );
 
     return tmp;
   }
