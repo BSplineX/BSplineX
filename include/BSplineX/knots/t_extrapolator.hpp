@@ -96,7 +96,7 @@ public:
   [[nodiscard]] T extrapolate(T value) const
   {
     debugassert(
-        value < this->value_left || value > this->value_right, "Value not outside of the domain"
+        value < this->value_left or value > this->value_right, "Value not outside of the domain"
     );
     return value < this->value_left ? this->value_left : this->value_right;
   }
@@ -165,7 +165,7 @@ public:
   [[nodiscard]] T extrapolate(T value) const
   {
     debugassert(
-        value < this->value_left || value > this->value_right, "Value not outside of the domain"
+        value < this->value_left or value > this->value_right, "Value not outside of the domain"
     );
 
     T wrapped = std::fmod<T>(value - this->value_left, this->period);

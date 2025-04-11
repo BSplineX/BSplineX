@@ -45,7 +45,7 @@ public:
   [[nodiscard]] size_t find(T value) const
   {
     debugassert(
-        value >= this->atter->at(this->index_left) && value <= this->atter->at(this->index_right),
+        value >= this->atter->at(this->index_left) and value <= this->atter->at(this->index_right),
         "Value outside of the domain"
     );
 
@@ -91,7 +91,7 @@ public:
   [[nodiscard]] size_t find(T value) const
   {
     debugassert(
-        value >= this->value_left && value <= this->value_right, "Value outside of the domain"
+        value >= this->value_left and value <= this->value_right, "Value outside of the domain"
     );
 
     size_t const index =

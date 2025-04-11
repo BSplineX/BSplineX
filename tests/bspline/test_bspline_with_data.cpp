@@ -102,7 +102,7 @@ BSplineType build_bspline(std::vector<real_t> knots, std::vector<real_t> ctrl_pt
     real_t knots_end   = knots.back();
     size_t num_knots   = knots.size();
 
-    if (BoundaryCondition::CLAMPED == BSplineType::boundary_condition_type ||
+    if (BoundaryCondition::CLAMPED == BSplineType::boundary_condition_type or
         BoundaryCondition::PERIODIC == BSplineType::boundary_condition_type)
     {
       knots_begin = knots[degree];
@@ -115,7 +115,7 @@ BSplineType build_bspline(std::vector<real_t> knots, std::vector<real_t> ctrl_pt
   else
   {
     static_assert(Curve::NON_UNIFORM == BSplineType::curve_type);
-    if (BoundaryCondition::CLAMPED == BSplineType::boundary_condition_type ||
+    if (BoundaryCondition::CLAMPED == BSplineType::boundary_condition_type or
         BoundaryCondition::PERIODIC == BSplineType::boundary_condition_type)
     {
       auto const deg = static_cast<int>(degree);

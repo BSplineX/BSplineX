@@ -568,7 +568,7 @@ private:
   BSpline const *get_derivative(size_t derivative_order) const
   {
     releaseassert(
-        (0 < derivative_order) && (derivative_order <= this->degree),
+        (0 < derivative_order) and (derivative_order <= this->degree),
         "derivative_order must be in [1, degree]"
     );
     BSpline const *d = this;
