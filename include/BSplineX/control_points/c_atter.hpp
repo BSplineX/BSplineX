@@ -20,7 +20,10 @@ private:
 public:
   Atter() { DEBUG_LOG_CALL(); }
 
-  Atter(Data<T> data, size_t degree) : data{data}, padder{this->data, degree} { DEBUG_LOG_CALL(); }
+  Atter(Data<T> data, size_t degree) : data{std::move(data)}, padder{this->data, degree}
+  {
+    DEBUG_LOG_CALL();
+  }
 
   Atter(Atter const &other) : data(other.data), padder(other.padder) { DEBUG_LOG_CALL(); }
 
@@ -35,7 +38,10 @@ public:
   {
     DEBUG_LOG_CALL();
     if (this == &other)
+    {
       return *this;
+    }
+
     data   = other.data;
     padder = other.padder;
     return *this;
@@ -45,13 +51,16 @@ public:
   {
     DEBUG_LOG_CALL();
     if (this == &other)
+    {
       return *this;
+    }
+
     data   = std::move(other.data);
     padder = std::move(other.padder);
     return *this;
   }
 
-  T at(size_t index) const
+  [[nodiscard]] T at(size_t index) const
   {
     debugassert(index < this->size(), "Out of bounds");
     if (index < this->data.size())
@@ -66,7 +75,7 @@ public:
 
   [[nodiscard]] size_t size() const { return this->data.size() + this->padder.size(); }
 
-  std::vector<T> get_values() const
+  [[nodiscard]] std::vector<T> get_values() const
   {
     std::vector<T> values(data.size() + padder.size());
     for (size_t i = 0; i < data.size(); i++)
@@ -78,6 +87,12 @@ public:
       values[data.size() + i] = padder.right(i);
     }
     return values;
+  }
+
+  [[nodiscard]] size_t get_derivative_data_size() const
+  {
+    size_t const data_size = this->data.size();
+    return this->padder.size() == 0 ? data_size - 1 : data_size;
   }
 };
 

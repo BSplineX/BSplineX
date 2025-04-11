@@ -18,11 +18,11 @@ class Padder
 public:
   Padder() { DEBUG_LOG_CALL(); }
 
-  Padder(Data<T> &, size_t) { DEBUG_LOG_CALL(); }
+  Padder(Data<T> & /*data*/, size_t /*degree*/) { DEBUG_LOG_CALL(); }
 
-  Padder(Padder const &) { DEBUG_LOG_CALL(); }
+  Padder(Padder const & /*other*/) { DEBUG_LOG_CALL(); }
 
-  Padder(Padder &&) noexcept { DEBUG_LOG_CALL(); }
+  Padder(Padder && /*other*/) noexcept { DEBUG_LOG_CALL(); }
 
   ~Padder() noexcept { DEBUG_LOG_CALL(); }
 
@@ -30,7 +30,10 @@ public:
   {
     DEBUG_LOG_CALL();
     if (this == &other)
+    {
       return *this;
+    }
+
     return *this;
   }
 
@@ -38,17 +41,21 @@ public:
   {
     DEBUG_LOG_CALL();
     if (this == &other)
+    {
       return *this;
+    }
+
     return *this;
   }
 
-  T right(size_t) const
+  [[nodiscard]] T right(size_t /*index*/) const
   {
     releaseassert(
         false,
         "Generic control points padder has zero length, this function is here only for "
         "compatibility reasons."
     );
+    return constants::ZERO<T>;
   }
 
   [[nodiscard]] size_t size() const { return 0; }
@@ -77,7 +84,10 @@ public:
   {
     DEBUG_LOG_CALL();
     if (this == &other)
+    {
       return *this;
+    }
+
     pad_right = other.pad_right;
     return *this;
   }
@@ -86,12 +96,15 @@ public:
   {
     DEBUG_LOG_CALL();
     if (this == &other)
+    {
       return *this;
+    }
+
     pad_right = std::move(other.pad_right);
     return *this;
   }
 
-  T right(size_t index) const
+  [[nodiscard]] T right(size_t index) const
   {
     debugassert(index < this->pad_right.size(), "Out of bounds");
     return this->pad_right[index];

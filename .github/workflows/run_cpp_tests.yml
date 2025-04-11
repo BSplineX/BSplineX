@@ -5,7 +5,7 @@ on:
   pull_request:
     branches: ["main"]
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,12 +20,23 @@ jobs:
         run: |
           mkdir build/
           cd build/
-          cmake .. -DBUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Debug
+          cmake .. -DBUILD_TESTS=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo
 
       - name: make
         run: |
           cd build
           make -j
+
+      - name: Checkout test data repo
+        uses: actions/checkout@v4
+        with:
+          repository: BSplineX/BSplineX-test-data
+          path: test-data
+
+      - name: Generate test data
+        run: |
+          pip3 install -r test-data/requirements.txt
+          python3 test-data/gen_data.py --degrees 1 2 3 --output-dir tests/bspline/data
 
       - name: ctest
         run: ctest --test-dir build/tests --output-on-failure -V

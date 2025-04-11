@@ -3,8 +3,11 @@
 
 // Standard includes
 #include <functional>
-#include <iostream>
 #include <vector>
+
+// #ifndef NDEBUG
+// #include <iostream>
+// #endif
 
 // Third-party includes
 #include <Eigen/Dense>
@@ -36,6 +39,8 @@
 
 namespace bsplinex::lsq
 {
+
+using namespace constants;
 
 template <typename T, class MatrixType>
 class LSQMatrix
@@ -74,15 +79,15 @@ public:
     lscg.compute(this->A);
     vec_t x = lscg.solve(b);
 
-#ifndef NDEBUG
-    std::cout << "DENSE" << std::endl;
-    std::cout << "iterations: " << lscg.iterations() << std::endl;
-    std::cout << "error: " << lscg.error() << std::endl;
-    std::cout << "|Ax - b| = " << (this->A * x - b).norm() << std::endl;
-    std::cout << "|b| = " << b.norm() << std::endl;
-    std::cout << "|Ax - b| / |b| = " << (this->A * x - b).norm() / b.norm() << std::endl;
-    std::cout << "condition number = " << this->conditioning_number() << std::endl;
-#endif
+    // #ifndef NDEBUG
+    //     std::cout << "DENSE" << "\n";
+    //     std::cout << "iterations: " << lscg.iterations() << "\n";
+    //     std::cout << "error: " << lscg.error() << "\n";
+    //     std::cout << "|Ax - b| = " << (this->A * x - b).norm() << "\n";
+    //     std::cout << "|b| = " << b.norm() << "\n";
+    //     std::cout << "|Ax - b| / |b| = " << (this->A * x - b).norm() / b.norm() << "\n";
+    //     std::cout << "condition number = " << this->conditioning_number() << std::endl;
+    // #endif
     return x;
   }
 
@@ -92,7 +97,7 @@ public:
 
   [[nodiscard]] T conditioning_number() const
   {
-    Eigen::JacobiSVD<mat_t> svd(this->A);
+    Eigen::JacobiSVD<mat_t> const svd(this->A);
     T cond = svd.singularValues()(0) / svd.singularValues()(svd.singularValues().size() - 1);
 
     return cond;
@@ -123,14 +128,14 @@ public:
     lscg.compute(this->A);
     vec_t x = lscg.solve(b);
 
-#ifndef NDEBUG
-    std::cout << "SPARSE" << std::endl;
-    std::cout << "iterations: " << lscg.iterations() << std::endl;
-    std::cout << "error: " << lscg.error() << std::endl;
-    std::cout << "|Ax - b| = " << (this->A * x - b).norm() << std::endl;
-    std::cout << "|b| = " << b.norm() << std::endl;
-    std::cout << "|Ax - b| / |b| = " << (this->A * x - b).norm() / b.norm() << std::endl;
-#endif
+    // #ifndef NDEBUG
+    //     std::cout << "SPARSE\n";
+    //     std::cout << "iterations: " << lscg.iterations() << "\n";
+    //     std::cout << "error: " << lscg.error() << "\n";
+    //     std::cout << "|Ax - b| = " << (this->A * x - b).norm() << "\n";
+    //     std::cout << "|b| = " << b.norm() << "\n";
+    //     std::cout << "|Ax - b| / |b| = " << (this->A * x - b).norm() / b.norm() << std::endl;
+    // #endif
 
     return x;
   }
@@ -153,10 +158,10 @@ struct Condition
 {
   T x_value;
   T y_value;
-  size_t derivative_degree;
+  size_t derivative_order;
 
-  Condition(T x_value, T y_value, size_t derivative_degree)
-      : x_value{x_value}, y_value{y_value}, derivative_degree{derivative_degree}
+  Condition(T x_value, T y_value, size_t derivative_order)
+      : x_value{x_value}, y_value{y_value}, derivative_order{derivative_order}
   {
   }
 };
@@ -193,7 +198,7 @@ void fill(
     LSQMatrix &A,
     Eigen::VectorX<T> &b,
     size_t const degree,
-    std::function<size_t(T, std::vector<T> &)> nnz_basis,
+    std::function<size_t(T, size_t, std::vector<T> &)> nnz_basis,
     views::ArrayView<Iter> const &x,
     views::ArrayView<Iter> const &y,
     std::vector<Condition<T>> const &additional_conditions
@@ -210,12 +215,12 @@ void fill(
 
   std::vector<Condition<T>> conditions = create_sorted_conditions(x, y, additional_conditions);
 
-  std::vector<T> nnz(degree + 1);
+  std::vector<T> nnz(degree + 1, ZERO<T>);
   for (size_t i{0}; i < num_rows; i++)
   {
     Condition<T> const &condition = conditions.at(i);
 
-    size_t const index = nnz_basis(condition.x_value, nnz);
+    size_t const index = nnz_basis(condition.x_value, condition.derivative_order, nnz);
     for (size_t j{0}; j <= degree; j++)
     {
       if constexpr (BoundaryCondition::PERIODIC == BC)
@@ -230,7 +235,7 @@ void fill(
     }
     b(i) = condition.y_value;
 
-    std::fill(nnz.begin(), nnz.end(), (T)0);
+    std::fill(nnz.begin(), nnz.end(), ZERO<T>);
   }
 
   // Check the conditioning number
@@ -241,7 +246,7 @@ template <typename T, class Iter, BoundaryCondition BC>
 control_points::ControlPoints<T, BC>
 lsq(size_t const degree,
     size_t const knots_size,
-    std::function<size_t(T, std::vector<T> &)> nnz_basis,
+    std::function<size_t(T, size_t, std::vector<T> &)> nnz_basis,
     views::ArrayView<Iter> const &x,
     views::ArrayView<Iter> const &y,
     std::vector<Condition<T>> const &additional_conditions)
@@ -260,7 +265,7 @@ lsq(size_t const degree,
 
   Eigen::VectorX<T> b(num_rows);
 
-  if (num_cols > DENSE_MAX_COL)
+  if (num_cols > constants::DENSE_MAX_COL)
   {
     using sparse_lsq = LSQMatrix<T, Eigen::SparseMatrix<T>>;
 

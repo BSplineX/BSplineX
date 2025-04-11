@@ -1,0 +1,9 @@
+---
+InheritParentConfig: true
+Checks: "
+  -cert-err58-cpp,
+  -clang-diagnostic-static-function-internal,
+  -misc-use-anonymous-namespace,
+  -readability-function-cognitive-complexity,
+  -cppcoreguidelines-avoid-do-while,
+  -clang-analyzer-optin.core.EnumCastOutOfRange"

@@ -32,7 +32,10 @@ public:
   {
     DEBUG_LOG_CALL();
     if (this == &other)
+    {
       return *this;
+    }
+
     raw_data = other.raw_data;
     return *this;
   }
@@ -41,12 +44,15 @@ public:
   {
     DEBUG_LOG_CALL();
     if (this == &other)
+    {
       return *this;
+    }
+
     raw_data = std::move(other.raw_data);
     return *this;
   }
 
-  T at(size_t index) const
+  [[nodiscard]] T at(size_t index) const
   {
     debugassert(index < this->raw_data.size(), "Out of bounds");
     return this->raw_data[index];

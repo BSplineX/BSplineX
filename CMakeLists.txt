@@ -138,4 +138,3 @@ install(FILES
   ${CMAKE_CURRENT_BINARY_DIR}/BSplineXConfigVersion.cmake
   DESTINATION lib/cmake/BSplineX
 )
-

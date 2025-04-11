@@ -18,7 +18,7 @@ template <typename T, Curve C, BoundaryCondition BC, Extrapolation EXT>
 class Extrapolator
 {
 public:
-  virtual size_t extrapolate(T value) const = 0;
+  [[nodiscard]] virtual size_t extrapolate(T value) const = 0;
 };
 
 template <typename T, Curve C, BoundaryCondition BC>
@@ -27,9 +27,14 @@ class Extrapolator<T, C, BC, Extrapolation::NONE>
 public:
   Extrapolator() = default;
 
-  Extrapolator(Atter<T, C, BC> const &, size_t) {}
+  Extrapolator(Atter<T, C, BC> const & /*atter*/, size_t /*degree*/) {}
 
-  T extrapolate(T) const { throw std::runtime_error("Extrapolation explicitly set to NONE"); }
+  [[nodiscard]] T extrapolate(T /*value*/) const
+  {
+    releaseassert(false, "Extrapolation explicitly set to NONE");
+
+    return constants::ZERO<T>;
+  }
 };
 
 template <typename T, Curve C, BoundaryCondition BC>
@@ -66,7 +71,10 @@ public:
   {
     DEBUG_LOG_CALL();
     if (this == &other)
+    {
       return *this;
+    }
+
     value_left  = other.value_left;
     value_right = other.value_right;
     return *this;
@@ -76,13 +84,16 @@ public:
   {
     DEBUG_LOG_CALL();
     if (this == &other)
+    {
       return *this;
+    }
+
     value_left  = other.value_left;
     value_right = other.value_right;
     return *this;
   }
 
-  T extrapolate(T value) const
+  [[nodiscard]] T extrapolate(T value) const
   {
     debugassert(
         value < this->value_left || value > this->value_right, "Value not outside of the domain"
@@ -127,7 +138,10 @@ public:
   {
     DEBUG_LOG_CALL();
     if (this == &other)
+    {
       return *this;
+    }
+
     value_left  = other.value_left;
     value_right = other.value_right;
     period      = other.period;
@@ -138,53 +152,32 @@ public:
   {
     DEBUG_LOG_CALL();
     if (this == &other)
+    {
       return *this;
+    }
+
     value_left  = other.value_left;
     value_right = other.value_right;
     period      = other.period;
     return *this;
   }
 
-  T extrapolate(T value) const
+  [[nodiscard]] T extrapolate(T value) const
   {
     debugassert(
         value < this->value_left || value > this->value_right, "Value not outside of the domain"
     );
 
-    // TODO: Figure out how to prevent numerical errors
+    T wrapped = std::fmod<T>(value - this->value_left, this->period);
 
-    if (value < this->value_left)
+    if (wrapped < constants::ZERO<T>)
     {
-      value += this->period * (std::floor((this->value_left - value) / this->period) + 1);
-    }
-    else if (value > this->value_right)
-    {
-      value -= this->period * (std::floor((value - this->value_right) / this->period) + 1);
+      wrapped += this->period;
     }
 
-    if (value < this->value_left)
-    {
-      value = this->value_left;
-    }
-    else if (value > this->value_right)
-    {
-      value = this->value_right;
-    }
-
-    return value;
+    return wrapped + this->value_left;
   }
 };
-
-/*
-
-value_right = 1
-value = 2
-period = 1
-
-
-
-
-*/
 
 } // namespace bsplinex::knots
 

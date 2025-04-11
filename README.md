@@ -128,7 +128,7 @@ In the previous example, the knots are easy to understand: they are you discreti
 
 ```cpp
 ...
- 
+
   // Create the B-Spline without specifying the control points
   auto bspline = bsplinex::factory::clamped_uniform_constant(
     degree, min_knot, max_knot, num_knots
@@ -139,7 +139,7 @@ In the previous example, the knots are easy to understand: they are you discreti
   // Fit the B-Spline
   bspline.fit(x, y);
 
-  // Now the B-Spline magically contains the best control points 
+  // Now the B-Spline magically contains the best control points
   // (in a least-squares sense) that fit your data
 
 ...

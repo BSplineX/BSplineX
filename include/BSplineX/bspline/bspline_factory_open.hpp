@@ -6,9 +6,12 @@
 
 // BSplineX
 #include "BSplineX/bspline/bspline_types.hpp"
+#include "BSplineX/defines.hpp"
 
 namespace bsplinex::factory
 {
+
+using namespace constants;
 
 /**
  * @brief Creates an open uniform BSpline.
@@ -68,8 +71,8 @@ inline types::OpenUniform<T> open_uniform(size_t degree, T begin, T end, size_t 
 template <typename T = double>
 inline types::OpenUniform<T> open_uniform(size_t degree)
 {
-  constexpr T begin{(T)0};
-  constexpr T end{(T)1};
+  constexpr T begin{ZERO<T>};
+  constexpr T end{ONE<T>};
   size_t const num_elems{1 + 2 * degree};
   return open_uniform<T>(degree, begin, end, num_elems, std::vector<T>(num_elems - degree - 1));
 }
@@ -136,8 +139,8 @@ open_uniform_constant(size_t degree, T begin, T end, size_t num_elems)
 template <typename T = double>
 inline types::OpenUniformConstant<T> open_uniform_constant(size_t degree)
 {
-  constexpr T begin{(T)0};
-  constexpr T end{(T)1};
+  constexpr T begin{ZERO<T>};
+  constexpr T end{ONE<T>};
   size_t const num_elems{1 + 2 * degree};
   return open_uniform_constant<T>(
       degree, begin, end, num_elems, std::vector<T>(num_elems - degree - 1)

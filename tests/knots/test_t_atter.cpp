@@ -1,9 +1,16 @@
+// Standard includes
+#include <cstddef>
+#include <vector>
+
 // Third-party includes
 #include <catch2/catch_test_macros.hpp>
-#include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
 
 // BSplineX includes
 #include "BSplineX/knots/t_atter.hpp"
+#include "BSplineX/knots/t_data.hpp"
+#include "BSplineX/types.hpp"
+#include "matchers.hpp"
 
 using namespace Catch::Matchers;
 using namespace bsplinex;
@@ -11,99 +18,114 @@ using namespace bsplinex::knots;
 
 TEST_CASE("knots::Atter<T, C, BC> atter{knots::Data<T, C> data, degree}", "[t_atter]")
 {
-  std::vector<double> data_vec{0.1, 1.3, 2.2, 4.9, 13.2};
-  Data<double, Curve::NON_UNIFORM> data{data_vec};
-  size_t degree{3};
-  Atter<double, Curve::NON_UNIFORM, BoundaryCondition::PERIODIC> atter{data, degree};
+  std::vector<double> const data_vec{0.1, 1.3, 2.2, 4.9, 13.2};
+  size_t const n = data_vec.size();
+  Data<double, Curve::NON_UNIFORM> const data{data_vec};
+  size_t constexpr degree{3};
+  Atter<double, Curve::NON_UNIFORM, BoundaryCondition::PERIODIC> const atter{data, degree};
 
-  SECTION("atter.size()") { REQUIRE(atter.size() == data.size() + 2 * degree); }
+  SECTION("atter.size()") { REQUIRE(atter.size() == n + (2 * degree)); }
   SECTION("atter.at(...)")
   {
-    REQUIRE_THAT(atter.at(0), WithinRel(-11.8));
-    REQUIRE_THAT(atter.at(1), WithinRel(-10.9));
-    REQUIRE_THAT(atter.at(2), WithinRel(-8.2));
-    for (size_t i{0}; i < data.size(); i++)
+    REQUIRE_THAT(
+        atter.at(0), WithinAbsRel(data_vec.at(0) - (data_vec.at(n - 1) - data_vec.at(n - 4)))
+    );
+    REQUIRE_THAT(
+        atter.at(1), WithinAbsRel(data_vec.at(0) - (data_vec.at(n - 1) - data_vec.at(n - 3)))
+    );
+    REQUIRE_THAT(
+        atter.at(2), WithinAbsRel(data_vec.at(0) - (data_vec.at(n - 1) - data_vec.at(n - 2)))
+    );
+    for (size_t i{0}; i < n; i++)
     {
       REQUIRE(atter.at(i + degree) == data.at(i));
     }
-    REQUIRE_THAT(atter.at(data.size() + degree), WithinRel(14.4));
-    REQUIRE_THAT(atter.at(data.size() + degree + 1), WithinRel(15.3));
-    REQUIRE_THAT(atter.at(data.size() + degree + 2), WithinRel(18.0));
+    REQUIRE_THAT(
+        atter.at(n + degree), WithinAbsRel(data_vec.at(n - 1) + (data_vec.at(1) - data_vec.at(0)))
+    );
+    REQUIRE_THAT(
+        atter.at(n + degree + 1),
+        WithinAbsRel(data_vec.at(n - 1) + (data_vec.at(2) - data_vec.at(0)))
+    );
+    REQUIRE_THAT(
+        atter.at(n + degree + 2),
+        WithinAbsRel(data_vec.at(n - 1) + (data_vec.at(3) - data_vec.at(0)))
+    );
   }
   SECTION("atter.begin()")
   {
     auto it = atter.begin();
-    REQUIRE_THAT(*it, WithinRel(-11.8));
+    REQUIRE(*it == atter.at(0));
   }
   SECTION("atter.end()")
   {
     auto it = atter.end();
-    it--;
-    REQUIRE_THAT(*it, WithinRel(18.0));
+    --it;
+    REQUIRE(*it == atter.at(n + degree + 2));
   }
 }
 
 TEST_CASE("knots::Atter::iterator", "[t_atter]")
 {
-  std::vector<double> data_vec{0.1, 1.3, 2.2, 4.9, 13.2};
-  Data<double, Curve::NON_UNIFORM> data{data_vec};
-  size_t degree{3};
-  Atter<double, Curve::NON_UNIFORM, BoundaryCondition::PERIODIC> atter{data, degree};
+  std::vector<double> const data_vec{0.1, 1.3, 2.2, 4.9, 13.2};
+  Data<double, Curve::NON_UNIFORM> const data{data_vec};
+  size_t constexpr degree{3};
+  Atter<double, Curve::NON_UNIFORM, BoundaryCondition::PERIODIC> const atter{data, degree};
 
   SECTION("*iterator")
   {
     auto it = atter.begin();
-    REQUIRE_THAT(*it, WithinRel(-11.8));
+    REQUIRE(*it == atter.at(0));
   }
   SECTION("iterator++")
   {
     auto it = atter.begin();
-    REQUIRE_THAT(*(it++), WithinRel(-11.8));
-    REQUIRE_THAT(*it, WithinRel(-10.9));
+    REQUIRE(*(it++) == atter.at(0));
+    REQUIRE(*it == atter.at(1));
   }
   SECTION("++iterator")
   {
     auto it = atter.begin();
-    REQUIRE_THAT(*(++it), WithinRel(-10.9));
-    REQUIRE_THAT(*it, WithinRel(-10.9));
+    REQUIRE(*(++it) == atter.at(1));
+    REQUIRE(*it == atter.at(1));
   }
   SECTION("iterator--")
   {
     auto it = atter.end();
-    it--;
-    REQUIRE_THAT(*(it--), WithinRel(18.0));
-    REQUIRE_THAT(*it, WithinRel(15.3));
+    --it;
+    REQUIRE(*(it--) == atter.at(atter.size() - 1));
+    REQUIRE(*it == atter.at(atter.size() - 2));
   }
   SECTION("--iterator")
   {
     auto it = atter.end();
-    REQUIRE_THAT(*(--it), WithinRel(18.0));
-    REQUIRE_THAT(*it, WithinRel(18.0));
+    REQUIRE(*(--it) == atter.at(atter.size() - 1));
+    REQUIRE(*it == atter.at(atter.size() - 1));
   }
   SECTION("iterator += 1")
   {
     auto it = atter.begin();
-    REQUIRE_THAT(*(it += 1), WithinRel(-10.9));
-    REQUIRE_THAT(*it, WithinRel(-10.9));
+    REQUIRE(*(it += 1) == atter.at(1));
+    REQUIRE(*it == atter.at(1));
   }
   SECTION("iterator + 1")
   {
     auto it = atter.begin();
-    REQUIRE_THAT(*(it + 1), WithinRel(-10.9));
-    REQUIRE_THAT(*it, WithinRel(-11.8));
+    REQUIRE(*(it + 1) == atter.at(1));
+    REQUIRE(*it == atter.at(0));
   }
   SECTION("iterator -= 1")
   {
     auto it = atter.end();
-    REQUIRE_THAT(*(it -= 1), WithinRel(18.0));
-    REQUIRE_THAT(*it, WithinRel(18.0));
+    REQUIRE(*(it -= 1) == atter.at(atter.size() - 1));
+    REQUIRE(*it == atter.at(atter.size() - 1));
   }
   SECTION("iterator - 1")
   {
     auto it = atter.end();
-    it--;
-    REQUIRE_THAT(*(it - 1), WithinRel(15.3));
-    REQUIRE_THAT(*it, WithinRel(18.0));
+    --it;
+    REQUIRE(*(it - 1) == atter.at(atter.size() - 2));
+    REQUIRE(*it == atter.at(atter.size() - 1));
   }
   SECTION("iterator - iterator")
   {
@@ -126,7 +148,7 @@ TEST_CASE("knots::Atter::iterator", "[t_atter]")
   SECTION("iterator[]")
   {
     auto it = atter.begin();
-    REQUIRE_THAT(it[atter.size() - 2], WithinRel(15.3));
+    REQUIRE(it[atter.size() - 2] == atter.at(atter.size() - 2));
   }
   SECTION("iterator > iterator")
   {

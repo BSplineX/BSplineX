@@ -13,6 +13,8 @@
 namespace bsplinex::knots
 {
 
+using namespace constants;
+
 template <typename T, Curve C, BoundaryCondition BC, Extrapolation EXT>
 class Finder
 {
@@ -40,7 +42,7 @@ public:
 
   Finder &operator=(Finder &&other) = delete;
 
-  size_t find(T value) const
+  [[nodiscard]] size_t find(T value) const
   {
     debugassert(
         value >= this->atter->at(this->index_left) && value <= this->atter->at(this->index_right),
@@ -70,11 +72,13 @@ public:
 
   Finder(Atter<T, Curve::UNIFORM, BC> const &atter, size_t degree)
       : value_left{atter.at(degree)}, value_right{atter.at(atter.size() - 1 - degree)},
-        step_size_inv{static_cast<T>(1) / (atter.at(degree + 1) - atter.at(degree))},
-        degree{degree}, max_index{atter.size() - 1 - degree - 1}
+        step_size_inv{ONE<T> / (atter.at(degree + 1) - atter.at(degree))}, degree{degree},
+        max_index{atter.size() - 1 - degree - 1}
   {
     DEBUG_LOG_CALL();
   }
+
+  ~Finder() = default;
 
   Finder(Finder const &other) = delete;
 
@@ -84,29 +88,17 @@ public:
 
   Finder &operator=(Finder &&other) = delete;
 
-  size_t find(T value) const
+  [[nodiscard]] size_t find(T value) const
   {
     debugassert(
         value >= this->value_left && value <= this->value_right, "Value outside of the domain"
     );
 
-    size_t index =
+    size_t const index =
         static_cast<size_t>((value - this->value_left) * this->step_size_inv) + this->degree;
     return std::min(index, max_index);
   }
 };
-
-// t_i = step_size * i + start_t
-//
-/*
-
-(begin + (atter.size - 1 - degree) * step_size - begin - degree * step_size) / step_size + degree
-((atter.size - 1 - degree) - degree) + degree
-atter.size - 1 - degree
-
-knots - 1 - degree = ctrl
-
-*/
 
 } // namespace bsplinex::knots
 

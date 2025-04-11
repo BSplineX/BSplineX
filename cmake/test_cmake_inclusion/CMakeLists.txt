@@ -44,4 +44,3 @@ if(FETCH_CONTENT_METHOD)
 endif()
 
 target_link_libraries(test PRIVATE BSplineX::BSplineX)
-

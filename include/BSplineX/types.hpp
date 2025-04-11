@@ -1,13 +1,15 @@
 #ifndef BSPLINEX_TYPES_HPP
 #define BSPLINEX_TYPES_HPP
 
+#include <cstdint>
+
 namespace bsplinex
 {
 
 /**
  * @brief Enum class representing different types of boundary conditions.
  */
-enum class BoundaryCondition
+enum class BoundaryCondition : uint8_t
 {
   CLAMPED  = 0,
   OPEN     = 1,
@@ -17,7 +19,7 @@ enum class BoundaryCondition
 /**
  * @brief Enum class representing different types of curves.
  */
-enum class Curve
+enum class Curve : uint8_t
 {
   NON_UNIFORM = 0,
   UNIFORM     = 1
@@ -26,7 +28,7 @@ enum class Curve
 /**
  * @brief Enum class representing different types of extrapolation methods.
  */
-enum class Extrapolation
+enum class Extrapolation : uint8_t
 {
   CONSTANT = 0,
   PERIODIC = 1,

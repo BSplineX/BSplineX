@@ -6,9 +6,12 @@
 
 // BSplineX
 #include "BSplineX/bspline/bspline_types.hpp"
+#include "BSplineX/defines.hpp"
 
 namespace bsplinex::factory
 {
+
+using namespace constants;
 
 /**
  * @brief Creates a periodic uniform BSpline.
@@ -67,8 +70,8 @@ inline types::PeriodicUniform<T> periodic_uniform(size_t degree, T begin, T end,
 template <typename T = double>
 inline types::PeriodicUniform<T> periodic_uniform(size_t degree)
 {
-  constexpr T begin{(T)0};
-  constexpr T end{(T)1};
+  constexpr T begin{ZERO<T>};
+  constexpr T end{ONE<T>};
   size_t const num_elems{2 * degree};
   return periodic_uniform<T>(degree, begin, end, num_elems, std::vector<T>(num_elems - 1));
 }

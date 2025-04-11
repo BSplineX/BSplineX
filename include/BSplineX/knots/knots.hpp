@@ -18,7 +18,7 @@
  *
  * Curve domain:
  * - If the curve is open, the domain is [t_p, t_{end - p}]
- * - If the curve is periodic, the domain is [t_0, t_{end}] but appropiate
+ * - If the curve is periodic, the domain is [t_0, t_{end}] but appropriate
  *   padding is needed
  * - If the curve is clamped, the domain is [t_0, t_{end}] but the start and end
  *   knots must have multiplicity `p+1`
@@ -29,7 +29,7 @@
  * - If the curve is periodic, we need to add `p` knots at the left and right
  *   following periodicity: [0, 1, 2, 2.5, 3] with p = 3 ->
  *   [-2.0, -1.0, -0.5, 0, 1, 2, 2.5, 3, 4, 5, 5.5]
- * - If the curve is clamped, we must repeat the first an last knots `p` times:
+ * - If the curve is clamped, we must repeat the first and last knots `p` times:
  *   [0, 1, 2, 2.5, 3] with p = 3 -> [0, 0, 0, 0, 1, 2, 2.5, 3, 3, 3, 3]
  *
  */
@@ -80,7 +80,10 @@ public:
   {
     DEBUG_LOG_CALL();
     if (this == &other)
+    {
       return *this;
+    }
+
     this->atter        = other.atter;
     this->extrapolator = other.extrapolator;
     new (&this->finder) Finder<T, C, BC, EXT>(this->atter, other.degree);
@@ -94,7 +97,10 @@ public:
   {
     DEBUG_LOG_CALL();
     if (this == &other)
+    {
       return *this;
+    }
+
     this->atter        = std::move(other.atter);
     this->extrapolator = std::move(other.extrapolator);
     new (&this->finder) Finder<T, C, BC, EXT>(this->atter, other.degree);
@@ -104,7 +110,7 @@ public:
     return *this;
   }
 
-  std::pair<size_t, T> find(T value) const
+  [[nodiscard]] std::pair<size_t, T> find(T value) const
   {
     if (value < this->value_left || value > this->value_right)
     {
@@ -114,11 +120,26 @@ public:
     return std::pair<size_t, T>{this->finder.find(value), value};
   }
 
-  std::pair<T, T> domain() const { return {value_left, value_right}; }
+  [[nodiscard]] std::pair<T, T> domain() const { return std::make_pair(value_left, value_right); }
 
-  T at(size_t index) const { return this->atter.at(index); }
+  [[nodiscard]] T at(size_t index) const { return this->atter.at(index); }
 
   [[nodiscard]] size_t size() const { return this->atter.size(); }
+
+  [[nodiscard]] Knots get_derivative_knots() const
+  {
+    Atter<T, C, BC> d_atter = this->atter;
+    return Knots(d_atter.pop_tails(), this->degree - 1);
+  }
+
+private:
+  Knots(Atter<T, C, BC> const &atter, size_t degree)
+      : atter{atter}, extrapolator{this->atter, degree}, finder{this->atter, degree},
+        value_left{this->atter.at(degree)},
+        value_right{this->atter.at(this->atter.size() - degree - 1)}, degree{degree}
+  {
+    DEBUG_LOG_CALL();
+  }
 };
 
 } // namespace bsplinex::knots

@@ -2,6 +2,7 @@
 
 // Injected C++ code
 %{
+#include "BSplineX/defines.hpp"
 #include "BSplineX/types.hpp"
 #include "BSplineX/bspline/bspline.hpp"
 #include "BSplineX/bspline/bspline_types.hpp"
@@ -18,6 +19,7 @@ using namespace bsplinex;
 %template() std::pair<double, double>;
 %template() std::vector<double>;
 
+%include "BSplineX/defines.hpp"
 %include "BSplineX/types.hpp"
 %include "BSplineX/bspline/bspline.hpp"
 %include "BSplineX/bspline/bspline_factory.hpp"
@@ -100,4 +102,3 @@ using namespace bsplinex;
 %template(PeriodicNonUniform) bspline::BSpline<double, Curve::NON_UNIFORM, BoundaryCondition::PERIODIC, Extrapolation::PERIODIC>;
 %template() types::PeriodicNonUniform<double>;
 %template(periodic_nonuniform) factory::periodic_nonuniform<double>;
-

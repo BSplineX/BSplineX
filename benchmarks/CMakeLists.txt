@@ -14,4 +14,3 @@ target_link_libraries(bench_bspline PRIVATE
   BSplineX Catch2::Catch2WithMain
 )
 catch_discover_tests(bench_bspline)
-
