@@ -1,6 +1,8 @@
 // Standard includes
+#include <algorithm>
 #include <cmath>
 #include <cstddef>
+#include <iterator>
 #include <string>
 #include <vector>
 
