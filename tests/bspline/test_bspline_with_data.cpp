@@ -87,7 +87,7 @@ std::string get_data_path()
     path /= "non-uniform";
   }
   path += ".json";
-  return path;
+  return path.string();
 }
 
 template <typename BSplineType>
