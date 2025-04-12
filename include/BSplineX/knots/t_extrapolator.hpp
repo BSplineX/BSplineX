@@ -4,7 +4,6 @@
 // Standard includes
 #include <cmath>
 #include <cstddef>
-#include <stdexcept>
 
 // BSplineX includes
 #include "BSplineX/defines.hpp"

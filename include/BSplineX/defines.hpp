@@ -12,7 +12,7 @@
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 #define debugassert(exp, msg) assert(((void)(msg), exp))
 #define releaseassert(exp, msg)                                                                    \
-  if (!(exp))                                                                                      \
+  if (not(exp))                                                                                    \
     throw std::runtime_error(msg);
 
 #ifdef BSPLINEX_DEBUG_LOG_CALL

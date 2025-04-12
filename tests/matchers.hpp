@@ -76,8 +76,8 @@ struct WithinAbsRelVectorMatcher final : Catch::Matchers::MatcherBase<std::vecto
 
     for (size_t i = 0; i < actual.size(); ++i)
     {
-      if (!Catch::Matchers::WithinRel(this->target[i], this->rtol).match(actual[i]) and
-          !Catch::Matchers::WithinAbs(this->target[i], this->atol).match(actual[i]))
+      if (not Catch::Matchers::WithinRel(this->target[i], this->rtol).match(actual[i]) and
+          not Catch::Matchers::WithinAbs(this->target[i], this->atol).match(actual[i]))
       {
         allMatch = false;
         this->failures.push_back({i, this->target[i], actual[i]});
@@ -99,7 +99,7 @@ struct WithinAbsRelVectorMatcher final : Catch::Matchers::MatcherBase<std::vecto
     }
     ss << "\n";
 
-    if (!this->mismatch_description.empty())
+    if (not this->mismatch_description.empty())
     {
       ss << this->mismatch_description;
       return ss.str();
