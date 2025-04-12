@@ -322,13 +322,7 @@ public:
     knots::Knots<T, C, BC, EXT> new_knots;
     if constexpr (Curve::UNIFORM == C)
     {
-      T const step = std::abs(x.at(1) - x.at(0));
-      for (size_t i{0}; i < x.size() - 1; i++)
-      {
-        T const diff = std::abs(x.at(i + 1) - x.at(i) - step);
-        T const max  = (std::max)(std::abs(x.at(i + 1) - x.at(i)), step);
-        releaseassert(diff <= RTOL<T> * max or diff <= ATOL<T>, "x is not uniform.");
-      }
+      releaseassert(is_uniform(x), "x is not uniform");
       new_knots = std::move(knots::Knots<T, C, BC, EXT>{{x.front(), x.back(), x.size()}, degree});
     }
     else
@@ -581,6 +575,29 @@ private:
   }
 
   void invalidate_derivative() const { this->derivative_ptr = nullptr; }
+
+  static bool is_uniform(std::vector<T> const &x)
+  {
+    if (x.size() < 2)
+    {
+      return true;
+    }
+
+    T const expected_step = std::abs(x.at(1) - x.at(0));
+
+    return std::adjacent_find(
+               x.begin(),
+               x.end() - 1,
+               [expected_step](T a, T b)
+               {
+                 T const actual_step = std::abs(b - a);
+                 T const diff        = std::abs(actual_step - expected_step);
+                 T const max_val     = std::max(actual_step, expected_step);
+
+                 return not(diff <= RTOL<T> * max_val or diff <= ATOL<T>);
+               }
+           ) == x.end() - 1;
+  }
 };
 
 } // namespace bsplinex::bspline
