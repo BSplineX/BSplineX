@@ -15,6 +15,7 @@
 #include "BSplineX/knots/knots.hpp"
 #include "BSplineX/types.hpp"
 #include "BSplineX/views.hpp"
+#include "BSplineX/windows.hpp"
 
 namespace bsplinex::bspline
 {

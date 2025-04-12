@@ -50,7 +50,9 @@ public:
     );
 
     auto upper = std::upper_bound(
-        this->atter->begin() + this->index_left, this->atter->begin() + this->index_right, value
+        this->atter->begin() + static_cast<int>(this->index_left),
+        this->atter->begin() + static_cast<int>(this->index_right),
+        value
     );
 
     return upper - this->atter->begin() - 1;

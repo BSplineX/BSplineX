@@ -18,6 +18,7 @@
 #include "BSplineX/bspline/bspline_lsq.hpp"
 #include "BSplineX/bspline/bspline_types.hpp"
 #include "BSplineX/types.hpp"
+#include "BSplineX/windows.hpp"
 #include "matchers.hpp"
 
 using real_t = double;

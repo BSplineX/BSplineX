@@ -169,7 +169,10 @@ public:
       return retval;
     }
 
-    difference_type operator-(iterator const &b) const { return this->index - b.index; }
+    difference_type operator-(iterator const &b) const
+    {
+      return static_cast<int>(this->index - b.index);
+    }
 
     bool operator==(iterator const &other) const { return this->index == other.index; }
 
