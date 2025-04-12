@@ -12,33 +12,6 @@
 using namespace bsplinex;
 using namespace bsplinex::knots;
 
-TEST_CASE("knots::Data<double, Curve::UNIFORM> data{begin, end, step}", "[t_data]")
-{
-  double constexpr begin{0.0};
-  double constexpr end{10.0};
-  double constexpr step{2.3};
-  size_t constexpr num_elems{5};
-  Data<double, Curve::UNIFORM> const data{begin, end, step};
-
-  SECTION("data.size()") { REQUIRE(data.size() == num_elems); }
-  SECTION("data.at(...)")
-  {
-    for (size_t i{0}; i < data.size(); i++)
-    {
-      REQUIRE(data.at(i) == i * step);
-    }
-  }
-  SECTION("data.slice(...)")
-  {
-    std::vector<double> const slice = data.slice(1, 4);
-    REQUIRE(slice.size() == 3);
-    for (size_t i{0}; i < slice.size(); i++)
-    {
-      REQUIRE(slice.at(i) == data.at(i + 1));
-    }
-  }
-}
-
 TEST_CASE("knots::Data<double, Curve::UNIFORM> data{begin, end, num_elems}", "[t_data]")
 {
   double constexpr begin{0.0};

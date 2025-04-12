@@ -37,19 +37,6 @@ private:
 public:
   Data() { DEBUG_LOG_CALL(); }
 
-  // Specifying the step-size means the domain will be [begin, end[
-  Data(T begin, T end, T step)
-  {
-    DEBUG_LOG_CALL();
-    debugassert(step > 0, "Negative step-size");
-    debugassert(begin < end, "Wrong interval");
-
-    this->begin     = begin;
-    this->step_size = step;
-    this->num_elems = (end - begin) / step + 1;
-    this->end       = begin + (this->num_elems - 1) * step;
-  }
-
   Data(std::vector<T> const &data)
   {
     releaseassert(Data::is_uniform(data), "data is not uniform");
