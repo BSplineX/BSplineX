@@ -148,7 +148,7 @@ TEST_CASE("knots::Atter::iterator", "[t_atter]")
   SECTION("iterator[]")
   {
     auto it = atter.begin();
-    REQUIRE(it[atter.size() - 2] == atter.at(atter.size() - 2));
+    REQUIRE(it[static_cast<int>(atter.size() - 2)] == atter.at(atter.size() - 2));
   }
   SECTION("iterator > iterator")
   {

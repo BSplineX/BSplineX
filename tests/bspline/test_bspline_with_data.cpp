@@ -356,12 +356,12 @@ TEMPLATE_TEST_CASE("BSpline", "[bspline][template][product]", BSPLINE_TEST_TYPES
       SECTION("interpolate(...)")
       {
 
-        auto x_interp                        = test_data["x"].get<std::vector<real_t>>();
-        auto y_interp                        = test_data["y"].get<std::vector<real_t>>();
+        auto x_interp                  = test_data["x"].get<std::vector<real_t>>();
+        auto y_interp                  = test_data["y"].get<std::vector<real_t>>();
         auto const [conds_left, conds_right] = test_data["conditions_interp"]
-                                                   .get<std::pair<
-                                                       std::vector<std::pair<real_t, real_t>>,
-                                                       std::vector<std::pair<real_t, real_t>>>>();
+                                             .get<std::pair<
+                                                 std::vector<std::pair<size_t, real_t>>,
+                                                 std::vector<std::pair<size_t, real_t>>>>();
         std::vector<lsq::Condition<real_t>> additional_conditions{};
         additional_conditions.reserve(conds_left.size() + conds_right.size());
         for (auto const &[derivative_order, value] : conds_left)
