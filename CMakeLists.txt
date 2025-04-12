@@ -40,6 +40,9 @@ endif()
 
 # Dependencies
 include(BSplineXEigen3)
+if(MSVC)
+  target_compile_options(Eigen3::Eigen INTERFACE /wd4127 /wd4714)
+endif()
 
 # Library definition
 add_library(BSplineX INTERFACE)
