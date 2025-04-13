@@ -9,6 +9,7 @@
 #include "BSplineX/defines.hpp"
 #include "BSplineX/knots/t_atter.hpp"
 #include "BSplineX/types.hpp"
+#include "BSplineX/windows.hpp"
 
 namespace bsplinex::knots
 {

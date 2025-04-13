@@ -9,6 +9,7 @@
 #include "BSplineX/knots/t_extrapolator.hpp"
 #include "BSplineX/knots/t_finder.hpp"
 #include "BSplineX/types.hpp"
+#include "BSplineX/windows.hpp"
 
 /**
  * Naming convention:

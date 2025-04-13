@@ -11,6 +11,7 @@
 // BSplineX includes
 #include "BSplineX/defines.hpp"
 #include "BSplineX/types.hpp"
+#include "BSplineX/windows.hpp"
 
 namespace bsplinex::knots
 {

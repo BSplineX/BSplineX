@@ -1,10 +1,14 @@
 #ifndef BSPLINEX_DEFINES_HPP
 #define BSPLINEX_DEFINES_HPP
 
+// Standard includes
 #include <cassert>
 #include <cstddef>
 #include <limits>
 #include <stdexcept>
+
+// BSplineX includes
+#include "BSplineX/windows.hpp"
 
 // avoids clangd/clang-tidy complaining about unused header stdexcept
 [[maybe_unused]] constexpr auto use_stdexcept = sizeof(std::runtime_error);
