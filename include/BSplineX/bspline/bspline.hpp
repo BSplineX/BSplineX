@@ -49,7 +49,7 @@ private:
   control_points::ControlPoints<T, BC> control_points{};
   size_t degree{};
   std::vector<T> mutable support{};
-  std::unique_ptr<BSpline> mutable derivative_ptr;
+  std::unique_ptr<BSpline const> mutable derivative_ptr;
 
 public:
   /**
@@ -548,7 +548,7 @@ private:
     if (not this->derivative_ptr)
     {
       debugassert(this->degree > 0, "Cannot compute derivative of a 0-degree bspline");
-      this->derivative_ptr = std::unique_ptr<BSpline>(new BSpline(
+      this->derivative_ptr = std::unique_ptr<BSpline const>(new BSpline(
           this->knots.get_derivative_knots(),
           this->control_points.get_derivative_control_points(this->knots),
           this->degree - 1
