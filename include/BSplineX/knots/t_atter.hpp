@@ -1,6 +1,9 @@
 #ifndef BSPLINEX_KNOTS_T_ATTER_HPP
 #define BSPLINEX_KNOTS_T_ATTER_HPP
 
+// Standard includes
+#include <cstddef>
+
 // BSplineX includes
 #include "BSplineX/defines.hpp"
 #include "BSplineX/knots/t_data.hpp"
@@ -101,7 +104,7 @@ public:
 
   public:
     // iterator traits
-    using difference_type   = int;
+    using difference_type   = std::ptrdiff_t;
     using value_type        = T;
     using pointer           = T const *;
     using reference         = T const &;
@@ -143,26 +146,26 @@ public:
       return retval;
     }
 
-    iterator &operator+=(int n)
+    iterator &operator+=(difference_type n)
     {
       this->index += n;
       return *this;
     }
 
-    iterator operator+(int n) const
+    iterator operator+(difference_type n) const
     {
       iterator retval  = *this;
       retval          += n;
       return retval;
     }
 
-    iterator &operator-=(int n)
+    iterator &operator-=(difference_type n)
     {
       this->index -= n;
       return *this;
     }
 
-    iterator operator-(int n) const
+    iterator operator-(difference_type n) const
     {
       iterator retval  = *this;
       retval          -= n;
@@ -171,7 +174,7 @@ public:
 
     difference_type operator-(iterator const &b) const
     {
-      return static_cast<int>(this->index - b.index);
+      return static_cast<difference_type>(this->index - b.index);
     }
 
     bool operator==(iterator const &other) const { return this->index == other.index; }
@@ -192,7 +195,7 @@ public:
 
     value_type operator*() const { return this->atter->at(this->index); }
 
-    value_type operator[](int n) const { return *(*this + n); }
+    value_type operator[](difference_type n) const { return *(*this + n); }
 
     bool operator<(iterator const &b) const { return this->index < b.index; }
 

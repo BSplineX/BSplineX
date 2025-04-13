@@ -48,10 +48,11 @@ public:
         value >= this->atter->at(this->index_left) and value <= this->atter->at(this->index_right),
         "Value outside of the domain"
     );
-
+    using difference_type =
+        typename std::remove_pointer_t<decltype(atter)>::iterator::difference_type;
     auto upper = std::upper_bound(
-        this->atter->begin() + static_cast<int>(this->index_left),
-        this->atter->begin() + static_cast<int>(this->index_right),
+        this->atter->begin() + static_cast<difference_type>(this->index_left),
+        this->atter->begin() + static_cast<difference_type>(this->index_right),
         value
     );
 

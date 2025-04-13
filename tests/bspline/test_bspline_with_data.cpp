@@ -119,7 +119,7 @@ BSplineType build_bspline(std::vector<real_t> knots, std::vector<real_t> ctrl_pt
     if (BoundaryCondition::CLAMPED == BSplineType::boundary_condition_type or
         BoundaryCondition::PERIODIC == BSplineType::boundary_condition_type)
     {
-      auto const deg = static_cast<int>(degree);
+      auto const deg = static_cast<std::ptrdiff_t>(degree);
       knots          = std::vector(std::next(knots.begin(), deg), std::prev(knots.end(), deg));
     }
     return BSplineType({knots}, {ctrl_pts}, degree);
