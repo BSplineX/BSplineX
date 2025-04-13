@@ -35,12 +35,11 @@ private:
   T step_size{};
 
 public:
-  Data() { DEBUG_LOG_CALL(); }
+  Data() = default;
 
   // Specifying the step-size means the domain will be [begin, end[
   Data(T begin, T end, T step)
   {
-    DEBUG_LOG_CALL();
     debugassert(step > 0, "Negative step-size");
     debugassert(begin < end, "Wrong interval");
 
@@ -63,7 +62,6 @@ public:
   // Specifying the num-elems means the domain will be [begin, end]
   Data(T begin, T end, size_t num_elems)
   {
-    DEBUG_LOG_CALL();
     debugassert(begin < end, "Wrong interval");
 
     this->begin     = begin;
@@ -75,20 +73,17 @@ public:
   Data(Data const &other)
       : begin(other.begin), end(other.end), num_elems(other.num_elems), step_size(other.step_size)
   {
-    DEBUG_LOG_CALL();
   }
 
   Data(Data &&other) noexcept
       : begin(other.begin), end(other.end), num_elems(other.num_elems), step_size(other.step_size)
   {
-    DEBUG_LOG_CALL();
   }
 
-  ~Data() noexcept { DEBUG_LOG_CALL(); }
+  ~Data() noexcept = default;
 
   Data &operator=(Data const &other)
   {
-    DEBUG_LOG_CALL();
     if (this == &other)
     {
       return *this;
@@ -103,7 +98,6 @@ public:
 
   Data &operator=(Data &&other) noexcept
   {
-    DEBUG_LOG_CALL();
     if (this == &other)
     {
       return *this;
@@ -178,11 +172,10 @@ private:
   std::vector<T> raw_data{};
 
 public:
-  Data() { DEBUG_LOG_CALL(); }
+  Data() = default;
 
   Data(std::vector<T> const &data) : raw_data(data)
   {
-    DEBUG_LOG_CALL();
     // NOTE: thank the STL for this wonderful backwards built sort check. Think it as if std::less
     // is <= and std::less_equal is <.
     debugassert(
@@ -191,15 +184,14 @@ public:
     );
   }
 
-  Data(Data const &other) : raw_data(other.raw_data) { DEBUG_LOG_CALL(); }
+  Data(Data const &other) : raw_data(other.raw_data) {}
 
-  Data(Data &&other) noexcept : raw_data(std::move(other.raw_data)) { DEBUG_LOG_CALL(); }
+  Data(Data &&other) noexcept : raw_data(std::move(other.raw_data)) {}
 
-  ~Data() noexcept { DEBUG_LOG_CALL(); }
+  ~Data() noexcept = default;
 
   Data &operator=(Data const &other)
   {
-    DEBUG_LOG_CALL();
     if (this == &other)
     {
       return *this;
@@ -211,7 +203,6 @@ public:
 
   Data &operator=(Data &&other) noexcept
   {
-    DEBUG_LOG_CALL()
     if (this == &other)
     {
       return *this;

@@ -28,19 +28,18 @@ template <typename T, Curve C>
 class Padder<T, C, BoundaryCondition::OPEN>
 {
 public:
-  Padder() { DEBUG_LOG_CALL(); }
+  Padder() = default;
 
-  Padder(Data<T, C> const & /*data*/, size_t /*degree*/) { DEBUG_LOG_CALL(); }
+  Padder(Data<T, C> const & /*data*/, size_t /*degree*/) {}
 
-  Padder(Padder const & /*other*/) { DEBUG_LOG_CALL(); }
+  Padder(Padder const & /*other*/) = default;
 
-  Padder(Padder && /*other*/) noexcept { DEBUG_LOG_CALL(); }
+  Padder(Padder && /*other*/) noexcept = default;
 
-  ~Padder() noexcept { DEBUG_LOG_CALL(); }
+  ~Padder() noexcept = default;
 
   Padder &operator=(Padder const &other)
   {
-    DEBUG_LOG_CALL();
     if (this == &other)
     {
       return *this;
@@ -51,7 +50,6 @@ public:
 
   Padder &operator=(Padder &&other) noexcept
   {
-    DEBUG_LOG_CALL();
     if (this == &other)
     {
       return *this;
@@ -102,11 +100,10 @@ private:
   size_t pad_size{0};
 
 public:
-  Padder() { DEBUG_LOG_CALL(); }
+  Padder() = default;
 
   Padder(Data<T, C> const &data, size_t degree)
   {
-    DEBUG_LOG_CALL();
     this->pad_left  = data.at(0);
     this->pad_right = data.at(data.size() - 1);
     this->pad_size  = degree;
@@ -115,20 +112,17 @@ public:
   Padder(Padder const &other)
       : pad_left(other.pad_left), pad_right(other.pad_right), pad_size(other.pad_size)
   {
-    DEBUG_LOG_CALL();
   }
 
   Padder(Padder &&other) noexcept
       : pad_left(other.pad_left), pad_right(other.pad_right), pad_size(other.pad_size)
   {
-    DEBUG_LOG_CALL();
   }
 
-  ~Padder() noexcept { DEBUG_LOG_CALL(); }
+  ~Padder() noexcept = default;
 
   Padder &operator=(Padder const &other)
   {
-    DEBUG_LOG_CALL();
     if (this == &other)
     {
       return *this;
@@ -142,7 +136,6 @@ public:
 
   Padder &operator=(Padder &&other) noexcept
   {
-    DEBUG_LOG_CALL();
     if (this == &other)
     {
       return *this;
@@ -183,11 +176,10 @@ private:
   std::vector<T> pad_right{};
 
 public:
-  Padder() { DEBUG_LOG_CALL(); }
+  Padder() = default;
 
   Padder(Data<T, C> const &data, size_t degree)
   {
-    DEBUG_LOG_CALL();
     T period        = data.at(data.size() - 1) - data.at(0);
     this->pad_left  = data.slice(data.size() - degree - 1, data.size() - 1);
     this->pad_right = data.slice(1, degree + 1);
@@ -198,22 +190,17 @@ public:
     }
   }
 
-  Padder(Padder const &other) : pad_left(other.pad_left), pad_right(other.pad_right)
-  {
-    DEBUG_LOG_CALL();
-  }
+  Padder(Padder const &other) : pad_left(other.pad_left), pad_right(other.pad_right) {}
 
   Padder(Padder &&other) noexcept
       : pad_left(std::move(other.pad_left)), pad_right(std::move(other.pad_right))
   {
-    DEBUG_LOG_CALL();
   }
 
-  ~Padder() noexcept { DEBUG_LOG_CALL(); }
+  ~Padder() noexcept = default;
 
   Padder &operator=(Padder const &other)
   {
-    DEBUG_LOG_CALL();
     if (this == &other)
     {
       return *this;
@@ -226,7 +213,6 @@ public:
 
   Padder &operator=(Padder &&other) noexcept
   {
-    DEBUG_LOG_CALL();
     if (this == &other)
     {
       return *this;
