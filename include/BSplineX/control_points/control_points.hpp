@@ -38,29 +38,21 @@ private:
   size_t degree{};
 
 public:
-  ControlPoints() { DEBUG_LOG_CALL(); }
+  ControlPoints() = default;
 
-  ControlPoints(Data<T> data, size_t degree) : atter{data, degree}, degree{degree}
-  {
-    DEBUG_LOG_CALL();
-  }
+  ControlPoints(Data<T> data, size_t degree) : atter{data, degree}, degree{degree} {}
 
-  ControlPoints(ControlPoints const &other) : atter(other.atter), degree(other.degree)
-  {
-    DEBUG_LOG_CALL();
-  }
+  ControlPoints(ControlPoints const &other) : atter(other.atter), degree(other.degree) {}
 
   ControlPoints(ControlPoints &&other) noexcept
       : atter(std::move(other.atter)), degree(other.degree)
   {
-    DEBUG_LOG_CALL();
   }
 
-  ~ControlPoints() noexcept { DEBUG_LOG_CALL(); }
+  ~ControlPoints() noexcept = default;
 
   ControlPoints &operator=(ControlPoints const &other)
   {
-    DEBUG_LOG_CALL();
     if (this == &other)
     {
       return *this;
@@ -73,7 +65,6 @@ public:
 
   ControlPoints &operator=(ControlPoints &&other) noexcept
   {
-    DEBUG_LOG_CALL();
     if (this == &other)
     {
       return *this;
@@ -89,8 +80,8 @@ public:
   [[nodiscard]] size_t size() const { return this->atter.size(); }
 
   template <Curve C, Extrapolation EXT>
-  [[nodiscard]] ControlPoints get_derivative_control_points(knots::Knots<T, C, BC, EXT> const &knots
-  ) const
+  [[nodiscard]] ControlPoints
+  get_derivative_control_points(knots::Knots<T, C, BC, EXT> const &knots) const
   {
     size_t const d_num_ctrl_pts = this->atter.get_derivative_data_size();
     std::vector<T> d_ctrl_points;

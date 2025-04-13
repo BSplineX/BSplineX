@@ -57,7 +57,7 @@ public:
    *
    * Constructs an empty BSpline.
    */
-  BSpline() { DEBUG_LOG_CALL(); }
+  BSpline() = default;
 
   /**
    * @brief Constructs a BSpline from a knot vector and control points.
@@ -76,7 +76,6 @@ public:
   )
       : knots{knots_data, degree}, control_points{control_points_data, degree}, degree{degree}
   {
-    DEBUG_LOG_CALL();
     this->check_sizes();
     this->support.resize(this->degree + 1);
   }
@@ -92,7 +91,6 @@ public:
       : knots(other.knots), control_points(other.control_points), degree(other.degree),
         support(other.support)
   {
-    DEBUG_LOG_CALL();
   }
 
   /**
@@ -106,13 +104,12 @@ public:
       : knots(std::move(other.knots)), control_points(std::move(other.control_points)),
         degree(other.degree), support(std::move(other.support))
   {
-    DEBUG_LOG_CALL();
   }
 
   /**
    * @brief Destructor.
    */
-  ~BSpline() noexcept { DEBUG_LOG_CALL(); }
+  ~BSpline() noexcept = default;
 
   /**
    * @brief Copy assignment operator.
@@ -124,7 +121,6 @@ public:
    */
   BSpline &operator=(BSpline const &other)
   {
-    DEBUG_LOG_CALL();
     if (this == &other)
     {
       return *this;
@@ -147,7 +143,6 @@ public:
    */
   BSpline &operator=(BSpline &&other) noexcept
   {
-    DEBUG_LOG_CALL();
     if (this == &other)
     {
       return *this;
@@ -422,7 +417,6 @@ private:
   )
       : knots{knots}, control_points{control_points}, degree{degree}
   {
-    DEBUG_LOG_CALL();
     this->check_sizes();
     this->support.resize(this->degree + 1);
   }

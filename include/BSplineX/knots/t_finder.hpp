@@ -24,19 +24,18 @@ private:
   size_t index_right{0};
 
 public:
-  Finder() { DEBUG_LOG_CALL(); }
+  Finder() = default;
 
   Finder(Atter<T, C, BC> const &atter, size_t degree)
       : atter{&atter}, index_left{degree}, index_right{this->atter->size() - degree - 1}
   {
-    DEBUG_LOG_CALL();
   }
 
   Finder(Finder const &other) = delete;
 
   Finder(Finder &&other) = delete;
 
-  ~Finder() noexcept { DEBUG_LOG_CALL(); }
+  ~Finder() noexcept = default;
 
   Finder &operator=(Finder const &other) = delete;
 
@@ -68,14 +67,13 @@ private:
   size_t max_index{};
 
 public:
-  Finder() { DEBUG_LOG_CALL(); }
+  Finder() = default;
 
   Finder(Atter<T, Curve::UNIFORM, BC> const &atter, size_t degree)
       : value_left{atter.at(degree)}, value_right{atter.at(atter.size() - 1 - degree)},
         step_size_inv{ONE<T> / (atter.at(degree + 1) - atter.at(degree))}, degree{degree},
         max_index{atter.size() - 1 - degree - 1}
   {
-    DEBUG_LOG_CALL();
   }
 
   ~Finder() = default;

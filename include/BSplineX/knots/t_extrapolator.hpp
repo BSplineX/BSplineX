@@ -45,31 +45,27 @@ private:
   T value_right{};
 
 public:
-  Extrapolator() { DEBUG_LOG_CALL(); }
+  Extrapolator() = default;
 
   Extrapolator(Atter<T, C, BC> const &atter, size_t degree)
       : value_left{atter.at(degree)}, value_right{atter.at(atter.size() - degree - 1)}
   {
-    DEBUG_LOG_CALL();
   }
 
   Extrapolator(Extrapolator const &other)
       : value_left(other.value_left), value_right(other.value_right)
   {
-    DEBUG_LOG_CALL();
   }
 
   Extrapolator(Extrapolator &&other) noexcept
       : value_left(other.value_left), value_right(other.value_right)
   {
-    DEBUG_LOG_CALL();
   }
 
-  ~Extrapolator() { DEBUG_LOG_CALL(); }
+  ~Extrapolator() = default;
 
   Extrapolator &operator=(Extrapolator const &other)
   {
-    DEBUG_LOG_CALL();
     if (this == &other)
     {
       return *this;
@@ -82,7 +78,6 @@ public:
 
   Extrapolator &operator=(Extrapolator &&other) noexcept
   {
-    DEBUG_LOG_CALL();
     if (this == &other)
     {
       return *this;
@@ -111,32 +106,28 @@ private:
   T period{};
 
 public:
-  Extrapolator() { DEBUG_LOG_CALL(); }
+  Extrapolator() = default;
 
   Extrapolator(Atter<T, C, BC> const &atter, size_t degree)
       : value_left{atter.at(degree)}, value_right{atter.at(atter.size() - degree - 1)},
         period{this->value_right - this->value_left}
   {
-    DEBUG_LOG_CALL();
   }
 
   Extrapolator(Extrapolator const &other)
       : value_left(other.value_left), value_right(other.value_right), period(other.period)
   {
-    DEBUG_LOG_CALL();
   }
 
   Extrapolator(Extrapolator &&other) noexcept
       : value_left(other.value_left), value_right(other.value_right), period(other.period)
   {
-    DEBUG_LOG_CALL();
   }
 
-  ~Extrapolator() { DEBUG_LOG_CALL(); }
+  ~Extrapolator() = default;
 
   Extrapolator &operator=(Extrapolator const &other)
   {
-    DEBUG_LOG_CALL();
     if (this == &other)
     {
       return *this;
@@ -150,7 +141,6 @@ public:
 
   Extrapolator &operator=(Extrapolator &&other) noexcept
   {
-    DEBUG_LOG_CALL();
     if (this == &other)
     {
       return *this;
