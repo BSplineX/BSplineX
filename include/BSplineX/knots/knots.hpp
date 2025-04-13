@@ -112,7 +112,7 @@ public:
 
   [[nodiscard]] std::pair<size_t, T> find(T value) const
   {
-    if (value < this->value_left || value > this->value_right)
+    if (value < this->value_left or value > this->value_right)
     {
       value = this->extrapolator.extrapolate(value);
     }

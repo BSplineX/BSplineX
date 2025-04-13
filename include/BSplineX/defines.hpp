@@ -4,11 +4,15 @@
 #include <cassert>
 #include <cstddef>
 #include <limits>
+#include <stdexcept>
+
+// avoids clangd/clang-tidy complaining about unused header stdexcept
+[[maybe_unused]] constexpr auto use_stdexcept = sizeof(std::runtime_error);
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 #define debugassert(exp, msg) assert(((void)(msg), exp))
 #define releaseassert(exp, msg)                                                                    \
-  if (!(exp))                                                                                      \
+  if (not(exp))                                                                                    \
     throw std::runtime_error(msg);
 
 #ifdef BSPLINEX_DEBUG_LOG_CALL

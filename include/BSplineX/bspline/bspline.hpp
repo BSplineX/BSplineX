@@ -49,7 +49,7 @@ private:
   control_points::ControlPoints<T, BC> control_points{};
   size_t degree{};
   std::vector<T> mutable support{};
-  std::unique_ptr<BSpline> mutable derivative_ptr;
+  std::unique_ptr<BSpline const> mutable derivative_ptr;
 
 public:
   /**
@@ -189,15 +189,15 @@ public:
    */
   [[nodiscard]] std::vector<T>
   evaluate(std::vector<T> const &values, size_t derivative_order = 0) const
-
   {
     std::vector<T> results;
     results.reserve(values.size());
-
-    for (auto const &value : values)
-    {
-      results.push_back(this->evaluate(value, derivative_order));
-    }
+    std::transform(
+        values.begin(),
+        values.end(),
+        std::back_inserter(results),
+        [this, derivative_order](T x) { return this->evaluate(x, derivative_order); }
+    );
 
     return results;
   }
@@ -226,8 +226,9 @@ public:
     auto [index, basis_functions] = this->nnz_basis(value, derivative_order);
 
     basis_functions.insert(basis_functions.begin(), index, ZERO<T>);
-    basis_functions
-        .insert(basis_functions.end(), this->control_points.size() - index - this->degree - 1, ZERO<T>);
+    basis_functions.insert(
+        basis_functions.end(), this->control_points.size() - index - this->degree - 1, ZERO<T>
+    );
 
     return basis_functions;
   }
@@ -264,15 +265,19 @@ public:
   {
     releaseassert(x.size() == y.size(), "x and y must have the same size");
 
-    this->control_points = std::move(lsq::lsq<T, vec_const_iter, BC>(
-        this->degree,
-        this->knots.size(),
-        [this](T value, size_t derivative_order, std::vector<T> &vec) -> size_t
-        { return this->nnz_basis<vec_iter>(value, derivative_order, {vec.begin(), vec.end()}); },
-        vec_const_view{x.begin(), x.end()},
-        vec_const_view{y.begin(), y.end()},
-        {}
-    ));
+    this->control_points = std::move(
+        lsq::lsq<T, vec_const_iter, BC>(
+            this->degree,
+            this->knots.size(),
+            [this](T value, size_t derivative_order, std::vector<T> &vec) -> size_t
+            {
+              return this->nnz_basis<vec_iter>(value, derivative_order, {vec.begin(), vec.end()});
+            },
+            vec_const_view{x.begin(), x.end()},
+            vec_const_view{y.begin(), y.end()},
+            {}
+        )
+    );
     this->invalidate_derivative();
   }
 
@@ -319,22 +324,7 @@ public:
       );
     }
 
-    knots::Knots<T, C, BC, EXT> new_knots;
-    if constexpr (Curve::UNIFORM == C)
-    {
-      T const step = std::abs(x.at(1) - x.at(0));
-      for (size_t i{0}; i < x.size() - 1; i++)
-      {
-        T const diff = std::abs(x.at(i + 1) - x.at(i) - step);
-        T const max  = (std::max)(std::abs(x.at(i + 1) - x.at(i)), step);
-        releaseassert(diff <= RTOL<T> * max or diff <= ATOL<T>, "x is not uniform.");
-      }
-      new_knots = std::move(knots::Knots<T, C, BC, EXT>{{x.front(), x.back(), x.size()}, degree});
-    }
-    else
-    {
-      new_knots = std::move(knots::Knots<T, C, BC, EXT>{{x}, degree});
-    }
+    knots::Knots<T, C, BC, EXT> new_knots{{x}, degree};
 
     auto const knots_domain = new_knots.domain();
     releaseassert(
@@ -371,43 +361,46 @@ public:
       static_assert(false, "Unknown boundary condition, you should never get here!");
     }
 
-    this->control_points = std::move(lsq::lsq<T, vec_const_iter, BC>(
-        this->degree,
-        this->knots.size(),
-        [this](T value, size_t derivative_order, std::vector<T> &vec) -> size_t {
-          return this->template nnz_basis<vec_iter>(
-              value, derivative_order, {vec.begin(), vec.end()}
-          );
-        },
-        x_view,
-        y_view,
-        additional_conditions
-    ));
+    this->control_points = std::move(
+        lsq::lsq<T, vec_const_iter, BC>(
+            this->degree,
+            this->knots.size(),
+            [this](T value, size_t derivative_order, std::vector<T> &vec) -> size_t
+            {
+              return this->template nnz_basis<vec_iter>(
+                  value, derivative_order, {vec.begin(), vec.end()}
+              );
+            },
+            x_view,
+            y_view,
+            additional_conditions
+        )
+    );
 
     this->invalidate_derivative();
   }
 
   [[nodiscard]] std::vector<T> get_control_points() const
   {
-    std::vector<T> ctrl_pts;
-    ctrl_pts.reserve(this->control_points.size());
-
-    for (size_t i{0}; i < this->control_points.size(); i++)
-    {
-      ctrl_pts.push_back(this->control_points.at(i));
-    }
-
-    return ctrl_pts;
+    std::vector<T> control_points_vec;
+    control_points_vec.reserve(this->control_points.size());
+    std::generate_n(
+        std::back_inserter(control_points_vec),
+        this->control_points.size(),
+        [this, i = 0]() mutable { return this->control_points.at(i++); }
+    );
+    return control_points_vec;
   }
 
   [[nodiscard]] std::vector<T> get_knots() const
   {
     std::vector<T> knots_vec;
     knots_vec.reserve(this->knots.size());
-    for (size_t i{0}; i < this->knots.size(); i++)
-    {
-      knots_vec.push_back(this->knots.at(i));
-    }
+    std::generate_n(
+        std::back_inserter(knots_vec),
+        this->knots.size(),
+        [this, i = 0]() mutable { return this->knots.at(i++); }
+    );
 
     return knots_vec;
   }
@@ -555,7 +548,7 @@ private:
     if (not this->derivative_ptr)
     {
       debugassert(this->degree > 0, "Cannot compute derivative of a 0-degree bspline");
-      this->derivative_ptr = std::unique_ptr<BSpline>(new BSpline(
+      this->derivative_ptr = std::unique_ptr<BSpline const>(new BSpline(
           this->knots.get_derivative_knots(),
           this->control_points.get_derivative_control_points(this->knots),
           this->degree - 1
@@ -568,7 +561,7 @@ private:
   BSpline const *get_derivative(size_t derivative_order) const
   {
     releaseassert(
-        (0 < derivative_order) && (derivative_order <= this->degree),
+        (0 < derivative_order) and (derivative_order <= this->degree),
         "derivative_order must be in [1, degree]"
     );
     BSpline const *d = this;
