@@ -11,7 +11,7 @@
 #include "BSplineX/windows.hpp"
 
 // avoids clangd/clang-tidy complaining about unused header stdexcept
-[[maybe_unused]] constexpr auto use_stdexcept = sizeof(std::runtime_error);
+[[maybe_unused]] constexpr static auto shut_up_clang_tidy = sizeof(std::runtime_error);
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 #define debugassert(exp, msg) assert(((void)(msg), exp))
@@ -27,6 +27,8 @@
 #endif
 // NOLINTEND(cppcoreguidelines-macro-usage)
 
+// some compilers complain about static_assert(false, ...)
+// Use a false_type dependent from a template argument to silence them.
 template <auto>
 struct dependent_false : std::false_type
 {
