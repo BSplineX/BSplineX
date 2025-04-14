@@ -89,7 +89,7 @@ public:
    */
   BSpline(BSpline const &other)
       : knots(other.knots), control_points(other.control_points), degree(other.degree),
-        support(other.support), derivative_ptr(nullptr)
+        support(other.support), derivative_ptr(BSpline::deep_copy_derivative(other))
   {
   }
 
@@ -126,7 +126,7 @@ public:
     this->control_points = other.control_points;
     this->degree         = other.degree;
     this->support        = other.support;
-    this->derivative_ptr = nullptr;
+    this->derivative_ptr = BSpline::deep_copy_derivative(other);
 
     return *this;
   }
@@ -568,6 +568,16 @@ private:
   }
 
   void invalidate_derivative() const { this->derivative_ptr = nullptr; }
+
+  static std::unique_ptr<BSpline> deep_copy_derivative(BSpline const &other)
+  {
+    if (other.derivative_ptr)
+    {
+      return std::make_unique<BSpline>(*(other.derivative_ptr));
+    }
+
+    return std::unique_ptr<BSpline>{nullptr};
+  }
 };
 
 } // namespace bsplinex::bspline
