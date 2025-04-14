@@ -43,7 +43,6 @@ class Knots
 private:
   Atter<T, C, BC> atter{};
   Extrapolator<T, C, BC, EXT> extrapolator{};
-  Finder<T, C, BC, EXT> finder{};
   T value_left{};
   T value_right{};
   size_t degree{};
@@ -52,58 +51,20 @@ public:
   Knots() = default;
 
   Knots(Data<T, C> const &data, size_t degree)
-      : atter{data, degree}, extrapolator{this->atter, degree}, finder{this->atter, degree},
-        value_left{this->atter.at(degree)},
+      : atter{data, degree}, extrapolator{this->atter, degree}, value_left{this->atter.at(degree)},
         value_right{this->atter.at(this->atter.size() - degree - 1)}, degree{degree}
   {
   }
 
-  Knots(Knots const &other)
-      : atter(other.atter), extrapolator(other.extrapolator), finder(this->atter, other.degree),
-        value_left(other.value_left), value_right(other.value_right), degree{other.degree}
-  {
-  }
+  Knots(Knots const &other) = default;
 
-  Knots(Knots &&other) noexcept
-      : atter(std::move(other.atter)), extrapolator(std::move(other.extrapolator)),
-        finder(this->atter, other.degree), value_left(std::move(other.value_left)),
-        value_right(std::move(other.value_right)), degree{other.degree}
-  {
-  }
+  Knots(Knots &&other) noexcept = default;
 
   ~Knots() = default;
 
-  Knots &operator=(Knots const &other)
-  {
-    if (this == &other)
-    {
-      return *this;
-    }
+  Knots &operator=(Knots const &other) = default;
 
-    this->atter        = other.atter;
-    this->extrapolator = other.extrapolator;
-    new (&this->finder) Finder<T, C, BC, EXT>(this->atter, other.degree);
-    this->value_left  = other.value_left;
-    this->value_right = other.value_right;
-    this->degree      = other.degree;
-    return *this;
-  }
-
-  Knots &operator=(Knots &&other) noexcept
-  {
-    if (this == &other)
-    {
-      return *this;
-    }
-
-    this->atter        = std::move(other.atter);
-    this->extrapolator = std::move(other.extrapolator);
-    new (&this->finder) Finder<T, C, BC, EXT>(this->atter, other.degree);
-    this->value_left  = std::move(other.value_left);
-    this->value_right = std::move(other.value_right);
-    this->degree      = other.degree;
-    return *this;
-  }
+  Knots &operator=(Knots &&other) noexcept = default;
 
   [[nodiscard]] std::pair<size_t, T> find(T value) const
   {
@@ -112,7 +73,9 @@ public:
       value = this->extrapolator.extrapolate(value);
     }
 
-    return std::pair<size_t, T>{this->finder.find(value), value};
+    return std::pair<size_t, T>{
+        knots::find<T, C, BC, EXT>(this->atter, this->degree, value), value
+    };
   }
 
   [[nodiscard]] std::pair<T, T> domain() const { return std::make_pair(value_left, value_right); }
@@ -129,8 +92,7 @@ public:
 
 private:
   Knots(Atter<T, C, BC> const &atter, size_t degree)
-      : atter{atter}, extrapolator{this->atter, degree}, finder{this->atter, degree},
-        value_left{this->atter.at(degree)},
+      : atter{atter}, extrapolator{this->atter, degree}, value_left{this->atter.at(degree)},
         value_right{this->atter.at(this->atter.size() - degree - 1)}, degree{degree}
   {
   }
