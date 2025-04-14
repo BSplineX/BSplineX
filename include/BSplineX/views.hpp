@@ -4,6 +4,7 @@
 #include <iterator>
 
 #include "BSplineX/defines.hpp"
+#include "BSplineX/windows.hpp"
 
 namespace bsplinex::views
 {

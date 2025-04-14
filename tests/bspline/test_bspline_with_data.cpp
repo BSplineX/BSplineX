@@ -18,6 +18,7 @@
 #include "BSplineX/bspline/bspline_lsq.hpp"
 #include "BSplineX/bspline/bspline_types.hpp"
 #include "BSplineX/types.hpp"
+#include "BSplineX/windows.hpp"
 #include "matchers.hpp"
 
 using real_t = double;
@@ -86,7 +87,7 @@ std::string get_data_path()
     path /= "non-uniform";
   }
   path += ".json";
-  return path;
+  return path.string();
 }
 
 template <typename BSplineType>
@@ -118,7 +119,7 @@ BSplineType build_bspline(std::vector<real_t> knots, std::vector<real_t> ctrl_pt
     if (BoundaryCondition::CLAMPED == BSplineType::boundary_condition_type or
         BoundaryCondition::PERIODIC == BSplineType::boundary_condition_type)
     {
-      auto const deg = static_cast<int>(degree);
+      auto const deg = static_cast<std::ptrdiff_t>(degree);
       knots          = std::vector(std::next(knots.begin(), deg), std::prev(knots.end(), deg));
     }
     return BSplineType({knots}, {ctrl_pts}, degree);
@@ -355,12 +356,12 @@ TEMPLATE_TEST_CASE("BSpline", "[bspline][template][product]", BSPLINE_TEST_TYPES
       SECTION("interpolate(...)")
       {
 
-        auto x_interp                        = test_data["x"].get<std::vector<real_t>>();
-        auto y_interp                        = test_data["y"].get<std::vector<real_t>>();
+        auto x_interp                  = test_data["x"].get<std::vector<real_t>>();
+        auto y_interp                  = test_data["y"].get<std::vector<real_t>>();
         auto const [conds_left, conds_right] = test_data["conditions_interp"]
-                                                   .get<std::pair<
-                                                       std::vector<std::pair<real_t, real_t>>,
-                                                       std::vector<std::pair<real_t, real_t>>>>();
+                                             .get<std::pair<
+                                                 std::vector<std::pair<size_t, real_t>>,
+                                                 std::vector<std::pair<size_t, real_t>>>>();
         std::vector<lsq::Condition<real_t>> additional_conditions{};
         additional_conditions.reserve(conds_left.size() + conds_right.size());
         for (auto const &[derivative_order, value] : conds_left)

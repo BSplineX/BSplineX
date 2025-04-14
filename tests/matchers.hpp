@@ -14,6 +14,7 @@
 
 // BSplineX includes
 #include "BSplineX/defines.hpp"
+#include "BSplineX/windows.hpp"
 
 using namespace bsplinex::constants;
 
