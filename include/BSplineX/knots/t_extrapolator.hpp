@@ -4,7 +4,6 @@
 // Standard includes
 #include <cmath>
 #include <cstddef>
-#include <stdexcept>
 
 // BSplineX includes
 #include "BSplineX/defines.hpp"
@@ -52,41 +51,15 @@ public:
   {
   }
 
-  Extrapolator(Extrapolator const &other)
-      : value_left(other.value_left), value_right(other.value_right)
-  {
-  }
+  Extrapolator(Extrapolator const &other) = default;
 
-  Extrapolator(Extrapolator &&other) noexcept
-      : value_left(other.value_left), value_right(other.value_right)
-  {
-  }
+  Extrapolator(Extrapolator &&other) noexcept = default;
 
   ~Extrapolator() = default;
 
-  Extrapolator &operator=(Extrapolator const &other)
-  {
-    if (this == &other)
-    {
-      return *this;
-    }
+  Extrapolator &operator=(Extrapolator const &other) = default;
 
-    value_left  = other.value_left;
-    value_right = other.value_right;
-    return *this;
-  }
-
-  Extrapolator &operator=(Extrapolator &&other) noexcept
-  {
-    if (this == &other)
-    {
-      return *this;
-    }
-
-    value_left  = other.value_left;
-    value_right = other.value_right;
-    return *this;
-  }
+  Extrapolator &operator=(Extrapolator &&other) noexcept = default;
 
   [[nodiscard]] T extrapolate(T value) const
   {
@@ -114,43 +87,15 @@ public:
   {
   }
 
-  Extrapolator(Extrapolator const &other)
-      : value_left(other.value_left), value_right(other.value_right), period(other.period)
-  {
-  }
+  Extrapolator(Extrapolator const &other) = default;
 
-  Extrapolator(Extrapolator &&other) noexcept
-      : value_left(other.value_left), value_right(other.value_right), period(other.period)
-  {
-  }
+  Extrapolator(Extrapolator &&other) noexcept = default;
 
   ~Extrapolator() = default;
 
-  Extrapolator &operator=(Extrapolator const &other)
-  {
-    if (this == &other)
-    {
-      return *this;
-    }
+  Extrapolator &operator=(Extrapolator const &other) = default;
 
-    value_left  = other.value_left;
-    value_right = other.value_right;
-    period      = other.period;
-    return *this;
-  }
-
-  Extrapolator &operator=(Extrapolator &&other) noexcept
-  {
-    if (this == &other)
-    {
-      return *this;
-    }
-
-    value_left  = other.value_left;
-    value_right = other.value_right;
-    period      = other.period;
-    return *this;
-  }
+  Extrapolator &operator=(Extrapolator &&other) noexcept = default;
 
   [[nodiscard]] T extrapolate(T value) const
   {

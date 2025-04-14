@@ -6,7 +6,6 @@
 
 // BSplineX includes
 #include "BSplineX/control_points/c_atter.hpp"
-#include "BSplineX/defines.hpp"
 #include "BSplineX/knots/knots.hpp"
 #include "BSplineX/types.hpp"
 
@@ -42,38 +41,15 @@ public:
 
   ControlPoints(Data<T> data, size_t degree) : atter{data, degree}, degree{degree} {}
 
-  ControlPoints(ControlPoints const &other) : atter(other.atter), degree(other.degree) {}
+  ControlPoints(ControlPoints const &other) = default;
 
-  ControlPoints(ControlPoints &&other) noexcept
-      : atter(std::move(other.atter)), degree(other.degree)
-  {
-  }
+  ControlPoints(ControlPoints &&other) noexcept = default;
 
   ~ControlPoints() noexcept = default;
 
-  ControlPoints &operator=(ControlPoints const &other)
-  {
-    if (this == &other)
-    {
-      return *this;
-    }
+  ControlPoints &operator=(ControlPoints const &other) = default;
 
-    atter  = other.atter;
-    degree = other.degree;
-    return *this;
-  }
-
-  ControlPoints &operator=(ControlPoints &&other) noexcept
-  {
-    if (this == &other)
-    {
-      return *this;
-    }
-
-    atter  = std::move(other.atter);
-    degree = other.degree;
-    return *this;
-  }
+  ControlPoints &operator=(ControlPoints &&other) noexcept = default;
 
   [[nodiscard]] T at(size_t index) const { return this->atter.at(index); }
 

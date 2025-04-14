@@ -60,45 +60,15 @@ public:
     this->step_size = (end - begin) / (num_elems - 1);
   }
 
-  Data(Data const &other)
-      : begin(other.begin), end(other.end), num_elems(other.num_elems), step_size(other.step_size)
-  {
-  }
+  Data(Data const &other) = default;
 
-  Data(Data &&other) noexcept
-      : begin(other.begin), end(other.end), num_elems(other.num_elems), step_size(other.step_size)
-  {
-  }
+  Data(Data &&other) noexcept = default;
 
   ~Data() noexcept = default;
 
-  Data &operator=(Data const &other)
-  {
-    if (this == &other)
-    {
-      return *this;
-    }
+  Data &operator=(Data const &other) = default;
 
-    begin     = other.begin;
-    end       = other.end;
-    num_elems = other.num_elems;
-    step_size = other.step_size;
-    return *this;
-  }
-
-  Data &operator=(Data &&other) noexcept
-  {
-    if (this == &other)
-    {
-      return *this;
-    }
-
-    begin     = other.begin;
-    end       = other.end;
-    num_elems = other.num_elems;
-    step_size = other.step_size;
-    return *this;
-  }
+  Data &operator=(Data &&other) noexcept = default;
 
   [[nodiscard]] T at(size_t index) const
   {
@@ -152,33 +122,15 @@ public:
     );
   }
 
-  Data(Data const &other) : raw_data(other.raw_data) {}
+  Data(Data const &other) = default;
 
-  Data(Data &&other) noexcept : raw_data(std::move(other.raw_data)) {}
+  Data(Data &&other) noexcept = default;
 
   ~Data() noexcept = default;
 
-  Data &operator=(Data const &other)
-  {
-    if (this == &other)
-    {
-      return *this;
-    }
+  Data &operator=(Data const &other) = default;
 
-    raw_data = other.raw_data;
-    return *this;
-  }
-
-  Data &operator=(Data &&other) noexcept
-  {
-    if (this == &other)
-    {
-      return *this;
-    }
-
-    raw_data = std::move(other.raw_data);
-    return *this;
-  }
+  Data &operator=(Data &&other) noexcept = default;
 
   [[nodiscard]] T at(size_t index) const
   {

@@ -89,7 +89,7 @@ public:
    */
   BSpline(BSpline const &other)
       : knots(other.knots), control_points(other.control_points), degree(other.degree),
-        support(other.support)
+        support(other.support), derivative_ptr(nullptr)
   {
   }
 
@@ -100,11 +100,7 @@ public:
    *
    * @param other The BSpline to move from.
    */
-  BSpline(BSpline &&other) noexcept
-      : knots(std::move(other.knots)), control_points(std::move(other.control_points)),
-        degree(other.degree), support(std::move(other.support))
-  {
-  }
+  BSpline(BSpline &&other) noexcept = default;
 
   /**
    * @brief Destructor.
@@ -126,10 +122,12 @@ public:
       return *this;
     }
 
-    knots          = other.knots;
-    control_points = other.control_points;
-    degree         = other.degree;
-    support        = other.support;
+    this->knots          = other.knots;
+    this->control_points = other.control_points;
+    this->degree         = other.degree;
+    this->support        = other.support;
+    this->derivative_ptr = nullptr;
+
     return *this;
   }
 
@@ -141,20 +139,7 @@ public:
    * @param other The BSpline to move from.
    * @return A reference to this BSpline.
    */
-  BSpline &operator=(BSpline &&other) noexcept
-  {
-    if (this == &other)
-    {
-      return *this;
-    }
-
-    knots          = std::move(other.knots);
-    control_points = std::move(other.control_points);
-    degree         = other.degree;
-    support        = std::move(other.support);
-
-    return *this;
-  }
+  BSpline &operator=(BSpline &&other) noexcept = default;
 
   /**
    * @brief Evaluates the BSpline at a given value.
@@ -221,8 +206,9 @@ public:
     auto [index, basis_functions] = this->nnz_basis(value, derivative_order);
 
     basis_functions.insert(basis_functions.begin(), index, ZERO<T>);
-    basis_functions
-        .insert(basis_functions.end(), this->control_points.size() - index - this->degree - 1, ZERO<T>);
+    basis_functions.insert(
+        basis_functions.end(), this->control_points.size() - index - this->degree - 1, ZERO<T>
+    );
 
     return basis_functions;
   }
@@ -259,15 +245,19 @@ public:
   {
     releaseassert(x.size() == y.size(), "x and y must have the same size");
 
-    this->control_points = std::move(lsq::lsq<T, vec_const_iter, BC>(
-        this->degree,
-        this->knots.size(),
-        [this](T value, size_t derivative_order, std::vector<T> &vec) -> size_t
-        { return this->nnz_basis<vec_iter>(value, derivative_order, {vec.begin(), vec.end()}); },
-        vec_const_view{x.begin(), x.end()},
-        vec_const_view{y.begin(), y.end()},
-        {}
-    ));
+    this->control_points = std::move(
+        lsq::lsq<T, vec_const_iter, BC>(
+            this->degree,
+            this->knots.size(),
+            [this](T value, size_t derivative_order, std::vector<T> &vec) -> size_t
+            {
+              return this->nnz_basis<vec_iter>(value, derivative_order, {vec.begin(), vec.end()});
+            },
+            vec_const_view{x.begin(), x.end()},
+            vec_const_view{y.begin(), y.end()},
+            {}
+        )
+    );
     this->invalidate_derivative();
   }
 
@@ -366,18 +356,21 @@ public:
       static_assert(false, "Unknown boundary condition, you should never get here!");
     }
 
-    this->control_points = std::move(lsq::lsq<T, vec_const_iter, BC>(
-        this->degree,
-        this->knots.size(),
-        [this](T value, size_t derivative_order, std::vector<T> &vec) -> size_t {
-          return this->template nnz_basis<vec_iter>(
-              value, derivative_order, {vec.begin(), vec.end()}
-          );
-        },
-        x_view,
-        y_view,
-        additional_conditions
-    ));
+    this->control_points = std::move(
+        lsq::lsq<T, vec_const_iter, BC>(
+            this->degree,
+            this->knots.size(),
+            [this](T value, size_t derivative_order, std::vector<T> &vec) -> size_t
+            {
+              return this->template nnz_basis<vec_iter>(
+                  value, derivative_order, {vec.begin(), vec.end()}
+              );
+            },
+            x_view,
+            y_view,
+            additional_conditions
+        )
+    );
 
     this->invalidate_derivative();
   }

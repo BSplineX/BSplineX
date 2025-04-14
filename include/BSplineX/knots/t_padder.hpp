@@ -38,25 +38,9 @@ public:
 
   ~Padder() noexcept = default;
 
-  Padder &operator=(Padder const &other)
-  {
-    if (this == &other)
-    {
-      return *this;
-    }
+  Padder &operator=(Padder const &other) = default;
 
-    return *this;
-  }
-
-  Padder &operator=(Padder &&other) noexcept
-  {
-    if (this == &other)
-    {
-      return *this;
-    }
-
-    return *this;
-  }
+  Padder &operator=(Padder &&other) noexcept = default;
 
   [[nodiscard]] T left(size_t /*index*/) const
   {
@@ -109,43 +93,15 @@ public:
     this->pad_size  = degree;
   }
 
-  Padder(Padder const &other)
-      : pad_left(other.pad_left), pad_right(other.pad_right), pad_size(other.pad_size)
-  {
-  }
+  Padder(Padder const &other) = default;
 
-  Padder(Padder &&other) noexcept
-      : pad_left(other.pad_left), pad_right(other.pad_right), pad_size(other.pad_size)
-  {
-  }
+  Padder(Padder &&other) noexcept = default;
 
   ~Padder() noexcept = default;
 
-  Padder &operator=(Padder const &other)
-  {
-    if (this == &other)
-    {
-      return *this;
-    }
+  Padder &operator=(Padder const &other) = default;
 
-    pad_left  = other.pad_left;
-    pad_right = other.pad_right;
-    pad_size  = other.pad_size;
-    return *this;
-  }
-
-  Padder &operator=(Padder &&other) noexcept
-  {
-    if (this == &other)
-    {
-      return *this;
-    }
-
-    pad_left  = other.pad_left;
-    pad_right = other.pad_right;
-    pad_size  = other.pad_size;
-    return *this;
-  }
+  Padder &operator=(Padder &&other) noexcept = default;
 
   [[nodiscard]] T left([[maybe_unused]] size_t index) const
   {
@@ -190,38 +146,15 @@ public:
     }
   }
 
-  Padder(Padder const &other) : pad_left(other.pad_left), pad_right(other.pad_right) {}
+  Padder(Padder const &other) = default;
 
-  Padder(Padder &&other) noexcept
-      : pad_left(std::move(other.pad_left)), pad_right(std::move(other.pad_right))
-  {
-  }
+  Padder(Padder &&other) noexcept = default;
 
   ~Padder() noexcept = default;
 
-  Padder &operator=(Padder const &other)
-  {
-    if (this == &other)
-    {
-      return *this;
-    }
+  Padder &operator=(Padder const &other) = default;
 
-    pad_left  = other.pad_left;
-    pad_right = other.pad_right;
-    return *this;
-  }
-
-  Padder &operator=(Padder &&other) noexcept
-  {
-    if (this == &other)
-    {
-      return *this;
-    }
-
-    pad_left  = std::move(other.pad_left);
-    pad_right = std::move(other.pad_right);
-    return *this;
-  }
+  Padder &operator=(Padder &&other) noexcept = default;
 
   [[nodiscard]] T left(size_t index) const
   {

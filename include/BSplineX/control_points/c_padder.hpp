@@ -26,25 +26,9 @@ public:
 
   ~Padder() noexcept = default;
 
-  Padder &operator=(Padder const &other)
-  {
-    if (this == &other)
-    {
-      return *this;
-    }
+  Padder &operator=(Padder const &other) = default;
 
-    return *this;
-  }
-
-  Padder &operator=(Padder &&other) noexcept
-  {
-    if (this == &other)
-    {
-      return *this;
-    }
-
-    return *this;
-  }
+  Padder &operator=(Padder &&other) noexcept = default;
 
   [[nodiscard]] T right(size_t /*index*/) const
   {
@@ -72,33 +56,15 @@ public:
 
   Padder(Data<T> &data, size_t degree) : pad_right{data.slice(0, degree)} {}
 
-  Padder(Padder const &other) : pad_right(other.pad_right) {}
+  Padder(Padder const &other) = default;
 
-  Padder(Padder &&other) noexcept : pad_right(std::move(other.pad_right)) {}
+  Padder(Padder &&other) noexcept = default;
 
   ~Padder() noexcept = default;
 
-  Padder &operator=(Padder const &other)
-  {
-    if (this == &other)
-    {
-      return *this;
-    }
+  Padder &operator=(Padder const &other) = default;
 
-    pad_right = other.pad_right;
-    return *this;
-  }
-
-  Padder &operator=(Padder &&other) noexcept
-  {
-    if (this == &other)
-    {
-      return *this;
-    }
-
-    pad_right = std::move(other.pad_right);
-    return *this;
-  }
+  Padder &operator=(Padder &&other) noexcept = default;
 
   [[nodiscard]] T right(size_t index) const
   {
