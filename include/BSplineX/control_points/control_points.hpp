@@ -9,6 +9,7 @@
 #include "BSplineX/defines.hpp"
 #include "BSplineX/knots/knots.hpp"
 #include "BSplineX/types.hpp"
+#include "BSplineX/windows.hpp"
 
 /**
  * Naming convention:

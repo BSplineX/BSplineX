@@ -27,6 +27,11 @@
 #endif
 // NOLINTEND(cppcoreguidelines-macro-usage)
 
+template <auto>
+struct dependent_false : std::false_type
+{
+};
+
 namespace bsplinex::constants
 {
 

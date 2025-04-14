@@ -38,6 +38,7 @@
 #include "BSplineX/defines.hpp"
 #include "BSplineX/types.hpp"
 #include "BSplineX/views.hpp"
+#include "BSplineX/windows.hpp"
 
 namespace bsplinex::lsq
 {

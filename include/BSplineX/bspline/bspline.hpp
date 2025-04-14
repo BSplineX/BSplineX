@@ -359,7 +359,9 @@ public:
     }
     else
     {
-      static_assert(false, "Unknown boundary condition, you should never get here!");
+      static_assert(
+          dependent_false<BC>::value, "Unknown boundary condition, you should never get here!"
+      );
     }
 
     this->control_points = std::move(
