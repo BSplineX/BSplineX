@@ -17,37 +17,19 @@ template <typename T, BoundaryCondition BC>
 class Padder
 {
 public:
-  Padder() { DEBUG_LOG_CALL(); }
+  Padder() = default;
 
-  Padder(Data<T> & /*data*/, size_t /*degree*/) { DEBUG_LOG_CALL(); }
+  Padder(Data<T> & /*data*/, size_t /*degree*/) {}
 
-  Padder(Padder const & /*other*/) { DEBUG_LOG_CALL(); }
+  Padder(Padder const & /*other*/) = default;
 
-  Padder(Padder && /*other*/) noexcept { DEBUG_LOG_CALL(); }
+  Padder(Padder && /*other*/) noexcept = default;
 
-  ~Padder() noexcept { DEBUG_LOG_CALL(); }
+  ~Padder() noexcept = default;
 
-  Padder &operator=(Padder const &other)
-  {
-    DEBUG_LOG_CALL();
-    if (this == &other)
-    {
-      return *this;
-    }
+  Padder &operator=(Padder const &other) = default;
 
-    return *this;
-  }
-
-  Padder &operator=(Padder &&other) noexcept
-  {
-    DEBUG_LOG_CALL();
-    if (this == &other)
-    {
-      return *this;
-    }
-
-    return *this;
-  }
+  Padder &operator=(Padder &&other) noexcept = default;
 
   [[nodiscard]] T right(size_t /*index*/) const
   {
@@ -71,39 +53,19 @@ private:
   std::vector<T> pad_right{};
 
 public:
-  Padder() { DEBUG_LOG_CALL(); }
+  Padder() = default;
 
-  Padder(Data<T> &data, size_t degree) : pad_right{data.slice(0, degree)} { DEBUG_LOG_CALL(); }
+  Padder(Data<T> &data, size_t degree) : pad_right{data.slice(0, degree)} {}
 
-  Padder(Padder const &other) : pad_right(other.pad_right) { DEBUG_LOG_CALL(); }
+  Padder(Padder const &other) = default;
 
-  Padder(Padder &&other) noexcept : pad_right(std::move(other.pad_right)) { DEBUG_LOG_CALL(); }
+  Padder(Padder &&other) noexcept = default;
 
-  ~Padder() noexcept { DEBUG_LOG_CALL(); }
+  ~Padder() noexcept = default;
 
-  Padder &operator=(Padder const &other)
-  {
-    DEBUG_LOG_CALL();
-    if (this == &other)
-    {
-      return *this;
-    }
+  Padder &operator=(Padder const &other) = default;
 
-    pad_right = other.pad_right;
-    return *this;
-  }
-
-  Padder &operator=(Padder &&other) noexcept
-  {
-    DEBUG_LOG_CALL();
-    if (this == &other)
-    {
-      return *this;
-    }
-
-    pad_right = std::move(other.pad_right);
-    return *this;
-  }
+  Padder &operator=(Padder &&other) noexcept = default;
 
   [[nodiscard]] T right(size_t index) const
   {

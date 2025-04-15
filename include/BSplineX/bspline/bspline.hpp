@@ -58,7 +58,7 @@ public:
    *
    * Constructs an empty BSpline.
    */
-  BSpline() { DEBUG_LOG_CALL(); }
+  BSpline() = default;
 
   /**
    * @brief Constructs a BSpline from a knot vector and control points.
@@ -77,7 +77,6 @@ public:
   )
       : knots{knots_data, degree}, control_points{control_points_data, degree}, degree{degree}
   {
-    DEBUG_LOG_CALL();
     this->check_sizes();
     this->support.resize(this->degree + 1);
   }
@@ -91,9 +90,8 @@ public:
    */
   BSpline(BSpline const &other)
       : knots(other.knots), control_points(other.control_points), degree(other.degree),
-        support(other.support)
+        support(other.support), derivative_ptr(BSpline::deep_copy_derivative(other))
   {
-    DEBUG_LOG_CALL();
   }
 
   /**
@@ -103,17 +101,12 @@ public:
    *
    * @param other The BSpline to move from.
    */
-  BSpline(BSpline &&other) noexcept
-      : knots(std::move(other.knots)), control_points(std::move(other.control_points)),
-        degree(other.degree), support(std::move(other.support))
-  {
-    DEBUG_LOG_CALL();
-  }
+  BSpline(BSpline &&other) noexcept = default;
 
   /**
    * @brief Destructor.
    */
-  ~BSpline() noexcept { DEBUG_LOG_CALL(); }
+  ~BSpline() noexcept = default;
 
   /**
    * @brief Copy assignment operator.
@@ -125,16 +118,17 @@ public:
    */
   BSpline &operator=(BSpline const &other)
   {
-    DEBUG_LOG_CALL();
     if (this == &other)
     {
       return *this;
     }
 
-    knots          = other.knots;
-    control_points = other.control_points;
-    degree         = other.degree;
-    support        = other.support;
+    this->knots          = other.knots;
+    this->control_points = other.control_points;
+    this->degree         = other.degree;
+    this->support        = other.support;
+    this->derivative_ptr = BSpline::deep_copy_derivative(other);
+
     return *this;
   }
 
@@ -146,21 +140,7 @@ public:
    * @param other The BSpline to move from.
    * @return A reference to this BSpline.
    */
-  BSpline &operator=(BSpline &&other) noexcept
-  {
-    DEBUG_LOG_CALL();
-    if (this == &other)
-    {
-      return *this;
-    }
-
-    knots          = std::move(other.knots);
-    control_points = std::move(other.control_points);
-    degree         = other.degree;
-    support        = std::move(other.support);
-
-    return *this;
-  }
+  BSpline &operator=(BSpline &&other) noexcept = default;
 
   /**
    * @brief Evaluates the BSpline at a given value.
@@ -418,7 +398,6 @@ private:
   )
       : knots{knots}, control_points{control_points}, degree{degree}
   {
-    DEBUG_LOG_CALL();
     this->check_sizes();
     this->support.resize(this->degree + 1);
   }
@@ -577,6 +556,16 @@ private:
   }
 
   void invalidate_derivative() const { this->derivative_ptr = nullptr; }
+
+  static std::unique_ptr<BSpline> deep_copy_derivative(BSpline const &other)
+  {
+    if (other.derivative_ptr)
+    {
+      return std::make_unique<BSpline>(*(other.derivative_ptr));
+    }
+
+    return std::unique_ptr<BSpline>{nullptr};
+  }
 };
 
 } // namespace bsplinex::bspline

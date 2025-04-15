@@ -19,47 +19,19 @@ private:
   Padder<T, BC> padder{};
 
 public:
-  Atter() { DEBUG_LOG_CALL(); }
+  Atter() = default;
 
-  Atter(Data<T> data, size_t degree) : data{std::move(data)}, padder{this->data, degree}
-  {
-    DEBUG_LOG_CALL();
-  }
+  Atter(Data<T> data, size_t degree) : data{std::move(data)}, padder{this->data, degree} {}
 
-  Atter(Atter const &other) : data(other.data), padder(other.padder) { DEBUG_LOG_CALL(); }
+  Atter(Atter const &other) = default;
 
-  Atter(Atter &&other) noexcept : data(std::move(other.data)), padder(std::move(other.padder))
-  {
-    DEBUG_LOG_CALL();
-  }
+  Atter(Atter &&other) noexcept = default;
 
-  ~Atter() noexcept { DEBUG_LOG_CALL(); }
+  ~Atter() noexcept = default;
 
-  Atter &operator=(Atter const &other)
-  {
-    DEBUG_LOG_CALL();
-    if (this == &other)
-    {
-      return *this;
-    }
+  Atter &operator=(Atter const &other) = default;
 
-    data   = other.data;
-    padder = other.padder;
-    return *this;
-  }
-
-  Atter &operator=(Atter &&other) noexcept
-  {
-    DEBUG_LOG_CALL();
-    if (this == &other)
-    {
-      return *this;
-    }
-
-    data   = std::move(other.data);
-    padder = std::move(other.padder);
-    return *this;
-  }
+  Atter &operator=(Atter &&other) noexcept = default;
 
   [[nodiscard]] T at(size_t index) const
   {

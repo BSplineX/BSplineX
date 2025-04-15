@@ -6,7 +6,6 @@
 
 // BSplineX includes
 #include "BSplineX/control_points/c_atter.hpp"
-#include "BSplineX/defines.hpp"
 #include "BSplineX/knots/knots.hpp"
 #include "BSplineX/types.hpp"
 #include "BSplineX/windows.hpp"
@@ -39,59 +38,27 @@ private:
   size_t degree{};
 
 public:
-  ControlPoints() { DEBUG_LOG_CALL(); }
+  ControlPoints() = default;
 
-  ControlPoints(Data<T> data, size_t degree) : atter{data, degree}, degree{degree}
-  {
-    DEBUG_LOG_CALL();
-  }
+  ControlPoints(Data<T> data, size_t degree) : atter{data, degree}, degree{degree} {}
 
-  ControlPoints(ControlPoints const &other) : atter(other.atter), degree(other.degree)
-  {
-    DEBUG_LOG_CALL();
-  }
+  ControlPoints(ControlPoints const &other) = default;
 
-  ControlPoints(ControlPoints &&other) noexcept
-      : atter(std::move(other.atter)), degree(other.degree)
-  {
-    DEBUG_LOG_CALL();
-  }
+  ControlPoints(ControlPoints &&other) noexcept = default;
 
-  ~ControlPoints() noexcept { DEBUG_LOG_CALL(); }
+  ~ControlPoints() noexcept = default;
 
-  ControlPoints &operator=(ControlPoints const &other)
-  {
-    DEBUG_LOG_CALL();
-    if (this == &other)
-    {
-      return *this;
-    }
+  ControlPoints &operator=(ControlPoints const &other) = default;
 
-    atter  = other.atter;
-    degree = other.degree;
-    return *this;
-  }
-
-  ControlPoints &operator=(ControlPoints &&other) noexcept
-  {
-    DEBUG_LOG_CALL();
-    if (this == &other)
-    {
-      return *this;
-    }
-
-    atter  = std::move(other.atter);
-    degree = other.degree;
-    return *this;
-  }
+  ControlPoints &operator=(ControlPoints &&other) noexcept = default;
 
   [[nodiscard]] T at(size_t index) const { return this->atter.at(index); }
 
   [[nodiscard]] size_t size() const { return this->atter.size(); }
 
   template <Curve C, Extrapolation EXT>
-  [[nodiscard]] ControlPoints get_derivative_control_points(knots::Knots<T, C, BC, EXT> const &knots
-  ) const
+  [[nodiscard]] ControlPoints
+  get_derivative_control_points(knots::Knots<T, C, BC, EXT> const &knots) const
   {
     size_t const d_num_ctrl_pts = this->atter.get_derivative_data_size();
     std::vector<T> d_ctrl_points;

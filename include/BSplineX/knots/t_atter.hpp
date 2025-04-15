@@ -22,47 +22,19 @@ private:
   Padder<T, C, BC> padder{};
 
 public:
-  Atter() { DEBUG_LOG_CALL(); }
+  Atter() = default;
 
-  Atter(Data<T, C> const &data, size_t degree) : data{data}, padder{this->data, degree}
-  {
-    DEBUG_LOG_CALL();
-  }
+  Atter(Data<T, C> const &data, size_t degree) : data{data}, padder{this->data, degree} {}
 
-  Atter(Atter const &other) : data(other.data), padder(other.padder) { DEBUG_LOG_CALL(); }
+  Atter(Atter const &other) = default;
 
-  Atter(Atter &&other) noexcept : data(std::move(other.data)), padder(std::move(other.padder))
-  {
-    DEBUG_LOG_CALL();
-  }
+  Atter(Atter &&other) noexcept = default;
 
-  ~Atter() noexcept { DEBUG_LOG_CALL(); }
+  ~Atter() noexcept = default;
 
-  Atter &operator=(Atter const &other)
-  {
-    DEBUG_LOG_CALL();
-    if (this == &other)
-    {
-      return *this;
-    }
+  Atter &operator=(Atter const &other) = default;
 
-    data   = other.data;
-    padder = other.padder;
-    return *this;
-  }
-
-  Atter &operator=(Atter &&other) noexcept
-  {
-    DEBUG_LOG_CALL();
-    if (this == &other)
-    {
-      return *this;
-    }
-
-    data   = std::move(other.data);
-    padder = std::move(other.padder);
-    return *this;
-  }
+  Atter &operator=(Atter &&other) noexcept = default;
 
   [[nodiscard]] T at(size_t index) const
   {
@@ -118,6 +90,8 @@ public:
     iterator(iterator const &b) = default;
 
     iterator(iterator &&b) = default;
+
+    iterator &operator=(iterator const &b) = default;
 
     iterator &operator=(iterator &&b) = default;
 
@@ -179,18 +153,6 @@ public:
     }
 
     bool operator==(iterator const &other) const { return this->index == other.index; }
-
-    iterator &operator=(iterator const &b)
-    {
-      if (this == &b)
-      {
-        return *this;
-      }
-
-      this->atter = b.atter;
-      this->index = b.index;
-      return *this;
-    };
 
     bool operator!=(iterator const &other) const { return !(*this == other); }
 

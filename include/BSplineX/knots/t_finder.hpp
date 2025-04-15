@@ -4,6 +4,8 @@
 // Standard includes
 #include <algorithm>
 #include <cstddef>
+#include <iterator>
+#include <type_traits>
 
 // BSplineX includes
 #include "BSplineX/defines.hpp"
@@ -14,95 +16,39 @@
 namespace bsplinex::knots
 {
 
-using namespace constants;
-
 template <typename T, Curve C, BoundaryCondition BC, Extrapolation EXT>
-class Finder
+[[nodiscard]] inline size_t find(Atter<T, C, BC> const &atter, size_t degree, T value)
 {
-private:
-  Atter<T, C, BC> const *atter{nullptr};
-  size_t index_left{0};
-  size_t index_right{0};
+  size_t const index_left{degree};
+  size_t const index_right{atter.size() - degree - 1};
+  debugassert(
+      value >= atter.at(index_left) && value <= atter.at(index_right), "Value outside of the domain"
+  );
 
-public:
-  Finder() { DEBUG_LOG_CALL(); }
+  using difference_type =
+      typename std::remove_reference_t<decltype(atter)>::iterator::difference_type;
+  auto const upper = std::upper_bound(
+      std::next(atter.begin(), static_cast<difference_type>(index_left)),
+      std::next(atter.begin(), static_cast<difference_type>(index_right)),
+      value
+  );
 
-  Finder(Atter<T, C, BC> const &atter, size_t degree)
-      : atter{&atter}, index_left{degree}, index_right{this->atter->size() - degree - 1}
-  {
-    DEBUG_LOG_CALL();
-  }
-
-  Finder(Finder const &other) = delete;
-
-  Finder(Finder &&other) = delete;
-
-  ~Finder() noexcept { DEBUG_LOG_CALL(); }
-
-  Finder &operator=(Finder const &other) = delete;
-
-  Finder &operator=(Finder &&other) = delete;
-
-  [[nodiscard]] size_t find(T value) const
-  {
-    debugassert(
-        value >= this->atter->at(this->index_left) and value <= this->atter->at(this->index_right),
-        "Value outside of the domain"
-    );
-    using difference_type =
-        typename std::remove_pointer_t<decltype(atter)>::iterator::difference_type;
-    auto upper = std::upper_bound(
-        this->atter->begin() + static_cast<difference_type>(this->index_left),
-        this->atter->begin() + static_cast<difference_type>(this->index_right),
-        value
-    );
-
-    return upper - this->atter->begin() - 1;
-  }
-};
+  return upper - atter.begin() - 1;
+}
 
 template <typename T, BoundaryCondition BC, Extrapolation EXT>
-class Finder<T, Curve::UNIFORM, BC, EXT>
+[[nodiscard]] size_t find(Atter<T, Curve::UNIFORM, BC> const &atter, size_t degree, T value)
 {
-private:
-  T value_left{};
-  T value_right{};
-  T step_size_inv{};
-  size_t degree{};
-  size_t max_index{};
+  T const value_left{atter.at(degree)};
+  T const value_right{atter.at(atter.size() - 1 - degree)};
+  T const step_size{atter.at(degree + 1) - atter.at(degree)};
+  size_t const max_index{atter.size() - 1 - degree - 1};
 
-public:
-  Finder() { DEBUG_LOG_CALL(); }
+  debugassert(value >= value_left && value <= value_right, "Value outside of the domain");
 
-  Finder(Atter<T, Curve::UNIFORM, BC> const &atter, size_t degree)
-      : value_left{atter.at(degree)}, value_right{atter.at(atter.size() - 1 - degree)},
-        step_size_inv{ONE<T> / (atter.at(degree + 1) - atter.at(degree))}, degree{degree},
-        max_index{atter.size() - 1 - degree - 1}
-  {
-    DEBUG_LOG_CALL();
-  }
-
-  ~Finder() = default;
-
-  Finder(Finder const &other) = delete;
-
-  Finder(Finder &&other) = delete;
-
-  Finder &operator=(Finder const &other) = delete;
-
-  Finder &operator=(Finder &&other) = delete;
-
-  [[nodiscard]] size_t find(T value) const
-  {
-    debugassert(
-        value >= this->value_left and value <= this->value_right, "Value outside of the domain"
-    );
-
-    size_t const index =
-        static_cast<size_t>((value - this->value_left) * this->step_size_inv) + this->degree;
-    return std::min(index, max_index);
-  }
-};
+  auto const index = static_cast<size_t>((value - value_left) / step_size) + degree;
+  return std::min(index, max_index);
+}
 
 } // namespace bsplinex::knots
 

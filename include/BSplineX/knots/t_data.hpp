@@ -36,11 +36,11 @@ private:
   T step_size{};
 
 public:
-  Data() { DEBUG_LOG_CALL(); }
+  Data() = default;
 
   Data(std::vector<T> const &data)
   {
-    releaseassert(Data::is_uniform(data), "data is not uniform");
+    releaseassert(Data::is_uniform(data), "Data must be uniform with step > 0");
 
     this->begin     = data.front();
     this->end       = data.back();
@@ -51,7 +51,6 @@ public:
   // Specifying the num-elems means the domain will be [begin, end]
   Data(T begin, T end, size_t num_elems)
   {
-    DEBUG_LOG_CALL();
     debugassert(begin < end, "Wrong interval");
 
     this->begin     = begin;
@@ -60,49 +59,15 @@ public:
     this->step_size = (end - begin) / (num_elems - 1);
   }
 
-  Data(Data const &other)
-      : begin(other.begin), end(other.end), num_elems(other.num_elems), step_size(other.step_size)
-  {
-    DEBUG_LOG_CALL();
-  }
+  Data(Data const &other) = default;
 
-  Data(Data &&other) noexcept
-      : begin(other.begin), end(other.end), num_elems(other.num_elems), step_size(other.step_size)
-  {
-    DEBUG_LOG_CALL();
-  }
+  Data(Data &&other) noexcept = default;
 
-  ~Data() noexcept { DEBUG_LOG_CALL(); }
+  ~Data() noexcept = default;
 
-  Data &operator=(Data const &other)
-  {
-    DEBUG_LOG_CALL();
-    if (this == &other)
-    {
-      return *this;
-    }
+  Data &operator=(Data const &other) = default;
 
-    begin     = other.begin;
-    end       = other.end;
-    num_elems = other.num_elems;
-    step_size = other.step_size;
-    return *this;
-  }
-
-  Data &operator=(Data &&other) noexcept
-  {
-    DEBUG_LOG_CALL();
-    if (this == &other)
-    {
-      return *this;
-    }
-
-    begin     = other.begin;
-    end       = other.end;
-    num_elems = other.num_elems;
-    step_size = other.step_size;
-    return *this;
-  }
+  Data &operator=(Data &&other) noexcept = default;
 
   [[nodiscard]] T at(size_t index) const
   {
@@ -142,20 +107,24 @@ private:
       return true;
     }
 
-    T const expected_step = std::abs(x.at(1) - x.at(0));
+    T const expected_step = x.at(1) - x.at(0);
+    if (expected_step <= 0)
+    {
+      return false;
+    }
 
     return std::adjacent_find(
                x.begin(),
-               x.end() - 1,
+               x.end(),
                [expected_step](T a, T b)
                {
-                 T const actual_step = std::abs(b - a);
+                 T const actual_step = b - a;
                  T const diff        = std::abs(actual_step - expected_step);
                  T const max_val     = std::max(actual_step, expected_step);
 
                  return not(diff <= constants::RTOL<T> * max_val or diff <= constants::ATOL<T>);
                }
-           ) == x.end() - 1;
+           ) == x.end();
   }
 };
 
@@ -166,11 +135,10 @@ private:
   std::vector<T> raw_data{};
 
 public:
-  Data() { DEBUG_LOG_CALL(); }
+  Data() = default;
 
   Data(std::vector<T> const &data) : raw_data(data)
   {
-    DEBUG_LOG_CALL();
     // NOTE: thank the STL for this wonderful backwards built sort check. Think it as if std::less
     // is <= and std::less_equal is <.
     debugassert(
@@ -179,35 +147,15 @@ public:
     );
   }
 
-  Data(Data const &other) : raw_data(other.raw_data) { DEBUG_LOG_CALL(); }
+  Data(Data const &other) = default;
 
-  Data(Data &&other) noexcept : raw_data(std::move(other.raw_data)) { DEBUG_LOG_CALL(); }
+  Data(Data &&other) noexcept = default;
 
-  ~Data() noexcept { DEBUG_LOG_CALL(); }
+  ~Data() noexcept = default;
 
-  Data &operator=(Data const &other)
-  {
-    DEBUG_LOG_CALL();
-    if (this == &other)
-    {
-      return *this;
-    }
+  Data &operator=(Data const &other) = default;
 
-    raw_data = other.raw_data;
-    return *this;
-  }
-
-  Data &operator=(Data &&other) noexcept
-  {
-    DEBUG_LOG_CALL()
-    if (this == &other)
-    {
-      return *this;
-    }
-
-    raw_data = std::move(other.raw_data);
-    return *this;
-  }
+  Data &operator=(Data &&other) noexcept = default;
 
   [[nodiscard]] T at(size_t index) const
   {
