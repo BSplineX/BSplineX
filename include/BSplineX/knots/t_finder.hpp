@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <iterator>
+#include <type_traits>
 
 // BSplineX includes
 #include "BSplineX/defines.hpp"
@@ -25,10 +26,10 @@ template <typename T, Curve C, BoundaryCondition BC, Extrapolation EXT>
   );
 
   using difference_type =
-      typename std::remove_pointer_t<decltype(atter)>::iterator::difference_type;
+      typename std::remove_reference_t<decltype(atter)>::iterator::difference_type;
   auto const upper = std::upper_bound(
       std::next(atter.begin(), static_cast<difference_type>(index_left)),
-      std::next(atter.begin(), static_cast<difference_type>(index_left)),
+      std::next(atter.begin(), static_cast<difference_type>(index_right)),
       value
   );
 
@@ -40,13 +41,12 @@ template <typename T, BoundaryCondition BC, Extrapolation EXT>
 {
   T const value_left{atter.at(degree)};
   T const value_right{atter.at(atter.size() - 1 - degree)};
-  T const step_size_inv{constants::ONE<T> / (atter.at(degree + 1) - atter.at(degree))};
+  T const step_size{atter.at(degree + 1) - atter.at(degree)};
   size_t const max_index{atter.size() - 1 - degree - 1};
 
   debugassert(value >= value_left && value <= value_right, "Value outside of the domain");
 
-  value            -= value_left;
-  auto const index  = static_cast<size_t>((value - value_left) * step_size_inv) + degree;
+  auto const index = static_cast<size_t>((value - value_left) / step_size) + degree;
   return std::min(index, max_index);
 }
 
