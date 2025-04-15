@@ -15,8 +15,8 @@ using namespace bsplinex;
 using namespace bsplinex::knots;
 
 TEST_CASE(
-    "knots::Finder<double, NON_UNIFORM, PERIODIC, PERIODIC> "
-    "finder{atter}",
+    "knots::find<double, NON_UNIFORM, PERIODIC, PERIODIC>"
+    "(atter, degree, value)",
     "[t_finder]"
 )
 {
@@ -25,7 +25,7 @@ TEST_CASE(
   size_t constexpr degree{3};
   Atter<double, Curve::NON_UNIFORM, BoundaryCondition::PERIODIC> const atter{data, degree};
 
-  SECTION("finder.find()")
+  SECTION("find()")
   {
     std::vector<double> const values_find{0.1, 2.0, 2.2, 6.3};
     std::vector<size_t> const expected_indices{degree, degree + 1, degree + 3, degree + 7};
