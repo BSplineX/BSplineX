@@ -8,6 +8,7 @@
 #include "BSplineX/control_points/c_data.hpp"
 #include "BSplineX/defines.hpp"
 #include "BSplineX/types.hpp"
+#include "BSplineX/windows.hpp"
 
 namespace bsplinex::control_points
 {

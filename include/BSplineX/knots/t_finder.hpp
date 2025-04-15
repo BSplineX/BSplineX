@@ -10,6 +10,7 @@
 #include "BSplineX/defines.hpp"
 #include "BSplineX/knots/t_atter.hpp"
 #include "BSplineX/types.hpp"
+#include "BSplineX/windows.hpp"
 
 namespace bsplinex::knots
 {
@@ -23,8 +24,12 @@ template <typename T, Curve C, BoundaryCondition BC, Extrapolation EXT>
       value >= atter.at(index_left) && value <= atter.at(index_right), "Value outside of the domain"
   );
 
+  using difference_type =
+      typename std::remove_pointer_t<decltype(atter)>::iterator::difference_type;
   auto const upper = std::upper_bound(
-      std::next(atter.begin(), index_left), std::next(atter.begin(), index_right), value
+      std::next(atter.begin(), static_cast<difference_type>(index_left)),
+      std::next(atter.begin(), static_cast<difference_type>(index_left)),
+      value
   );
 
   return upper - atter.begin() - 1;

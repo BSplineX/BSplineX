@@ -14,6 +14,7 @@
 
 // BSplineX includes
 #include "BSplineX/defines.hpp"
+#include "BSplineX/windows.hpp"
 
 using namespace bsplinex::constants;
 
@@ -24,7 +25,7 @@ public:
   WithinAbsRelMatcher(T const target, T const rtol, T const atol)
       : target(target), rtol(rtol), atol(atol),
         rel_matcher(Catch::Matchers::WithinRel(target, rtol)),
-        abs_matcher(Catch::Matchers::WithinAbs(target, atol)), matcher(rel_matcher || abs_matcher)
+        abs_matcher(Catch::Matchers::WithinAbs(target, atol)), matcher(rel_matcher or abs_matcher)
   {
   }
 
@@ -76,8 +77,8 @@ struct WithinAbsRelVectorMatcher final : Catch::Matchers::MatcherBase<std::vecto
 
     for (size_t i = 0; i < actual.size(); ++i)
     {
-      if (!Catch::Matchers::WithinRel(this->target[i], this->rtol).match(actual[i]) &&
-          !Catch::Matchers::WithinAbs(this->target[i], this->atol).match(actual[i]))
+      if (not Catch::Matchers::WithinRel(this->target[i], this->rtol).match(actual[i]) and
+          not Catch::Matchers::WithinAbs(this->target[i], this->atol).match(actual[i]))
       {
         allMatch = false;
         this->failures.push_back({i, this->target[i], actual[i]});
@@ -93,13 +94,13 @@ struct WithinAbsRelVectorMatcher final : Catch::Matchers::MatcherBase<std::vecto
     ss << "is within " << this->rtol << " relative tolerance and " << this->atol
        << " absolute tolerance of expected vector";
 
-    if (this->failures.empty() && this->mismatch_description.empty())
+    if (this->failures.empty() and this->mismatch_description.empty())
     {
       return "";
     }
     ss << "\n";
 
-    if (!this->mismatch_description.empty())
+    if (not this->mismatch_description.empty())
     {
       ss << this->mismatch_description;
       return ss.str();

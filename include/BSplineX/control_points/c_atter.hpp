@@ -6,6 +6,7 @@
 #include "BSplineX/control_points/c_padder.hpp"
 #include "BSplineX/defines.hpp"
 #include "BSplineX/types.hpp"
+#include "BSplineX/windows.hpp"
 
 namespace bsplinex::control_points
 {
@@ -49,14 +50,15 @@ public:
 
   [[nodiscard]] std::vector<T> get_values() const
   {
-    std::vector<T> values(data.size() + padder.size());
+    std::vector<T> values;
+    values.reserve(data.size() + padder.size());
     for (size_t i = 0; i < data.size(); i++)
     {
-      values[i] = data.at(i);
+      values.push_back(data.at(i));
     }
     for (size_t i = 0; i < padder.size(); i++)
     {
-      values[data.size() + i] = padder.right(i);
+      values.push_back(padder.right(i));
     }
     return values;
   }

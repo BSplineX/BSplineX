@@ -7,6 +7,7 @@
 
 // BSplineX includes
 #include "BSplineX/defines.hpp"
+#include "BSplineX/windows.hpp"
 
 namespace bsplinex::control_points
 {

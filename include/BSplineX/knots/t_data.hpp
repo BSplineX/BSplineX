@@ -11,6 +11,7 @@
 // BSplineX includes
 #include "BSplineX/defines.hpp"
 #include "BSplineX/types.hpp"
+#include "BSplineX/windows.hpp"
 
 namespace bsplinex::knots
 {
@@ -37,16 +38,14 @@ private:
 public:
   Data() = default;
 
-  // Specifying the step-size means the domain will be [begin, end[
-  Data(T begin, T end, T step)
+  Data(std::vector<T> const &data)
   {
-    debugassert(step > 0, "Negative step-size");
-    debugassert(begin < end, "Wrong interval");
+    releaseassert(Data::is_uniform(data), "data is not uniform");
 
-    this->begin     = begin;
-    this->step_size = step;
-    this->num_elems = (end - begin) / step + 1;
-    this->end       = begin + (this->num_elems - 1) * step;
+    this->begin     = data.front();
+    this->end       = data.back();
+    this->num_elems = data.size();
+    this->step_size = (this->end - this->begin) / (this->num_elems - 1);
   }
 
   // Specifying the num-elems means the domain will be [begin, end]
@@ -85,11 +84,9 @@ public:
 
     std::vector<T> tmp{};
     tmp.reserve(last - first);
-
-    for (size_t i{first}; i < last; i++)
-    {
-      tmp.push_back(this->at(i));
-    }
+    std::generate_n(
+        std::back_inserter(tmp), last - first, [this, i = first]() mutable { return this->at(i++); }
+    );
 
     return tmp;
   }
@@ -100,6 +97,30 @@ public:
     this->begin     += this->step_size;
     this->end       -= this->step_size;
     this->num_elems -= 2;
+  }
+
+private:
+  static bool is_uniform(std::vector<T> const &x)
+  {
+    if (x.size() < 2)
+    {
+      return true;
+    }
+
+    T const expected_step = std::abs(x.at(1) - x.at(0));
+
+    return std::adjacent_find(
+               x.begin(),
+               x.end() - 1,
+               [expected_step](T a, T b)
+               {
+                 T const actual_step = std::abs(b - a);
+                 T const diff        = std::abs(actual_step - expected_step);
+                 T const max_val     = std::max(actual_step, expected_step);
+
+                 return not(diff <= constants::RTOL<T> * max_val or diff <= constants::ATOL<T>);
+               }
+           ) == x.end() - 1;
   }
 };
 

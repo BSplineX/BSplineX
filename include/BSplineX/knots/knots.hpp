@@ -9,6 +9,7 @@
 #include "BSplineX/knots/t_extrapolator.hpp"
 #include "BSplineX/knots/t_finder.hpp"
 #include "BSplineX/types.hpp"
+#include "BSplineX/windows.hpp"
 
 /**
  * Naming convention:
@@ -68,7 +69,7 @@ public:
 
   [[nodiscard]] std::pair<size_t, T> find(T value) const
   {
-    if (value < this->value_left || value > this->value_right)
+    if (value < this->value_left or value > this->value_right)
     {
       value = this->extrapolator.extrapolate(value);
     }

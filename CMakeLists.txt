@@ -22,6 +22,8 @@ message(STATUS "BSplineX: version ${BSPLINEX_FULL_VERSION}")
 
 set(BSPLINEX_THIRD_PARTY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third_party")
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 
 if(NOT CMAKE_INSTALL_PREFIX)
@@ -39,6 +41,10 @@ include(BSplineXEigen3)
 # Library definition
 add_library(BSplineX INTERFACE)
 add_library(BSplineX::BSplineX ALIAS BSplineX)
+if(MSVC)
+  # Avoid compilation errors when compiling Eigen3
+  target_compile_options(BSplineX INTERFACE /wd4127 /wd4714)
+endif()
 
 target_link_libraries(BSplineX INTERFACE Eigen3::Eigen)
 

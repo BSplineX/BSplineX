@@ -1,12 +1,15 @@
 // Standard includes
+#include <algorithm>
 #include <cmath>
 #include <cstddef>
+#include <iterator>
 #include <string>
 #include <vector>
 
 // Third-party includes
-#include <catch2/benchmark/catch_benchmark_all.hpp>
+#include <catch2/benchmark/catch_benchmark.hpp>
 #include <catch2/benchmark/catch_chronometer.hpp>
+#include <catch2/benchmark/catch_constructor.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 // BSplineX includes
@@ -14,8 +17,6 @@
 #include "BSplineX/control_points/c_data.hpp"
 #include "BSplineX/knots/t_data.hpp"
 #include "BSplineX/types.hpp"
-#include "catch2/benchmark/catch_benchmark.hpp"
-#include "catch2/benchmark/catch_constructor.hpp"
 
 using namespace bsplinex;
 using namespace bsplinex::bspline;
@@ -104,10 +105,12 @@ TEST_CASE(
 
       y_data.clear();
       y_data.reserve(x_data.size());
-      for (auto x : x_data)
-      {
-        y_data.push_back(bspline.evaluate(x));
-      }
+      std::transform(
+          x_data.begin(),
+          x_data.end(),
+          std::back_inserter(y_data),
+          [&bspline](double x) { return bspline.evaluate(x); }
+      );
 
       BENCHMARK(
           "bspline.fit - knots: " + std::to_string(knots_num) +
