@@ -1,5 +1,6 @@
 // Standard includes
 #include <cstddef>
+#include <stdexcept>
 #include <vector>
 
 // Third-party includes
@@ -26,6 +27,42 @@ TEST_CASE("knots::Data<double, Curve::UNIFORM> data{begin, end, num_elems}", "[t
     for (size_t i{0}; i < data.size(); i++)
     {
       REQUIRE(data.at(i) == i * step);
+    }
+  }
+  SECTION("data.slice(...)")
+  {
+    std::vector<double> const slice = data.slice(1, 4);
+    REQUIRE(slice.size() == 3);
+    for (size_t i{0}; i < slice.size(); i++)
+    {
+      REQUIRE(slice.at(i) == data.at(i + 1));
+    }
+  }
+}
+
+TEST_CASE("knots::Data<double, Curve::UNIFORM> data{data_vec}", "[t_data]")
+{
+  SECTION("Non-uniform vector")
+  {
+    std::vector<double> const data_vec{0.0, 2.5, 5.0, 7.5, 9.0};
+    auto test = [&]() { Data<double, Curve::UNIFORM> _(data_vec); };
+    REQUIRE_THROWS_AS(test(), std::runtime_error);
+  }
+  SECTION("Uniform descending vector")
+  {
+    std::vector<double> const data_vec{10.0, 7.5, 5.0, 2.5, 0.0};
+    auto test = [&]() { Data<double, Curve::UNIFORM> _(data_vec); };
+    REQUIRE_THROWS_AS(test(), std::runtime_error);
+  }
+  std::vector<double> const data_vec{0.0, 2.5, 5.0, 7.5, 10.0};
+  Data<double, Curve::UNIFORM> const data{data_vec};
+
+  SECTION("data.size()") { REQUIRE(data.size() == data_vec.size()); }
+  SECTION("data.at(...)")
+  {
+    for (size_t i{0}; i < data.size(); i++)
+    {
+      REQUIRE(data.at(i) == data_vec.at(i));
     }
   }
   SECTION("data.slice(...)")

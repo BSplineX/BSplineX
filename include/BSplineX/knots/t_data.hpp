@@ -40,7 +40,7 @@ public:
 
   Data(std::vector<T> const &data)
   {
-    releaseassert(Data::is_uniform(data), "data is not uniform");
+    releaseassert(Data::is_uniform(data), "Data must be uniform with step > 0");
 
     this->begin     = data.front();
     this->end       = data.back();
@@ -107,20 +107,24 @@ private:
       return true;
     }
 
-    T const expected_step = std::abs(x.at(1) - x.at(0));
+    T const expected_step = x.at(1) - x.at(0);
+    if (expected_step <= 0)
+    {
+      return false;
+    }
 
     return std::adjacent_find(
                x.begin(),
-               x.end() - 1,
+               x.end(),
                [expected_step](T a, T b)
                {
-                 T const actual_step = std::abs(b - a);
+                 T const actual_step = b - a;
                  T const diff        = std::abs(actual_step - expected_step);
                  T const max_val     = std::max(actual_step, expected_step);
 
                  return not(diff <= constants::RTOL<T> * max_val or diff <= constants::ATOL<T>);
                }
-           ) == x.end() - 1;
+           ) == x.end();
   }
 };
 
