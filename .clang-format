@@ -1,4 +1,5 @@
 # Braces on a new line
+BasedOnStyle: LLVM
 BreakBeforeBraces: Allman
 
 AlignConsecutiveAssignments:
