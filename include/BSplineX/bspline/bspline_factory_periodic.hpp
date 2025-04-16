@@ -6,7 +6,9 @@
 
 // BSplineX
 #include "BSplineX/bspline/bspline_types.hpp"
+#include "BSplineX/control_points/c_data.hpp"
 #include "BSplineX/defines.hpp"
+#include "BSplineX/knots/t_data.hpp"
 
 namespace bsplinex::factory
 {
@@ -34,7 +36,11 @@ template <typename T = double>
 inline types::PeriodicUniform<T>
 periodic_uniform(size_t degree, T begin, T end, size_t num_elems, std::vector<T> const &ctrl_points)
 {
-  return types::PeriodicUniform<T>{{begin, end, num_elems}, {ctrl_points}, degree};
+  return types::PeriodicUniform<T>{
+      knots::Data<T, types::PeriodicUniform<T>::curve_type>{begin, end, num_elems},
+      control_points::Data<T>{ctrl_points},
+      degree
+  };
 }
 
 /**
@@ -95,7 +101,11 @@ template <typename T = double>
 inline types::PeriodicNonUniform<T>
 periodic_nonuniform(size_t degree, std::vector<T> const &knots, std::vector<T> const &ctrl_points)
 {
-  return types::PeriodicNonUniform<T>{{knots}, {ctrl_points}, degree};
+  return types::PeriodicNonUniform<T>{
+      knots::Data<T, types::PeriodicNonUniform<T>::curve_type>{knots},
+      control_points::Data<T>{ctrl_points},
+      degree
+  };
 }
 
 /**

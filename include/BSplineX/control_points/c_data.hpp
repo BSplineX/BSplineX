@@ -21,7 +21,7 @@ private:
 public:
   Data() = default;
 
-  Data(std::vector<T> const &data) : raw_data{data} {}
+  explicit Data(std::vector<T> const &data) : raw_data{data} {}
 
   Data(Data const &other) = default;
 

@@ -38,7 +38,7 @@ private:
 public:
   Data() = default;
 
-  Data(std::vector<T> const &data)
+  explicit Data(std::vector<T> const &data)
   {
     releaseassert(Data::is_uniform(data), "Data must be uniform with step > 0");
 
@@ -137,7 +137,7 @@ private:
 public:
   Data() = default;
 
-  Data(std::vector<T> const &data) : raw_data(data)
+  explicit Data(std::vector<T> const &data) : raw_data(data)
   {
     // NOTE: thank the STL for this wonderful backwards built sort check. Think it as if std::less
     // is <= and std::less_equal is <.
