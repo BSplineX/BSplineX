@@ -2,7 +2,6 @@
 #define BSPLINEX_BSPLINE_BSPLINE_LSQ_HPP
 
 // Standard includes
-#include "BSplineX/control_points/c_data.hpp"
 #include <functional>
 #include <vector>
 
@@ -35,6 +34,7 @@
 #endif
 
 // BSplineX includes
+#include "BSplineX/control_points/c_data.hpp"
 #include "BSplineX/control_points/control_points.hpp"
 #include "BSplineX/defines.hpp"
 #include "BSplineX/types.hpp"
