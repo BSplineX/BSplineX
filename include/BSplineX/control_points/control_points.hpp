@@ -6,6 +6,7 @@
 
 // BSplineX includes
 #include "BSplineX/control_points/c_atter.hpp"
+#include "BSplineX/control_points/c_data.hpp"
 #include "BSplineX/knots/knots.hpp"
 #include "BSplineX/types.hpp"
 #include "BSplineX/windows.hpp"
@@ -71,7 +72,7 @@ public:
       );
     }
 
-    return ControlPoints({d_ctrl_points}, this->degree - 1);
+    return ControlPoints(Data<T>{d_ctrl_points}, this->degree - 1);
   }
 };
 

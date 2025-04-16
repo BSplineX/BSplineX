@@ -79,7 +79,9 @@ TEST_CASE(
     auto const knots_num = static_cast<size_t>(std::pow(2.0, j));
     fill(start, stop, knots_num - degree - 1, ctrl_pts);
     BSpline<double, Curve::UNIFORM, BoundaryCondition::OPEN, Extrapolation::NONE> bspline{
-        {0.0, 100.0, knots_num}, {ctrl_pts}, degree
+        knots::Data<double, Curve::UNIFORM>{0.0, 100.0, knots_num},
+        control_points::Data<double>{ctrl_pts},
+        degree
     };
 
     size_t const min_eval_pow{4};
@@ -179,7 +181,9 @@ TEST_CASE(
     fill(0.0, 100.0, knots_num, knots);
     fill(start, stop, knots_num - degree - 1, ctrl_pts);
     BSpline<double, Curve::NON_UNIFORM, BoundaryCondition::OPEN, Extrapolation::NONE> bspline{
-        {knots}, {ctrl_pts}, degree
+        knots::Data<double, Curve::NON_UNIFORM>{knots},
+        control_points::Data<double>{ctrl_pts},
+        degree
     };
 
     size_t const min_eval_pow{4};

@@ -17,6 +17,8 @@
 // BSplineX includes
 #include "BSplineX/bspline/bspline_lsq.hpp"
 #include "BSplineX/bspline/bspline_types.hpp"
+#include "BSplineX/control_points/c_data.hpp"
+#include "BSplineX/knots/t_data.hpp"
 #include "BSplineX/types.hpp"
 #include "BSplineX/windows.hpp"
 #include "matchers.hpp"
@@ -111,7 +113,11 @@ BSplineType build_bspline(std::vector<real_t> knots, std::vector<real_t> ctrl_pt
       num_knots   = knots.size() - 2 * degree;
     }
 
-    return BSplineType({knots_begin, knots_end, num_knots}, {ctrl_pts}, degree);
+    return BSplineType(
+        knots::Data<real_t, BSplineType::curve_type>{knots_begin, knots_end, num_knots},
+        control_points::Data<real_t>{ctrl_pts},
+        degree
+    );
   }
   else
   {
@@ -122,7 +128,11 @@ BSplineType build_bspline(std::vector<real_t> knots, std::vector<real_t> ctrl_pt
       auto const deg = static_cast<std::ptrdiff_t>(degree);
       knots          = std::vector(std::next(knots.begin(), deg), std::prev(knots.end(), deg));
     }
-    return BSplineType({knots}, {ctrl_pts}, degree);
+    return BSplineType(
+        knots::Data<real_t, BSplineType::curve_type>{knots},
+        control_points::Data<real_t>{ctrl_pts},
+        degree
+    );
   }
 }
 } // namespace
@@ -215,7 +225,8 @@ TEMPLATE_TEST_CASE("BSpline", "[bspline][template][product]", BSPLINE_TEST_TYPES
                   );
                 }
                 real_t const period = domain.second - domain.first;
-                constexpr real_t periodic_extrapolation_tol{1e-8
+                constexpr real_t periodic_extrapolation_tol{
+                    1e-8
                 }; // HACK: this may be correct, but requires an in-depth analysis
                 for (real_t const x : x_eval)
                 {
@@ -356,12 +367,12 @@ TEMPLATE_TEST_CASE("BSpline", "[bspline][template][product]", BSPLINE_TEST_TYPES
       SECTION("interpolate(...)")
       {
 
-        auto x_interp                  = test_data["x"].get<std::vector<real_t>>();
-        auto y_interp                  = test_data["y"].get<std::vector<real_t>>();
+        auto x_interp                        = test_data["x"].get<std::vector<real_t>>();
+        auto y_interp                        = test_data["y"].get<std::vector<real_t>>();
         auto const [conds_left, conds_right] = test_data["conditions_interp"]
-                                             .get<std::pair<
-                                                 std::vector<std::pair<size_t, real_t>>,
-                                                 std::vector<std::pair<size_t, real_t>>>>();
+                                                   .get<std::pair<
+                                                       std::vector<std::pair<size_t, real_t>>,
+                                                       std::vector<std::pair<size_t, real_t>>>>();
         std::vector<lsq::Condition<real_t>> additional_conditions{};
         additional_conditions.reserve(conds_left.size() + conds_right.size());
         for (auto const &[derivative_order, value] : conds_left)
@@ -380,8 +391,10 @@ TEMPLATE_TEST_CASE("BSpline", "[bspline][template][product]", BSPLINE_TEST_TYPES
         {
           if constexpr (Curve::UNIFORM == BSplineType::curve_type)
           {
-            SKIP("SciPy implementation forces clamped boundary condition, but we cannot add "
-                 "explicit padding to uniform BSplines.");
+            SKIP(
+                "SciPy implementation forces clamped boundary condition, but we cannot add "
+                "explicit padding to uniform BSplines."
+            );
           }
           x_interp.insert(x_interp.begin(), degree, x_interp.front());
           x_interp.insert(x_interp.end(), degree, x_interp.back());

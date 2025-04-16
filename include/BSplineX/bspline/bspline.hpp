@@ -13,6 +13,7 @@
 #include "BSplineX/control_points/control_points.hpp"
 #include "BSplineX/defines.hpp"
 #include "BSplineX/knots/knots.hpp"
+#include "BSplineX/knots/t_data.hpp"
 #include "BSplineX/types.hpp"
 #include "BSplineX/views.hpp"
 #include "BSplineX/windows.hpp"
@@ -305,7 +306,7 @@ public:
       );
     }
 
-    knots::Knots<T, C, BC, EXT> new_knots{{x}, degree};
+    knots::Knots<T, C, BC, EXT> new_knots{knots::Data<T, C>{x}, degree};
 
     auto const knots_domain = new_knots.domain();
     releaseassert(

@@ -2,6 +2,7 @@
 #define BSPLINEX_BSPLINE_BSPLINE_LSQ_HPP
 
 // Standard includes
+#include "BSplineX/control_points/c_data.hpp"
 #include <functional>
 #include <vector>
 
@@ -277,7 +278,8 @@ lsq(size_t const degree,
     Eigen::VectorX<T> res = A.solve(b);
 
     return control_points::ControlPoints<T, BC>{
-        {std::vector<T>{res.data(), res.data() + res.rows() * res.cols()}}, degree
+        control_points::Data<T>{std::vector<T>{res.data(), res.data() + res.rows() * res.cols()}},
+        degree
     };
   }
   else
@@ -289,7 +291,8 @@ lsq(size_t const degree,
     Eigen::VectorX<T> res = A.solve(b);
 
     return control_points::ControlPoints<T, BC>{
-        {std::vector<T>{res.data(), res.data() + res.rows() * res.cols()}}, degree
+        control_points::Data<T>{std::vector<T>{res.data(), res.data() + res.rows() * res.cols()}},
+        degree
     };
   }
 }
