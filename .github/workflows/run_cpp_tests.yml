@@ -27,16 +27,16 @@ jobs:
         if: runner.os == 'Windows'
         run: choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' -y
 
-      - name: cmake
-        run: |
-          mkdir build/
-          cd build/
-          cmake .. -DBUILD_TESTS=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo
+      - name: Create build directory
+        run: mkdir build
+        shell: bash
 
-      - name: make
+      - name: Build with CMake
         run: |
           cd build
-          make -j
+          cmake .. -DBUILD_TESTS=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo
+          cmake --build . --config Release
+        shell: bash
 
       - name: Checkout test data repo
         uses: actions/checkout@v4
