@@ -24,6 +24,7 @@ jobs:
       - name: "Setup: copy test folder to separate location"
         run: |
           mkdir -p /tmp/test_project
+          ls
           cp -r $GITHUB_WORKSPACE/cmake/test_cmake_inclusion/* /tmp/test_project
           cd /tmp/test_project
 
