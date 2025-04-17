@@ -1,6 +1,10 @@
 set(EIGEN_REQUIRED_VERSION 3.4.0)
 cmake_policy(SET CMP0135 NEW)
 
+set(EIGEN_BUILD_TESTING OFF)
+set(EIGEN_BUILD_BLAS OFF)
+set(EIGEN_BUILD_LAPACK OFF)
+
 list(APPEND CMAKE_PREFIX_PATH "${BSPLINEX_THIRD_PARTY_DIR}")
 find_package(
   Eigen3
@@ -22,8 +26,6 @@ if(NOT TARGET Eigen3::Eigen)
       Eigen3
       URL "https://gitlab.com/libeigen/eigen/-/archive/${EIGEN_REQUIRED_VERSION}/eigen-${EIGEN_REQUIRED_VERSION}.tar.gz"
   )
-
-  set(EIGEN_NO_FORTRAN ON)
 
   fetchcontent_makeavailable(Eigen3)
 else()
