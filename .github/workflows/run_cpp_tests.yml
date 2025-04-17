@@ -44,5 +44,4 @@ jobs:
           python test-data/gen_data.py --degrees 1 2 3 --output-dir tests/bspline/data
 
       - name: ctest
-        if: runner.os == 'Windows'
         run: ctest --test-dir build/tests --output-on-failure -V
