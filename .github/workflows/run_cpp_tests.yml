@@ -27,8 +27,9 @@ jobs:
 
       - name: Build with CMake
         run: |
+          CORES=$(python -c "import os; print(os.cpu_count())")
           cmake -B build -DBUILD_TESTS=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo
-          cmake --build build --config RelWithDebInfo
+          cmake --build build --config RelWithDebInfo --parallel $CORES
         shell: bash
 
       - name: Checkout test data repo
