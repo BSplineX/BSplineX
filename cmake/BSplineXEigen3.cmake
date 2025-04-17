@@ -23,12 +23,6 @@ if(NOT TARGET Eigen3::Eigen)
       URL "https://gitlab.com/libeigen/eigen/-/archive/${EIGEN_REQUIRED_VERSION}/eigen-${EIGEN_REQUIRED_VERSION}.tar.gz"
   )
 
-  set(BUILD_TESTING OFF)
-  set(EIGEN_BUILD_TESTING OFF)
-  set(EIGEN_MPL2_ONLY ON)
-  set(EIGEN_BUILD_PKGCONFIG OFF)
-  set(EIGEN_BUILD_DOC OFF)
-
   fetchcontent_makeavailable(Eigen3)
 else()
   get_target_property(EIGEN_INCLUDE_DIRS
