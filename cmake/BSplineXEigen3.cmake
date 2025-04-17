@@ -27,6 +27,12 @@ if(NOT TARGET Eigen3::Eigen)
       URL "https://gitlab.com/libeigen/eigen/-/archive/${EIGEN_REQUIRED_VERSION}/eigen-${EIGEN_REQUIRED_VERSION}.tar.gz"
   )
 
+
+  set(EIGEN_BUILD_TESTING OFF CACHE BOOL "" FORCE)
+  set(EIGEN_BUILD_BLAS OFF CACHE BOOL "" FORCE)
+  set(EIGEN_BUILD_LAPACK OFF CACHE BOOL "" FORCE)
+  fetchcontent_populate(Eigen3)
+
   fetchcontent_makeavailable(Eigen3)
 else()
   get_target_property(EIGEN_INCLUDE_DIRS
