@@ -24,6 +24,10 @@ if(NOT TARGET Eigen3::Eigen)
   )
 
   set(BUILD_TESTING OFF)
+  set(EIGEN_BUILD_TESTING OFF)
+  set(EIGEN_MPL2_ONLY ON)
+  set(EIGEN_BUILD_PKGCONFIG OFF)
+  set(EIGEN_BUILD_DOC OFF)
 
   fetchcontent_makeavailable(Eigen3)
 else()
