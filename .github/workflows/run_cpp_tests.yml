@@ -46,7 +46,7 @@ jobs:
 
       - name: Generate test data
         run: |
-          pip3 install --break-system-packages scipy==1.14
+          pip3 install --break-system-packages scipy==1.14.1
           python3 test-data/gen_data.py --degrees 1 2 3 --output-dir tests/bspline/data
 
       - name: ctest
