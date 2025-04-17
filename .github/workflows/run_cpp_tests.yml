@@ -27,21 +27,15 @@ jobs:
       #   if: runner.os == 'Windows'
       #   run: choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' -y
 
-      - name: Get CMake with Ninja
+      - name: Get CMake
         uses: lukka/get-cmake@latest
         with:
           cmakeVersion: latestrc
-          ninjaVersion: latest
-
-      - name: Create build directory
-        run: mkdir build
-        shell: bash
 
       - name: Build with CMake
         run: |
-          cd build
-          cmake .. -DBUILD_TESTS=ON
-          cmake --build . --config RelWithDebInfo
+          cmake -B build -DBUILD_TESTS=ON
+          cmake --build build --config RelWithDebInfo
         shell: bash
 
       - name: Checkout test data repo
@@ -52,7 +46,7 @@ jobs:
 
       - name: Generate test data
         run: |
-          pip3 install --break-system-packages -r test-data/requirements.txt
+          pip3 install --break-system-packages scipy==1.14
           python3 test-data/gen_data.py --degrees 1 2 3 --output-dir tests/bspline/data
 
       - name: ctest
