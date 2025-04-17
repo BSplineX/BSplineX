@@ -15,17 +15,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install dependencies (Ubuntu)
-        if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y cmake make g++
+      # - name: Install dependencies (Ubuntu)
+      #   if: runner.os == 'Linux'
+      #   run: sudo apt-get update && sudo apt-get install -y cmake make g++
+      #
+      # - name: Install dependencies (macOS)
+      #   if: runner.os == 'macOS'
+      #   run: brew install cmake || echo "CMake already installed"
+      #
+      # - name: Install dependencies (Windows)
+      #   if: runner.os == 'Windows'
+      #   run: choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' -y
 
-      - name: Install dependencies (macOS)
-        if: runner.os == 'macOS'
-        run: brew install cmake || echo "CMake already installed"
-
-      - name: Install dependencies (Windows)
-        if: runner.os == 'Windows'
-        run: choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' -y
+      - name: Get CMake with Ninja
+        uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: latestrc
+          ninjaVersion: latest
 
       - name: Create build directory
         run: mkdir build
@@ -34,8 +40,8 @@ jobs:
       - name: Build with CMake
         run: |
           cd build
-          cmake .. -DBUILD_TESTS=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo
-          cmake --build . --config Release
+          cmake .. -DBUILD_TESTS=ON
+          cmake --build . --config RelWithDebInfo
         shell: bash
 
       - name: Checkout test data repo
