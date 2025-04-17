@@ -41,7 +41,7 @@ jobs:
 
       - name: "Test: generate test data"
         run: |
-          pip install --break-system-packages -r test-data/requirements.txt
+          pip install -r test-data/requirements.txt
           python test-data/gen_data.py --degrees 1 2 3 --output-dir tests/bspline/data
 
       - name: "Test: run ctest"
