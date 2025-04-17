@@ -2,31 +2,37 @@ name: Test BSplineX CMake Inclusion Methods
 
 on:
   push:
-    branches: ["main"]
   pull_request:
     branches: ["main"]
 jobs:
   test-cmake-methods:
-    runs-on: ubuntu-latest
+    name: Run CMake inclusion tests on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, macos-13, windows-latest]
 
     steps:
-      - uses: actions/checkout@v4
+      - name: "Setup: checkout repo"
+        uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential cmake g++
+      - name: "Setup: get CMake"
+        uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: latestrc
 
-      - name: Copy test folder to separate location
+      - name: "Setup: copy test folder to separate location"
         run: |
           mkdir -p /tmp/test_project
           cp -r $GITHUB_WORKSPACE/cmake/test_cmake_inclusion/* /tmp/test_project
           cd /tmp/test_project
+        shell: bash
 
-      - name: Prepare build directory
+      - name: "Setup: prepare build directory"
         run: mkdir -p /tmp/test_project/build
+        shell: bash
 
-      - name: Test add_subdirectory method
+      - name: "Test: add_subdirectory method"
         run: |
           cd /tmp/test_project
           mkdir -p third_party
@@ -35,8 +41,9 @@ jobs:
           cmake -DADD_SUBDIRECTORY_METHOD=ON ..
           cmake --build .
           ./test
+        shell: bash
 
-      - name: Test FetchContent method
+      - name: "Test: FetchContent method"
         run: |
           cd /tmp/test_project
           rm -rf third_party
@@ -46,8 +53,9 @@ jobs:
           cmake -DFETCH_CONTENT_METHOD=ON -DFETCH_GIT_TAG=${GITHUB_HEAD_REF:-${GITHUB_REF_NAME}} ..
           cmake --build .
           ./test
+        shell: bash
 
-      - name: Test find_package method
+      - name: "Test: find_package method"
         run: |
           cd /tmp/test_project
           rm -rf build/*
@@ -55,3 +63,4 @@ jobs:
           cmake -DFIND_PACKAGE_METHOD=ON ..
           cmake --build .
           ./test
+        shell: bash
