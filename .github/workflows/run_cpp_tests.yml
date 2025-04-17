@@ -15,26 +15,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # - name: Install dependencies (Ubuntu)
-      #   if: runner.os == 'Linux'
-      #   run: sudo apt-get update && sudo apt-get install -y cmake make g++
-      #
-      # - name: Install dependencies (macOS)
-      #   if: runner.os == 'macOS'
-      #   run: brew install cmake || echo "CMake already installed"
-      #
-      # - name: Install dependencies (Windows)
-      #   if: runner.os == 'Windows'
-      #   run: choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' -y
-
       - name: Get CMake
         uses: lukka/get-cmake@latest
         with:
           cmakeVersion: latestrc
 
+      - name: Get Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
       - name: Build with CMake
         run: |
-          cmake -B build -DBUILD_TESTS=ON
+          cmake -B build -DBUILD_TESTS=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo
           cmake --build build --config RelWithDebInfo
         shell: bash
 
@@ -46,8 +39,8 @@ jobs:
 
       - name: Generate test data
         run: |
-          pip3 install --break-system-packages scipy==1.14.1
-          python3 test-data/gen_data.py --degrees 1 2 3 --output-dir tests/bspline/data
+          pip install --break-system-packages -r test-data/requirements.txt
+          python test-data/gen_data.py --degrees 1 2 3 --output-dir tests/bspline/data
 
       - name: ctest
         run: ctest --test-dir build/tests --output-on-failure -V
