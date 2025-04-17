@@ -10,7 +10,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, macos-13]
+        os: [ubuntu-latest, macos-latest, macos-13, windows-latest]
 
     steps:
       - name: "Setup: checkout repo"
@@ -26,7 +26,6 @@ jobs:
           mkdir -p /tmp/test_project
           cp -r $GITHUB_WORKSPACE/cmake/test_cmake_inclusion/* /tmp/test_project
           cd /tmp/test_project
-        shell: bash
 
       - name: "Setup: prepare build directory"
         run: mkdir -p /tmp/test_project/build
