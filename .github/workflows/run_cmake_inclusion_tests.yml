@@ -23,13 +23,13 @@ jobs:
 
       - name: "Setup: copy test folder to separate location"
         run: |
-          mkdir -p /tmp/test_project
-          cp -r cmake/test_cmake_inclusion/* /tmp/test_project
+          mkdir -p tmp/test_project
+          cp -r cmake/test_cmake_inclusion/* tmp/test_project
         shell: bash
 
       - name: "Test: add_subdirectory method"
         run: |
-          cd /tmp/test_project
+          cd tmp/test_project
           mkdir -p third_party
           git clone $GITHUB_WORKSPACE third_party/BSplineX
           cmake -B build -DCMAKE_DISABLE_FIND_PACKAGE_Fortran=ON -DADD_SUBDIRECTORY_METHOD=ON
@@ -39,7 +39,7 @@ jobs:
 
       - name: "Test: FetchContent method"
         run: |
-          cd /tmp/test_project
+          cd tmp/test_project
           rm -rf third_party
           rm -rf build/*
           echo "FETCH_GIT_TAG=${GITHUB_HEAD_REF:-${GITHUB_REF_NAME}}" >> $GITHUB_ENV
@@ -50,7 +50,7 @@ jobs:
 
       - name: "Test: find_package method"
         run: |
-          cd /tmp/test_project
+          cd tmp/test_project
           rm -rf build/*
           cmake -B build -DCMAKE_DISABLE_FIND_PACKAGE_Fortran=ON -DFIND_PACKAGE_METHOD=ON
           cmake --build build
