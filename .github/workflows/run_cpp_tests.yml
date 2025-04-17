@@ -6,7 +6,11 @@ on:
     branches: ["main"]
 jobs:
   test:
-    runs-on: ubuntu-latest
+    name: Run tests on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, macos-13, windows-latest]
 
     steps:
       - uses: actions/checkout@v4
