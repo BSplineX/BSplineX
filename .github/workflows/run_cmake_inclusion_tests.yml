@@ -36,7 +36,7 @@ jobs:
         run: |
           cd /tmp/test_project
           mkdir -p third_party
-          git clone third_party/BSplineX
+          git clone $GITHUB_WORKSPACE third_party/BSplineX
           cd build
           cmake -DADD_SUBDIRECTORY_METHOD=ON ..
           cmake --build .
