@@ -25,7 +25,7 @@ jobs:
         run: |
           mkdir -p /tmp/test_project
           ls
-          cp -r $GITHUB_WORKSPACE/cmake/test_cmake_inclusion/* /tmp/test_project
+          cp -r cmake/test_cmake_inclusion/* /tmp/test_project
           cd /tmp/test_project
 
       - name: "Setup: prepare build directory"
@@ -36,7 +36,7 @@ jobs:
         run: |
           cd /tmp/test_project
           mkdir -p third_party
-          git clone $GITHUB_WORKSPACE third_party/BSplineX
+          git clone third_party/BSplineX
           cd build
           cmake -DADD_SUBDIRECTORY_METHOD=ON ..
           cmake --build .
