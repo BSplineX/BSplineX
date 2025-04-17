@@ -32,8 +32,8 @@ jobs:
           cd tmp/test_project
           mkdir -p third_party
           git clone $GITHUB_WORKSPACE third_party/BSplineX
-          cmake -B build -DADD_SUBDIRECTORY_METHOD=ON
-          cmake --build build
+          cmake -B build -DADD_SUBDIRECTORY_METHOD=ON -DCMAKE_BUILD_TYPE=Debug
+          cmake --build build --config Debug
           build/test
         shell: bash
 
@@ -43,8 +43,8 @@ jobs:
           rm -rf third_party
           rm -rf build/*
           echo "FETCH_GIT_TAG=${GITHUB_HEAD_REF:-${GITHUB_REF_NAME}}" >> $GITHUB_ENV
-          cmake -B build -DFETCH_CONTENT_METHOD=ON -DFETCH_GIT_TAG=${GITHUB_HEAD_REF:-${GITHUB_REF_NAME}}
-          cmake --build build
+          cmake -B build -DFETCH_CONTENT_METHOD=ON -DFETCH_GIT_TAG=${GITHUB_HEAD_REF:-${GITHUB_REF_NAME}} -DCMAKE_BUILD_TYPE=Debug
+          cmake --build build --config Debug
           build/test
         shell: bash
 
@@ -52,7 +52,7 @@ jobs:
         run: |
           cd tmp/test_project
           rm -rf build/*
-          cmake -B build -DFIND_PACKAGE_METHOD=ON
-          cmake --build build
+          cmake -B build -DFIND_PACKAGE_METHOD=ON -DCMAKE_BUILD_TYPE=Debug
+          cmake --build build --config Debug
           build/test
         shell: bash
