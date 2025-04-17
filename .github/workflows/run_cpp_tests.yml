@@ -44,4 +44,4 @@ jobs:
           python test-data/gen_data.py --degrees 1 2 3 --output-dir tests/bspline/data
 
       - name: ctest
-        run: ctest --test-dir build/tests --output-on-failure -V
+        run: ctest --test-dir build/RelWithDebInfo/tests --output-on-failure -V
