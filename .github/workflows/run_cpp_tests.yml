@@ -6,37 +6,47 @@ on:
     branches: ["main"]
 jobs:
   test:
-    runs-on: ubuntu-latest
+    name: Run tests on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, macos-13, windows-latest]
 
     steps:
-      - uses: actions/checkout@v4
+      - name: "Setup: checkout repo"
+        uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential cmake g++
+      - name: "Setup: get CMake"
+        uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: latestrc
 
-      - name: cmake
-        run: |
-          mkdir build/
-          cd build/
-          cmake .. -DBUILD_TESTS=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo
+      - name: "Setup: get Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
 
-      - name: make
-        run: |
-          cd build
-          make -j
-
-      - name: Checkout test data repo
+      - name: "Setup: checkout test data repo"
         uses: actions/checkout@v4
         with:
           repository: BSplineX/BSplineX-test-data
           path: test-data
 
-      - name: Generate test data
+      - name: "Compile: build with CMake"
         run: |
-          pip3 install -r test-data/requirements.txt
-          python3 test-data/gen_data.py --degrees 1 2 3 --output-dir tests/bspline/data
+          CORES=$(python -c "import os; print(os.cpu_count())")
+          cmake -B build -DBUILD_TESTS=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo
+          cmake --build build --config RelWithDebInfo --parallel $CORES
+        shell: bash
 
-      - name: ctest
-        run: ctest --test-dir build/tests --output-on-failure -V
+      - name: "Test: generate test data"
+        run: |
+          pip install -r test-data/requirements.txt
+          python test-data/gen_data.py --degrees 1 2 3 --output-dir tests/bspline/data
+        shell: bash
+
+      - name: "Test: run ctest"
+        run: |
+          CORES=$(python -c "import os; print(os.cpu_count())")
+          ctest --test-dir build/tests --output-on-failure -V -j $CORES
+        shell: bash

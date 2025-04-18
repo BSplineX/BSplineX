@@ -2,56 +2,96 @@ name: Test BSplineX CMake Inclusion Methods
 
 on:
   push:
-    branches: ["main"]
   pull_request:
     branches: ["main"]
 jobs:
   test-cmake-methods:
-    runs-on: ubuntu-latest
+    name: Run CMake inclusion tests on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, macos-13, windows-latest]
 
     steps:
-      - uses: actions/checkout@v4
+      - name: "Setup: checkout repo"
+        uses: actions/checkout@v4
 
-      - name: Install dependencies
+      - name: "Setup: get CMake"
+        uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: latestrc
+
+      - name: "Setup: copy test folder to separate location"
         run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential cmake g++
+          mkdir -p tmp/test_project
+          cp -r cmake/test_cmake_inclusion/* tmp/test_project
+        shell: bash
 
-      - name: Copy test folder to separate location
+      - name: "Compile: add_subdirectory method"
         run: |
-          mkdir -p /tmp/test_project
-          cp -r $GITHUB_WORKSPACE/cmake/test_cmake_inclusion/* /tmp/test_project
-          cd /tmp/test_project
-
-      - name: Prepare build directory
-        run: mkdir -p /tmp/test_project/build
-
-      - name: Test add_subdirectory method
-        run: |
-          cd /tmp/test_project
+          cd tmp/test_project
           mkdir -p third_party
           git clone $GITHUB_WORKSPACE third_party/BSplineX
-          cd build
-          cmake -DADD_SUBDIRECTORY_METHOD=ON ..
-          cmake --build .
-          ./test
+          cmake -B build -DADD_SUBDIRECTORY_METHOD=ON -DCMAKE_BUILD_TYPE=Debug
+          cmake --build build --config Debug
+        shell: bash
 
-      - name: Test FetchContent method
+      - name: "Test: add_subdirectory method"
+        if: runner.os != 'Windows'
         run: |
-          cd /tmp/test_project
+          cd tmp/test_project
+          build/test
+        shell: bash
+
+      - name: "Test: add_subdirectory method"
+        if: runner.os == 'Windows'
+        run: |
+          cd tmp/test_project
+          build/Debug/test
+        shell: bash
+
+      - name: "Compile: FetchContent method"
+        run: |
+          cd tmp/test_project
           rm -rf third_party
           rm -rf build/*
-          cd build
           echo "FETCH_GIT_TAG=${GITHUB_HEAD_REF:-${GITHUB_REF_NAME}}" >> $GITHUB_ENV
-          cmake -DFETCH_CONTENT_METHOD=ON -DFETCH_GIT_TAG=${GITHUB_HEAD_REF:-${GITHUB_REF_NAME}} ..
-          cmake --build .
-          ./test
+          cmake -B build -DFETCH_CONTENT_METHOD=ON -DFETCH_GIT_TAG=${GITHUB_HEAD_REF:-${GITHUB_REF_NAME}} -DCMAKE_BUILD_TYPE=Debug
+          cmake --build build --config Debug
+        shell: bash
 
-      - name: Test find_package method
+      - name: "Test: FetchContent method"
+        if: runner.os != 'Windows'
         run: |
-          cd /tmp/test_project
+          cd tmp/test_project
+          build/test
+        shell: bash
+
+      - name: "Test: FetchContent method"
+        if: runner.os == 'Windows'
+        run: |
+          cd tmp/test_project
+          build/Debug/test
+        shell: bash
+
+      - name: "Compile: find_package method"
+        run: |
+          cd tmp/test_project
           rm -rf build/*
-          cd build
-          cmake -DFIND_PACKAGE_METHOD=ON ..
-          cmake --build .
-          ./test
+          cmake -B build -DFIND_PACKAGE_METHOD=ON -DCMAKE_BUILD_TYPE=Debug
+          cmake --build build --config Debug
+        shell: bash
+
+      - name: "Test: find_package method"
+        if: runner.os != 'Windows'
+        run: |
+          cd tmp/test_project
+          build/test
+        shell: bash
+
+      - name: "Test: find_package method"
+        if: runner.os == 'Windows'
+        run: |
+          cd tmp/test_project
+          build/Debug/test
+        shell: bash
