@@ -79,7 +79,7 @@ types::OpenUniform<T> open_uniform(size_t degree)
 {
   constexpr T begin{ZERO<T>};
   constexpr T end{ONE<T>};
-  size_t const num_elems{1 + 2 * degree};
+  size_t const num_elems{1 + (2 * degree)};
   return open_uniform<T>(degree, begin, end, num_elems, std::vector<T>(num_elems - degree - 1));
 }
 
@@ -150,7 +150,7 @@ types::OpenUniformConstant<T> open_uniform_constant(size_t degree)
 {
   constexpr T begin{ZERO<T>};
   constexpr T end{ONE<T>};
-  size_t const num_elems{1 + 2 * degree};
+  size_t const num_elems{1 + (2 * degree)};
   return open_uniform_constant<T>(
       degree, begin, end, num_elems, std::vector<T>(num_elems - degree - 1)
   );
@@ -212,7 +212,7 @@ types::OpenNonUniform<T> open_nonuniform(size_t degree, std::vector<T> const &kn
 template <typename T = double>
 types::OpenNonUniform<T> open_nonuniform(size_t degree)
 {
-  std::vector<T> const knots(1 + 2 * degree);
+  std::vector<T> const knots(1 + (2 * degree));
   return open_nonuniform<T>(degree, knots, std::vector<T>(knots.size() - degree - 1));
 }
 
@@ -274,7 +274,7 @@ open_nonuniform_constant(size_t degree, std::vector<T> const &knots)
 template <typename T = double>
 types::OpenNonUniformConstant<T> open_nonuniform_constant(size_t degree)
 {
-  std::vector<T> const knots(1 + 2 * degree);
+  std::vector<T> const knots(1 + (2 * degree));
   return open_nonuniform_constant<T>(degree, knots, std::vector<T>(knots.size() - degree - 1));
 }
 
