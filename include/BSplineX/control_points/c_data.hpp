@@ -3,6 +3,7 @@
 
 // Standard includes
 #include <cstddef>
+#include <iterator>
 #include <vector>
 
 // BSplineX includes
@@ -46,7 +47,12 @@ public:
     debugassert(first <= last, "Invalid range");
     debugassert(last <= this->raw_data.size(), "Out of bounds");
 
-    return std::vector<T>{this->raw_data.begin() + first, this->raw_data.begin() + last};
+    using difference_type = typename std::vector<T>::iterator::difference_type;
+
+    return std::vector<T>{
+        std::next(this->raw_data.begin(), static_cast<difference_type>(first)),
+        std::next(this->raw_data.begin(), static_cast<difference_type>(last))
+    };
   }
 };
 

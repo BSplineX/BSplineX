@@ -325,8 +325,12 @@ public:
     vec_const_view y_view;
     if constexpr (BoundaryCondition::OPEN == BC)
     {
-      x_view = vec_const_view{std::next(x.begin(), degree), std::prev(x.end(), degree)};
-      y_view = vec_const_view{std::next(y.begin(), degree), std::prev(y.end(), degree)};
+      using difference_type = typename vec_const_iter::difference_type;
+
+      auto const shift = static_cast<difference_type>(degree);
+
+      x_view = vec_const_view{std::next(x.begin(), shift), std::prev(x.end(), shift)};
+      y_view = vec_const_view{std::next(y.begin(), shift), std::prev(y.end(), shift)};
     }
     else if constexpr (BoundaryCondition::CLAMPED == BC)
     {
