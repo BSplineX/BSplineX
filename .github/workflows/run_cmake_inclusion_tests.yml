@@ -2,6 +2,7 @@ name: Test BSplineX CMake Inclusion Methods
 
 on:
   push:
+    branches: ["main"]
   pull_request:
     branches: ["main"]
 jobs:
