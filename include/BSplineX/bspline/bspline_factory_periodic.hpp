@@ -33,7 +33,7 @@ using namespace constants;
  * @return A periodic uniform BSpline.
  */
 template <typename T = double>
-inline types::PeriodicUniform<T>
+types::PeriodicUniform<T>
 periodic_uniform(size_t degree, T begin, T end, size_t num_elems, std::vector<T> const &ctrl_points)
 {
   return types::PeriodicUniform<T>{
@@ -58,7 +58,7 @@ periodic_uniform(size_t degree, T begin, T end, size_t num_elems, std::vector<T>
  * @return A periodic uniform BSpline.
  */
 template <typename T = double>
-inline types::PeriodicUniform<T> periodic_uniform(size_t degree, T begin, T end, size_t num_elems)
+types::PeriodicUniform<T> periodic_uniform(size_t degree, T begin, T end, size_t num_elems)
 {
   return periodic_uniform<T>(degree, begin, end, num_elems, std::vector<T>(num_elems - 1));
 }
@@ -74,7 +74,7 @@ inline types::PeriodicUniform<T> periodic_uniform(size_t degree, T begin, T end,
  * @return A periodic uniform BSpline.
  */
 template <typename T = double>
-inline types::PeriodicUniform<T> periodic_uniform(size_t degree)
+types::PeriodicUniform<T> periodic_uniform(size_t degree)
 {
   constexpr T begin{ZERO<T>};
   constexpr T end{ONE<T>};
@@ -98,7 +98,7 @@ inline types::PeriodicUniform<T> periodic_uniform(size_t degree)
  * @return A periodic non-uniform BSpline.
  */
 template <typename T = double>
-inline types::PeriodicNonUniform<T>
+types::PeriodicNonUniform<T>
 periodic_nonuniform(size_t degree, std::vector<T> const &knots, std::vector<T> const &ctrl_points)
 {
   return types::PeriodicNonUniform<T>{
@@ -121,7 +121,7 @@ periodic_nonuniform(size_t degree, std::vector<T> const &knots, std::vector<T> c
  * @return A periodic non-uniform BSpline.
  */
 template <typename T = double>
-inline types::PeriodicNonUniform<T> periodic_nonuniform(size_t degree, std::vector<T> const &knots)
+types::PeriodicNonUniform<T> periodic_nonuniform(size_t degree, std::vector<T> const &knots)
 {
   return periodic_nonuniform<T>(degree, knots, std::vector<T>(knots.size() - 1));
 }
@@ -137,7 +137,7 @@ inline types::PeriodicNonUniform<T> periodic_nonuniform(size_t degree, std::vect
  * @return A periodic non-uniform BSpline.
  */
 template <typename T = double>
-inline types::PeriodicNonUniform<T> periodic_nonuniform(size_t degree)
+types::PeriodicNonUniform<T> periodic_nonuniform(size_t degree)
 {
   std::vector<T> const knots(2 * degree);
   return periodic_nonuniform<T>(degree, knots, std::vector<T>(knots.size() - 1));

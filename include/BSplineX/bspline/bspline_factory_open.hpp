@@ -33,7 +33,7 @@ using namespace constants;
  * @return A open uniform BSpline.
  */
 template <typename T = double>
-inline types::OpenUniform<T>
+types::OpenUniform<T>
 open_uniform(size_t degree, T begin, T end, size_t num_elems, std::vector<T> const &ctrl_points)
 {
   return types::OpenUniform<T>{
@@ -59,7 +59,7 @@ open_uniform(size_t degree, T begin, T end, size_t num_elems, std::vector<T> con
  * @return A open uniform BSpline.
  */
 template <typename T = double>
-inline types::OpenUniform<T> open_uniform(size_t degree, T begin, T end, size_t num_elems)
+types::OpenUniform<T> open_uniform(size_t degree, T begin, T end, size_t num_elems)
 {
   return open_uniform<T>(degree, begin, end, num_elems, std::vector<T>(num_elems - degree - 1));
 }
@@ -75,7 +75,7 @@ inline types::OpenUniform<T> open_uniform(size_t degree, T begin, T end, size_t 
  * @return A open uniform BSpline.
  */
 template <typename T = double>
-inline types::OpenUniform<T> open_uniform(size_t degree)
+types::OpenUniform<T> open_uniform(size_t degree)
 {
   constexpr T begin{ZERO<T>};
   constexpr T end{ONE<T>};
@@ -101,7 +101,7 @@ inline types::OpenUniform<T> open_uniform(size_t degree)
  * @return A open uniform constant BSpline.
  */
 template <typename T = double>
-inline types::OpenUniformConstant<T> open_uniform_constant(
+types::OpenUniformConstant<T> open_uniform_constant(
     size_t degree, T begin, T end, size_t num_elems, std::vector<T> const &ctrl_points
 )
 {
@@ -128,8 +128,7 @@ inline types::OpenUniformConstant<T> open_uniform_constant(
  * @return A open uniform constant BSpline.
  */
 template <typename T = double>
-inline types::OpenUniformConstant<T>
-open_uniform_constant(size_t degree, T begin, T end, size_t num_elems)
+types::OpenUniformConstant<T> open_uniform_constant(size_t degree, T begin, T end, size_t num_elems)
 {
   return open_uniform_constant<T>(
       degree, begin, end, num_elems, std::vector<T>(num_elems - degree - 1)
@@ -147,7 +146,7 @@ open_uniform_constant(size_t degree, T begin, T end, size_t num_elems)
  * @return A open uniform constant BSpline.
  */
 template <typename T = double>
-inline types::OpenUniformConstant<T> open_uniform_constant(size_t degree)
+types::OpenUniformConstant<T> open_uniform_constant(size_t degree)
 {
   constexpr T begin{ZERO<T>};
   constexpr T end{ONE<T>};
@@ -172,7 +171,7 @@ inline types::OpenUniformConstant<T> open_uniform_constant(size_t degree)
  * @return A open non-uniform BSpline.
  */
 template <typename T = double>
-inline types::OpenNonUniform<T>
+types::OpenNonUniform<T>
 open_nonuniform(size_t degree, std::vector<T> const &knots, std::vector<T> const &ctrl_points)
 {
   return types::OpenNonUniform<T>{
@@ -195,7 +194,7 @@ open_nonuniform(size_t degree, std::vector<T> const &knots, std::vector<T> const
  * @return A open non-uniform BSpline.
  */
 template <typename T = double>
-inline types::OpenNonUniform<T> open_nonuniform(size_t degree, std::vector<T> const &knots)
+types::OpenNonUniform<T> open_nonuniform(size_t degree, std::vector<T> const &knots)
 {
   return open_nonuniform<T>(degree, knots, std::vector<T>(knots.size() - degree - 1));
 }
@@ -211,7 +210,7 @@ inline types::OpenNonUniform<T> open_nonuniform(size_t degree, std::vector<T> co
  * @return A open non-uniform BSpline.
  */
 template <typename T = double>
-inline types::OpenNonUniform<T> open_nonuniform(size_t degree)
+types::OpenNonUniform<T> open_nonuniform(size_t degree)
 {
   std::vector<T> const knots(1 + 2 * degree);
   return open_nonuniform<T>(degree, knots, std::vector<T>(knots.size() - degree - 1));
@@ -232,7 +231,7 @@ inline types::OpenNonUniform<T> open_nonuniform(size_t degree)
  * @return A open non-uniform constant BSpline.
  */
 template <typename T = double>
-inline types::OpenNonUniformConstant<T> open_nonuniform_constant(
+types::OpenNonUniformConstant<T> open_nonuniform_constant(
     size_t degree, std::vector<T> const &knots, std::vector<T> const &ctrl_points
 )
 {
@@ -256,7 +255,7 @@ inline types::OpenNonUniformConstant<T> open_nonuniform_constant(
  * @return A open non-uniform constant BSpline.
  */
 template <typename T = double>
-inline types::OpenNonUniformConstant<T>
+types::OpenNonUniformConstant<T>
 open_nonuniform_constant(size_t degree, std::vector<T> const &knots)
 {
   return open_nonuniform_constant<T>(degree, knots, std::vector<T>(knots.size() - degree - 1));
@@ -273,7 +272,7 @@ open_nonuniform_constant(size_t degree, std::vector<T> const &knots)
  * @return A open non-uniform constant BSpline.
  */
 template <typename T = double>
-inline types::OpenNonUniformConstant<T> open_nonuniform_constant(size_t degree)
+types::OpenNonUniformConstant<T> open_nonuniform_constant(size_t degree)
 {
   std::vector<T> const knots(1 + 2 * degree);
   return open_nonuniform_constant<T>(degree, knots, std::vector<T>(knots.size() - degree - 1));
