@@ -106,7 +106,7 @@ int main()
   constexpr double max_knot{10.0};
   std::vector<double> ctrl_points{1.0, 0.3, 0.6, 0.9, 0.28, 9.32};
 
-  auto bspline = bsplinex::factory::clamped_uniform_constant(
+  auto bspline = bsplinex::clamped_uniform_constant(
     degree, min_knot, max_knot, num_knots, ctrl_points
   );
 
@@ -130,7 +130,7 @@ In the previous example, the knots are easy to understand: they are you discreti
 ...
 
   // Create the B-Spline without specifying the control points
-  auto bspline = bsplinex::factory::clamped_uniform_constant(
+  auto bspline = bsplinex::clamped_uniform_constant(
     degree, min_knot, max_knot, num_knots
   );
 

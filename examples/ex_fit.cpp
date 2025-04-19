@@ -16,7 +16,7 @@ int main()
   constexpr double knots_end{12.0};
   constexpr size_t num_knots{12};
 
-  auto bspline = bsplinex::factory::periodic_uniform(degree, knots_begin, knots_end, num_knots);
+  auto bspline = bsplinex::periodic_uniform(degree, knots_begin, knots_end, num_knots);
 
   // fit the curve to the points
   bspline.fit(x_fit, y_fit);

@@ -3,9 +3,10 @@
 
 int main()
 {
-  auto bspline = bsplinex::factory::periodic_nonuniform(3, {0, 1, 2, 3, 4});
+  auto bspline = bsplinex::periodic_nonuniform(3, {0, 1, 2, 3, 4});
 
-  std::cout << bspline.evaluate(3.0) << std::endl;
+  constexpr double x{3.0};
+  std::cout << bspline.evaluate(x) << "\n";
 
   return 0;
 }
