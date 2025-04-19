@@ -24,43 +24,34 @@ jobs:
             language: c-cpp
           - os: macos-latest
             language: c-cpp
+          - os: macos-13
+            language: c-cpp
           - os: windows-latest
             language: c-cpp
 
     steps:
-      - name: Checkout repository
+      - name: "Setup: checkout repo"
         uses: actions/checkout@v4
 
-      - name: Initialize CodeQL
+      - name: "Setup: initialize CodeQL"
         uses: github/codeql-action/init@v3
         with:
           languages: ${{ matrix.language }}
           build-mode: manual
 
-      - name: Install dependencies (Ubuntu)
-        if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y cmake make g++
+      - name: "Setup: get CMake"
+        uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: latestrc
 
-      - name: Install dependencies (macOS)
-        if: runner.os == 'macOS'
-        run: brew install cmake || echo "CMake already installed"
-
-      - name: Install dependencies (Windows)
-        if: runner.os == 'Windows'
-        run: choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' -y
-
-      - name: Create build directory
-        run: mkdir build
-        shell: bash
-
-      - name: Build with CMake
+      - name: "Compile: build with CMake"
         run: |
-          cd build
-          cmake .. -DBUILD_TESTS=ON -DBUILD_EXAMPLES=ON -DBUILD_BENCHMARKS=ON
-          cmake --build . --config Release
+          CORES=$(python -c "import os; print(os.cpu_count())")
+          cmake -B build -DBUILD_TESTS=ON -DBUILD_EXAMPLES=ON -DBUILD_BENCHMARKS=ON -DCMAKE_BUILD_TYPE=Release
+          cmake --build build --config Release --parallel $CORES
         shell: bash
 
-      - name: Perform CodeQL Analysis
+      - name: "Test: perform CodeQL analysis"
         uses: github/codeql-action/analyze@v3
         with:
           category: "/language:${{matrix.language}}"
