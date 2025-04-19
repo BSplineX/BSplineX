@@ -108,8 +108,8 @@ BSplineType build_bspline(std::vector<real_t> knots, std::vector<real_t> ctrl_pt
     if (BoundaryCondition::CLAMPED == BSplineType::boundary_condition_type or
         BoundaryCondition::PERIODIC == BSplineType::boundary_condition_type)
     {
-      knots_begin = knots[degree];
-      knots_end   = knots[knots.size() - degree - 1];
+      knots_begin = knots.at(degree);
+      knots_end   = knots.at(knots.size() - degree - 1);
       num_knots   = knots.size() - 2 * degree;
     }
 
