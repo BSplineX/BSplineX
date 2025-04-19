@@ -3,6 +3,7 @@
 
 // Standard includes
 #include <functional>
+#include <iterator>
 #include <vector>
 
 // #ifndef NDEBUG
@@ -277,9 +278,11 @@ lsq(size_t const degree,
     fill<sparse_lsq, T, iter_type, BC>(A, b, degree, nnz_basis, x, y, additional_conditions);
     Eigen::VectorX<T> res = A.solve(b);
 
+    using difference_type = typename Eigen::VectorX<T>::iterator::difference_type;
+
+    auto const res_size = static_cast<difference_type>(res.size());
     return control_points::ControlPoints<T, BC>{
-        control_points::Data<T>{std::vector<T>{res.data(), res.data() + res.rows() * res.cols()}},
-        degree
+        control_points::Data<T>{std::vector<T>{res.data(), std::next(res.data(), res_size)}}, degree
     };
   }
   else
@@ -290,9 +293,11 @@ lsq(size_t const degree,
     fill<dense_lsq, T, iter_type, BC>(A, b, degree, nnz_basis, x, y, additional_conditions);
     Eigen::VectorX<T> res = A.solve(b);
 
+    using difference_type = typename Eigen::VectorX<T>::iterator::difference_type;
+
+    auto const res_size = static_cast<difference_type>(res.size());
     return control_points::ControlPoints<T, BC>{
-        control_points::Data<T>{std::vector<T>{res.data(), res.data() + res.rows() * res.cols()}},
-        degree
+        control_points::Data<T>{std::vector<T>{res.data(), std::next(res.data(), res_size)}}, degree
     };
   }
 }

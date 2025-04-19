@@ -108,8 +108,8 @@ BSplineType build_bspline(std::vector<real_t> knots, std::vector<real_t> ctrl_pt
     if (BoundaryCondition::CLAMPED == BSplineType::boundary_condition_type or
         BoundaryCondition::PERIODIC == BSplineType::boundary_condition_type)
     {
-      knots_begin = knots[degree];
-      knots_end   = knots[knots.size() - degree - 1];
+      knots_begin = knots.at(degree);
+      knots_end   = knots.at(knots.size() - degree - 1);
       num_knots   = knots.size() - 2 * degree;
     }
 
@@ -125,8 +125,10 @@ BSplineType build_bspline(std::vector<real_t> knots, std::vector<real_t> ctrl_pt
     if (BoundaryCondition::CLAMPED == BSplineType::boundary_condition_type or
         BoundaryCondition::PERIODIC == BSplineType::boundary_condition_type)
     {
-      auto const deg = static_cast<std::ptrdiff_t>(degree);
-      knots          = std::vector(std::next(knots.begin(), deg), std::prev(knots.end(), deg));
+      using difference_type = typename std::vector<real_t>::iterator::difference_type;
+
+      auto const deg = static_cast<difference_type>(degree);
+      knots = std::vector<real_t>(std::next(knots.begin(), deg), std::prev(knots.end(), deg));
     }
     return BSplineType(
         knots::Data<real_t, BSplineType::curve_type>{knots},

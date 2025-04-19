@@ -70,7 +70,7 @@ public:
   [[nodiscard]] T right(size_t index) const
   {
     debugassert(index < this->pad_right.size(), "Out of bounds");
-    return this->pad_right[index];
+    return this->pad_right.at(index);
   }
 
   [[nodiscard]] size_t size() const { return this->pad_right.size(); }

@@ -2,8 +2,7 @@ name: Run Cpp tests
 
 on:
   push:
-  pull_request:
-    branches: ["main"]
+
 jobs:
   test:
     name: Run tests on ${{ matrix.os }}

@@ -88,10 +88,8 @@ public:
   Padder() = default;
 
   Padder(Data<T, C> const &data, size_t degree)
+      : pad_left{data.at(0)}, pad_right{data.at(data.size() - 1)}, pad_size{degree}
   {
-    this->pad_left  = data.at(0);
-    this->pad_right = data.at(data.size() - 1);
-    this->pad_size  = degree;
   }
 
   Padder(Padder const &other) = default;
@@ -136,14 +134,15 @@ public:
   Padder() = default;
 
   Padder(Data<T, C> const &data, size_t degree)
+      : pad_left{data.slice(data.size() - degree - 1, data.size() - 1)},
+        pad_right{data.slice(1, degree + 1)}
+
   {
-    T period        = data.at(data.size() - 1) - data.at(0);
-    this->pad_left  = data.slice(data.size() - degree - 1, data.size() - 1);
-    this->pad_right = data.slice(1, degree + 1);
+    T period = data.at(data.size() - 1) - data.at(0);
     for (size_t i{0}; i < degree; i++)
     {
-      this->pad_left[i]  -= period;
-      this->pad_right[i] += period;
+      this->pad_left.at(i)  -= period;
+      this->pad_right.at(i) += period;
     }
   }
 
@@ -160,13 +159,13 @@ public:
   [[nodiscard]] T left(size_t index) const
   {
     debugassert(index < this->pad_left.size(), "Out of bounds");
-    return this->pad_left[index];
+    return this->pad_left.at(index);
   }
 
   [[nodiscard]] T right(size_t index) const
   {
     debugassert(index < this->pad_right.size(), "Out of bounds");
-    return this->pad_right[index];
+    return this->pad_right.at(index);
   }
 
   [[nodiscard]] size_t size() const { return this->size_left() + this->size_right(); }
