@@ -142,8 +142,8 @@ public:
     this->pad_right = data.slice(1, degree + 1);
     for (size_t i{0}; i < degree; i++)
     {
-      this->pad_left[i]  -= period;
-      this->pad_right[i] += period;
+      this->pad_left.at(i)  -= period;
+      this->pad_right.at(i) += period;
     }
   }
 
@@ -160,13 +160,13 @@ public:
   [[nodiscard]] T left(size_t index) const
   {
     debugassert(index < this->pad_left.size(), "Out of bounds");
-    return this->pad_left[index];
+    return this->pad_left.at(index);
   }
 
   [[nodiscard]] T right(size_t index) const
   {
     debugassert(index < this->pad_right.size(), "Out of bounds");
-    return this->pad_right[index];
+    return this->pad_right.at(index);
   }
 
   [[nodiscard]] size_t size() const { return this->size_left() + this->size_right(); }
