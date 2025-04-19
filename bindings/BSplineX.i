@@ -6,7 +6,6 @@
 #include "BSplineX/types.hpp"
 #include "BSplineX/bspline/bspline.hpp"
 #include "BSplineX/bspline/bspline_types.hpp"
-#include "BSplineX/bspline/bspline_factory.hpp"
 #include "BSplineX/bspline/bspline_factory_open.hpp"
 #include "BSplineX/bspline/bspline_factory_clamped.hpp"
 #include "BSplineX/bspline/bspline_factory_periodic.hpp"
@@ -22,12 +21,11 @@ using namespace bsplinex;
 %include "BSplineX/defines.hpp"
 %include "BSplineX/types.hpp"
 %include "BSplineX/bspline/bspline.hpp"
-%include "BSplineX/bspline/bspline_factory.hpp"
+%include "BSplineX/bspline/bspline_types.hpp"
 %include "BSplineX/bspline/bspline_factory_open.hpp"
 %include "BSplineX/bspline/bspline_factory_clamped.hpp"
 %include "BSplineX/bspline/bspline_factory_periodic.hpp"
 %include "BSplineX/bspline/bspline_lsq.hpp"
-%include "BSplineX/bspline/bspline_types.hpp"
 %include "exception.i"
 using namespace bsplinex;
 
