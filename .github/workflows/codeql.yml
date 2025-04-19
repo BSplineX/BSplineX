@@ -47,7 +47,7 @@ jobs:
       - name: "Compile: build with CMake"
         run: |
           CORES=$(python -c "import os; print(os.cpu_count())")
-          cmake -B build -DBUILD_TESTS=ON -DBUILD_EXAMPLES=ON -DBUILD_BENCHMARKS=ON
+          cmake -B build -DBUILD_TESTS=ON -DBUILD_EXAMPLES=ON -DBUILD_BENCHMARKS=ON -DCMAKE_BUILD_TYPE=Release
           cmake --build build --config Release --parallel $CORES
         shell: bash
 
