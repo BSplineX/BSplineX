@@ -48,7 +48,7 @@ target_link_libraries(your_target PRIVATE BSplineX::BSplineX)
 ```
 
 If you already have `BSplineX` somewhere on your system, you can use
-`find_pacakge` directly.
+`find_package` directly.
 
 ```cmake
 # Optionally specify a custom path to find content from
