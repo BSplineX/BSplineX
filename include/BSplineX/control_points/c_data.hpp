@@ -42,7 +42,7 @@ public:
 
   [[nodiscard]] size_t size() const { return this->raw_data.size(); }
 
-  std::vector<T> slice(size_t first, size_t last)
+  std::vector<T> slice(size_t first, size_t last) const
   {
     debugassert(first <= last, "Invalid range");
     debugassert(last <= this->raw_data.size(), "Out of bounds");
