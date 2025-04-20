@@ -26,7 +26,6 @@ private:
 
   using difference_type = typename std::iterator_traits<Iter>::difference_type;
   using reference       = typename std::iterator_traits<Iter>::reference;
-  using const_reference = reference const;
 
 public:
   /**
@@ -107,38 +106,12 @@ public:
   }
 
   /**
-   * @brief Access an element at a given index with bounds checking (const version).
-   *
-   * @param index The index of the element to access.
-   * @return A const reference to the element at the specified index.
-   * @throw in debug mode if the index is out of bounds.
-   */
-  [[nodiscard]] const_reference at(difference_type index) const
-  {
-    debugassert(std::distance(this->_begin, this->_end) > index, "Out of bounds.");
-    debugassert(index >= 0, "Negative indices are not supported.");
-
-    return this->operator[](index);
-  }
-
-  /**
    * @brief Access an element at a given index without bounds checking.
    *
    * @param index The index of the element to access.
    * @return A reference to the element at the specified index.
    */
   reference operator[](difference_type index) { return *std::next(this->_begin, index); }
-
-  /**
-   * @brief Access an element at a given index without bounds checking (const version).
-   *
-   * @param index The index of the element to access.
-   * @return A const reference to the element at the specified index.
-   */
-  [[nodiscard]] const_reference operator[](difference_type index) const
-  {
-    return *std::next(this->_begin, index);
-  }
 
   /**
    * @brief Get the first element of the view
@@ -148,25 +121,11 @@ public:
   reference front() { return *(this->_begin); }
 
   /**
-   * @brief Get the first element of the view
-   *
-   * @return a const reference to the first element of the view
-   */
-  [[nodiscard]] const_reference front() const { return *(this->_begin); }
-
-  /**
    * @brief Get the last element of the view
    *
    * @return a reference to the last element of the view
    */
   reference back() { return *std::prev(this->_end, 1); }
-
-  /**
-   * @brief Get the last element of the view
-   *
-   * @return a const reference to the last element of the view
-   */
-  [[nodiscard]] const_reference back() const { return *std::prev(this->_end, 1); }
 
   /**
    * @brief Get the number of elements in the view.

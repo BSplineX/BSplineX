@@ -173,8 +173,8 @@ struct Condition
 
 template <typename T, class Iter>
 std::vector<Condition<T>> create_sorted_conditions(
-    views::ArrayView<Iter> const &x,
-    views::ArrayView<Iter> const &y,
+    views::ArrayView<Iter> x,
+    views::ArrayView<Iter> y,
     std::vector<Condition<T>> const &additional_conditions
 )
 {
@@ -185,7 +185,7 @@ std::vector<Condition<T>> create_sorted_conditions(
 
   for (size_t k{0}; k < x.size(); k++)
   {
-    conditions.emplace_back(x[k], y[k], 0);
+    conditions.emplace_back(x.at(k), y.at(k), 0);
   }
   conditions.insert(conditions.end(), additional_conditions.begin(), additional_conditions.end());
 
