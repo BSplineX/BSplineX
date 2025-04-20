@@ -32,8 +32,9 @@ using namespace constants;
  * @return A clamped uniform BSpline.
  */
 template <typename T = double>
-types::ClampedUniform<T>
-clamped_uniform(size_t degree, T begin, T end, size_t num_elems, std::vector<T> const &ctrl_points)
+types::ClampedUniform<T> make_clamped_uniform(
+    size_t degree, T begin, T end, size_t num_elems, std::vector<T> const &ctrl_points
+)
 {
   return types::ClampedUniform<T>{
       knots::Data<T, types::ClampedUniform<T>::curve_type>{begin, end, num_elems},
@@ -57,9 +58,11 @@ clamped_uniform(size_t degree, T begin, T end, size_t num_elems, std::vector<T> 
  * @return A clamped uniform BSpline.
  */
 template <typename T = double>
-types::ClampedUniform<T> clamped_uniform(size_t degree, T begin, T end, size_t num_elems)
+types::ClampedUniform<T> make_clamped_uniform(size_t degree, T begin, T end, size_t num_elems)
 {
-  return clamped_uniform<T>(degree, begin, end, num_elems, std::vector<T>(num_elems + degree - 1));
+  return make_clamped_uniform<T>(
+      degree, begin, end, num_elems, std::vector<T>(num_elems + degree - 1)
+  );
 }
 
 /**
@@ -73,12 +76,14 @@ types::ClampedUniform<T> clamped_uniform(size_t degree, T begin, T end, size_t n
  * @return A clamped uniform BSpline.
  */
 template <typename T = double>
-types::ClampedUniform<T> clamped_uniform(size_t degree)
+types::ClampedUniform<T> make_clamped_uniform(size_t degree)
 {
   constexpr T begin{ZERO<T>};
   constexpr T end{ONE<T>};
   constexpr size_t num_elems{2};
-  return clamped_uniform<T>(degree, begin, end, num_elems, std::vector<T>(num_elems + degree - 1));
+  return make_clamped_uniform<T>(
+      degree, begin, end, num_elems, std::vector<T>(num_elems + degree - 1)
+  );
 }
 
 /**
@@ -98,7 +103,7 @@ types::ClampedUniform<T> clamped_uniform(size_t degree)
  * @return A clamped uniform constant BSpline.
  */
 template <typename T = double>
-types::ClampedUniformConstant<T> clamped_uniform_constant(
+types::ClampedUniformConstant<T> make_clamped_uniform_constant(
     size_t degree, T begin, T end, size_t num_elems, std::vector<T> const &ctrl_points
 )
 {
@@ -125,9 +130,9 @@ types::ClampedUniformConstant<T> clamped_uniform_constant(
  */
 template <typename T = double>
 types::ClampedUniformConstant<T>
-clamped_uniform_constant(size_t degree, T begin, T end, size_t num_elems)
+make_clamped_uniform_constant(size_t degree, T begin, T end, size_t num_elems)
 {
-  return clamped_uniform_constant<T>(
+  return make_clamped_uniform_constant<T>(
       degree, begin, end, num_elems, std::vector<T>(num_elems + degree - 1)
   );
 }
@@ -143,12 +148,12 @@ clamped_uniform_constant(size_t degree, T begin, T end, size_t num_elems)
  * @return A clamped uniform constant BSpline.
  */
 template <typename T = double>
-types::ClampedUniformConstant<T> clamped_uniform_constant(size_t degree)
+types::ClampedUniformConstant<T> make_clamped_uniform_constant(size_t degree)
 {
   constexpr T begin{ZERO<T>};
   constexpr T end{ONE<T>};
   constexpr size_t num_elems{2};
-  return clamped_uniform_constant<T>(
+  return make_clamped_uniform_constant<T>(
       degree, begin, end, num_elems, std::vector<T>(num_elems + degree - 1)
   );
 }
@@ -168,8 +173,9 @@ types::ClampedUniformConstant<T> clamped_uniform_constant(size_t degree)
  * @return A clamped non-uniform BSpline.
  */
 template <typename T = double>
-types::ClampedNonUniform<T>
-clamped_nonuniform(size_t degree, std::vector<T> const &knots, std::vector<T> const &ctrl_points)
+types::ClampedNonUniform<T> make_clamped_nonuniform(
+    size_t degree, std::vector<T> const &knots, std::vector<T> const &ctrl_points
+)
 {
   return types::ClampedNonUniform<T>{
       knots::Data<T, types::ClampedNonUniform<T>::curve_type>{knots},
@@ -191,9 +197,9 @@ clamped_nonuniform(size_t degree, std::vector<T> const &knots, std::vector<T> co
  * @return A clamped non-uniform BSpline.
  */
 template <typename T = double>
-types::ClampedNonUniform<T> clamped_nonuniform(size_t degree, std::vector<T> const &knots)
+types::ClampedNonUniform<T> make_clamped_nonuniform(size_t degree, std::vector<T> const &knots)
 {
-  return clamped_nonuniform<T>(degree, knots, std::vector<T>(knots.size() + degree - 1));
+  return make_clamped_nonuniform<T>(degree, knots, std::vector<T>(knots.size() + degree - 1));
 }
 
 /**
@@ -207,10 +213,10 @@ types::ClampedNonUniform<T> clamped_nonuniform(size_t degree, std::vector<T> con
  * @return A clamped non-uniform BSpline.
  */
 template <typename T = double>
-types::ClampedNonUniform<T> clamped_nonuniform(size_t degree)
+types::ClampedNonUniform<T> make_clamped_nonuniform(size_t degree)
 {
   std::vector<T> const knots(2);
-  return clamped_nonuniform<T>(degree, knots, std::vector<T>(knots.size() + degree - 1));
+  return make_clamped_nonuniform<T>(degree, knots, std::vector<T>(knots.size() + degree - 1));
 }
 
 /**
@@ -228,7 +234,7 @@ types::ClampedNonUniform<T> clamped_nonuniform(size_t degree)
  * @return A clamped non-uniform constant BSpline.
  */
 template <typename T = double>
-types::ClampedNonUniformConstant<T> clamped_nonuniform_constant(
+types::ClampedNonUniformConstant<T> make_clamped_nonuniform_constant(
     size_t degree, std::vector<T> const &knots, std::vector<T> const &ctrl_points
 )
 {
@@ -253,9 +259,11 @@ types::ClampedNonUniformConstant<T> clamped_nonuniform_constant(
  */
 template <typename T = double>
 types::ClampedNonUniformConstant<T>
-clamped_nonuniform_constant(size_t degree, std::vector<T> const &knots)
+make_clamped_nonuniform_constant(size_t degree, std::vector<T> const &knots)
 {
-  return clamped_nonuniform_constant<T>(degree, knots, std::vector<T>(knots.size() + degree - 1));
+  return make_clamped_nonuniform_constant<T>(
+      degree, knots, std::vector<T>(knots.size() + degree - 1)
+  );
 }
 
 /**
@@ -269,10 +277,12 @@ clamped_nonuniform_constant(size_t degree, std::vector<T> const &knots)
  * @return A clamped non-uniform constant BSpline.
  */
 template <typename T = double>
-types::ClampedNonUniformConstant<T> clamped_nonuniform_constant(size_t degree)
+types::ClampedNonUniformConstant<T> make_clamped_nonuniform_constant(size_t degree)
 {
   std::vector<T> const knots(2);
-  return clamped_nonuniform_constant<T>(degree, knots, std::vector<T>(knots.size() + degree - 1));
+  return make_clamped_nonuniform_constant<T>(
+      degree, knots, std::vector<T>(knots.size() + degree - 1)
+  );
 }
 
 } // namespace bsplinex::factory

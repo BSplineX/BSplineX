@@ -14,26 +14,26 @@ using types::OpenNonUniformConstant;
 using types::OpenUniform;
 using types::OpenUniformConstant;
 
-using factory::open_nonuniform;
-using factory::open_nonuniform_constant;
-using factory::open_uniform;
-using factory::open_uniform_constant;
+using factory::make_open_nonuniform;
+using factory::make_open_nonuniform_constant;
+using factory::make_open_uniform;
+using factory::make_open_uniform_constant;
 
 using types::ClampedNonUniform;
 using types::ClampedNonUniformConstant;
 using types::ClampedUniform;
 using types::ClampedUniformConstant;
 
-using factory::clamped_nonuniform;
-using factory::clamped_nonuniform_constant;
-using factory::clamped_uniform;
-using factory::clamped_uniform_constant;
+using factory::make_clamped_nonuniform;
+using factory::make_clamped_nonuniform_constant;
+using factory::make_clamped_uniform;
+using factory::make_clamped_uniform_constant;
 
 using types::PeriodicNonUniform;
 using types::PeriodicUniform;
 
-using factory::periodic_nonuniform;
-using factory::periodic_uniform;
+using factory::make_periodic_nonuniform;
+using factory::make_periodic_uniform;
 
 } // namespace bsplinex
 
