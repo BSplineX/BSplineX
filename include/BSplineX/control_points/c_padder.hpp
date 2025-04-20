@@ -55,7 +55,7 @@ private:
 public:
   Padder() = default;
 
-  Padder(Data<T> &data, size_t degree) : pad_right{data.slice(0, degree)} {}
+  Padder(Data<T> const &data, size_t degree) : pad_right{data.slice(0, degree)} {}
 
   Padder(Padder const &other) = default;
 
