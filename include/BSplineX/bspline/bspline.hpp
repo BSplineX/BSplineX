@@ -3,6 +3,7 @@
 
 // Standard includes
 #include <algorithm>
+#include <cstddef>
 #include <memory>
 #include <sstream>
 #include <utility>
@@ -53,6 +54,10 @@ private:
   std::vector<T> mutable support{};
   std::unique_ptr<BSpline const> mutable derivative_ptr;
 
+  struct ShallowCopyTag
+  {
+  };
+
 public:
   /**
    * @brief Default constructor.
@@ -89,10 +94,9 @@ public:
    *
    * @param other The BSpline to copy from.
    */
-  BSpline(BSpline const &other)
-      : knots(other.knots), control_points(other.control_points), degree(other.degree),
-        support(other.support), derivative_ptr(BSpline::deep_copy_derivative(other))
+  BSpline(BSpline const &other) noexcept : BSpline(other, ShallowCopyTag{})
   {
+    deep_copy_derivative(other);
   }
 
   /**
@@ -128,7 +132,8 @@ public:
     this->control_points = other.control_points;
     this->degree         = other.degree;
     this->support        = other.support;
-    this->derivative_ptr = BSpline::deep_copy_derivative(other);
+    this->derivative_ptr = nullptr;
+    deep_copy_derivative(other);
 
     return *this;
   }
@@ -408,6 +413,19 @@ private:
     this->support.resize(this->degree + 1);
   }
 
+  /**
+   * @brief Shallow copy constructor.
+   *
+   * Constructs a BSpline by copying another BSpline, without copying the derivative_ptr.
+   *
+   * @param other The BSpline to copy from.
+   */
+  BSpline(BSpline const &other, ShallowCopyTag /*unused*/) noexcept
+      : knots(other.knots), control_points(other.control_points), degree(other.degree),
+        support(other.support), derivative_ptr(nullptr)
+  {
+  }
+
   void check_sizes()
   {
     if (this->control_points.size() == this->knots.size() - this->degree - 1)
@@ -563,14 +581,22 @@ private:
 
   void invalidate_derivative() const { this->derivative_ptr = nullptr; }
 
-  static std::unique_ptr<BSpline> deep_copy_derivative(BSpline const &other)
+  void copy_derivative(BSpline const &other) const
   {
-    if (other.derivative_ptr)
-    {
-      return std::make_unique<BSpline>(*(other.derivative_ptr));
-    }
+    this->derivative_ptr =
+        std::unique_ptr<BSpline const>(new BSpline(*other.derivative_ptr, ShallowCopyTag{}));
+  }
 
-    return std::unique_ptr<BSpline>{nullptr};
+  void deep_copy_derivative(BSpline const &other) const
+  {
+    BSpline const *d       = this;
+    BSpline const *other_d = &other;
+    for (size_t i{0}; i < degree && other_d->derivative_ptr; i++)
+    {
+      d->copy_derivative(*other_d);
+      d       = d->derivative_ptr.get();
+      other_d = other_d->derivative_ptr.get();
+    }
   }
 };
 
