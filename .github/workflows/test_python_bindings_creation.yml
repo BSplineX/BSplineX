@@ -13,8 +13,15 @@ jobs:
         os: [ubuntu-latest, macos-latest, macos-13, windows-latest]
 
     steps:
+      - name: "Setup: checkout Python bindings repo"
+        uses: actions/checkout@v4
+        with:
+          repository: BSplineX/BSplineX-python
+
       - name: "Setup: checkout repo"
         uses: actions/checkout@v4
+        with:
+          path: BSplineX
 
       - name: "Setup: get CMake"
         uses: lukka/get-cmake@latest
@@ -26,21 +33,7 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: "Setup: checkout Python bindings repo"
-        uses: actions/checkout@v4
-        with:
-          repository: BSplineX/BSplineX-python
-          path: BSplineX-python
-
-      - name: "Setup: create symlink to BSplineX"
-        run: |
-          cd BSplineX-python
-          rm -r BSplineX
-          ln -s .. ./BSplineX
-        shell: bash
-
       - name: "Test: generate Python bindings"
         run: |
-          cd BSplineX-python
           pip install . -U
         shell: bash
