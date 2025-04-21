@@ -29,7 +29,7 @@
 
 // some compilers complain about static_assert(false, ...)
 // Use a false_type dependent from a template argument to silence them.
-template <auto>
+template <typename T>
 struct dependent_false : std::false_type
 {
 };
