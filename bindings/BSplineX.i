@@ -42,40 +42,40 @@ using namespace bsplinex;
 
 %template(OpenUniform) bspline::BSpline<double, Curve::UNIFORM, BoundaryCondition::OPEN, Extrapolation::NONE>;
 %template() types::OpenUniform<double>;
-%template(open_uniform) factory::open_uniform<double>;
+%template(open_uniform) factory::make_open_uniform<double>;
 
 %template(OpenUniformConstant) bspline::BSpline<double, Curve::UNIFORM, BoundaryCondition::OPEN, Extrapolation::CONSTANT>;
 %template() types::OpenUniformConstant<double>;
-%template(open_uniform_constant) factory::open_uniform_constant<double>;
+%template(open_uniform_constant) factory::make_open_uniform_constant<double>;
 
 %template(OpenNonUniform) bspline::BSpline<double, Curve::NON_UNIFORM, BoundaryCondition::OPEN, Extrapolation::NONE>;
 %template() types::OpenNonUniform<double>;
-%template(open_nonuniform) factory::open_nonuniform<double>;
+%template(open_nonuniform) factory::make_open_nonuniform<double>;
 
 %template(OpenNonUniformConstant) bspline::BSpline<double, Curve::NON_UNIFORM, BoundaryCondition::OPEN, Extrapolation::CONSTANT>;
 %template() types::OpenNonUniformConstant<double>;
-%template(open_nonuniform_constant) factory::open_nonuniform_constant<double>;
+%template(open_nonuniform_constant) factory::make_open_nonuniform_constant<double>;
 
 %template(ClampedUniform) bspline::BSpline<double, Curve::UNIFORM, BoundaryCondition::CLAMPED, Extrapolation::NONE>;
 %template() types::ClampedUniform<double>;
-%template(clamped_uniform) factory::clamped_uniform<double>;
+%template(clamped_uniform) factory::make_clamped_uniform<double>;
 
 %template(ClampedUniformConstant) bspline::BSpline<double, Curve::UNIFORM, BoundaryCondition::CLAMPED, Extrapolation::CONSTANT>;
 %template() types::ClampedUniformConstant<double>;
-%template(clamped_uniform_constant) factory::clamped_uniform_constant<double>;
+%template(clamped_uniform_constant) factory::make_clamped_uniform_constant<double>;
 
 %template(ClampedNonUniform) bspline::BSpline<double, Curve::NON_UNIFORM, BoundaryCondition::CLAMPED, Extrapolation::NONE>;
 %template() types::ClampedNonUniform<double>;
-%template(clamped_nonuniform) factory::clamped_nonuniform<double>;
+%template(clamped_nonuniform) factory::make_clamped_nonuniform<double>;
 
 %template(ClampedNonUniformConstant) bspline::BSpline<double, Curve::NON_UNIFORM, BoundaryCondition::CLAMPED, Extrapolation::CONSTANT>;
 %template() types::ClampedNonUniformConstant<double>;
-%template(clamped_nonuniform_constant) factory::clamped_nonuniform_constant<double>;
+%template(clamped_nonuniform_constant) factory::make_clamped_nonuniform_constant<double>;
 
 %template(PeriodicUniform) bspline::BSpline<double, Curve::UNIFORM, BoundaryCondition::PERIODIC, Extrapolation::PERIODIC>;
 %template() types::PeriodicUniform<double>;
-%template(periodic_uniform) factory::periodic_uniform<double>;
+%template(periodic_uniform) factory::make_periodic_uniform<double>;
 
 %template(PeriodicNonUniform) bspline::BSpline<double, Curve::NON_UNIFORM, BoundaryCondition::PERIODIC, Extrapolation::PERIODIC>;
 %template() types::PeriodicNonUniform<double>;
-%template(periodic_nonuniform) factory::periodic_nonuniform<double>;
+%template(periodic_nonuniform) factory::make_periodic_nonuniform<double>;
