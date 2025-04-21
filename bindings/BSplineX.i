@@ -40,13 +40,6 @@ using namespace bsplinex;
 %template(Condition) lsq::Condition<double>;
 %template() std::vector<lsq::Condition<double>>;
 
-//  ██████╗ ██████╗ ███████╗███╗   ██╗
-// ██╔═══██╗██╔══██╗██╔════╝████╗  ██║
-// ██║   ██║██████╔╝█████╗  ██╔██╗ ██║
-// ██║   ██║██╔═══╝ ██╔══╝  ██║╚██╗██║
-// ╚██████╔╝██║     ███████╗██║ ╚████║
-//  ╚═════╝ ╚═╝     ╚══════╝╚═╝  ╚═══╝
-
 %template(OpenUniform) bspline::BSpline<double, Curve::UNIFORM, BoundaryCondition::OPEN, Extrapolation::NONE>;
 %template() types::OpenUniform<double>;
 %template(open_uniform) factory::open_uniform<double>;
@@ -63,13 +56,6 @@ using namespace bsplinex;
 %template() types::OpenNonUniformConstant<double>;
 %template(open_nonuniform_constant) factory::open_nonuniform_constant<double>;
 
-//  ██████╗██╗      █████╗ ███╗   ███╗██████╗ ███████╗██████╗
-// ██╔════╝██║     ██╔══██╗████╗ ████║██╔══██╗██╔════╝██╔══██╗
-// ██║     ██║     ███████║██╔████╔██║██████╔╝█████╗  ██║  ██║
-// ██║     ██║     ██╔══██║██║╚██╔╝██║██╔═══╝ ██╔══╝  ██║  ██║
-// ╚██████╗███████╗██║  ██║██║ ╚═╝ ██║██║     ███████╗██████╔╝
-// ╚═════╝╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝╚═╝     ╚══════╝╚═════╝
-
 %template(ClampedUniform) bspline::BSpline<double, Curve::UNIFORM, BoundaryCondition::CLAMPED, Extrapolation::NONE>;
 %template() types::ClampedUniform<double>;
 %template(clamped_uniform) factory::clamped_uniform<double>;
@@ -85,13 +71,6 @@ using namespace bsplinex;
 %template(ClampedNonUniformConstant) bspline::BSpline<double, Curve::NON_UNIFORM, BoundaryCondition::CLAMPED, Extrapolation::CONSTANT>;
 %template() types::ClampedNonUniformConstant<double>;
 %template(clamped_nonuniform_constant) factory::clamped_nonuniform_constant<double>;
-
-// ██████╗ ███████╗██████╗ ██╗ ██████╗ ██████╗ ██╗ ██████╗
-// ██╔══██╗██╔════╝██╔══██╗██║██╔═══██╗██╔══██╗██║██╔════╝
-// ██████╔╝█████╗  ██████╔╝██║██║   ██║██║  ██║██║██║
-// ██╔═══╝ ██╔══╝  ██╔══██╗██║██║   ██║██║  ██║██║██║
-// ██║     ███████╗██║  ██║██║╚██████╔╝██████╔╝██║╚██████╗
-// ╚═╝     ╚══════╝╚═╝  ╚═╝╚═╝ ╚═════╝ ╚═════╝ ╚═╝ ╚═════╝
 
 %template(PeriodicUniform) bspline::BSpline<double, Curve::UNIFORM, BoundaryCondition::PERIODIC, Extrapolation::PERIODIC>;
 %template() types::PeriodicUniform<double>;
