@@ -286,7 +286,7 @@ public:
   void interpolate(
       std::vector<T> const &x,
       std::vector<T> const &y,
-      std::vector<lsq::Condition<T>> const &additional_conditions
+      std::vector<lsq::InterpolantCondition<T>> const &additional_conditions
   )
   {
     releaseassert(x.size() == y.size(), "x and y must have the same size");

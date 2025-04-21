@@ -39,8 +39,8 @@ using namespace bsplinex;
   }
 }
 
-%template(Condition) lsq::Condition<double>;
-%template() std::vector<lsq::Condition<double>>;
+%template(Condition) InterpolantCondition<double>;
+%template() std::vector<InterpolantCondition<double>>;
 
 %template(OpenUniform) bspline::BSpline<double, Curve::UNIFORM, BoundaryCondition::OPEN, Extrapolation::NONE>;
 %template() OpenUniform<double>;

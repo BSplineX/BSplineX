@@ -158,28 +158,28 @@ public:
 };
 
 template <typename T>
-struct Condition
+struct InterpolantCondition
 {
   T x_value;
   T y_value;
   size_t derivative_order;
 
-  Condition(T x_value, T y_value, size_t derivative_order)
+  InterpolantCondition(T x_value, T y_value, size_t derivative_order)
       : x_value{x_value}, y_value{y_value}, derivative_order{derivative_order}
   {
   }
 };
 
 template <typename T, class Iter>
-std::vector<Condition<T>> create_sorted_conditions(
+std::vector<InterpolantCondition<T>> create_sorted_conditions(
     views::ArrayView<Iter> const &x,
     views::ArrayView<Iter> const &y,
-    std::vector<Condition<T>> const &additional_conditions
+    std::vector<InterpolantCondition<T>> const &additional_conditions
 )
 {
   debugassert(x.size() == y.size(), "x and y must have the same size.");
 
-  std::vector<Condition<T>> conditions;
+  std::vector<InterpolantCondition<T>> conditions;
   conditions.reserve(x.size() + additional_conditions.size());
 
   for (size_t k{0}; k < x.size(); k++)
@@ -191,7 +191,8 @@ std::vector<Condition<T>> create_sorted_conditions(
   std::sort(
       conditions.begin(),
       conditions.end(),
-      [&](Condition<T> const &a, Condition<T> const &b) { return a.x_value < b.x_value; }
+      [&](InterpolantCondition<T> const &a, InterpolantCondition<T> const &b)
+      { return a.x_value < b.x_value; }
   );
 
   return conditions;
@@ -205,7 +206,7 @@ void fill(
     std::function<size_t(T, size_t, std::vector<T> &)> nnz_basis,
     views::ArrayView<Iter> const &x,
     views::ArrayView<Iter> const &y,
-    std::vector<Condition<T>> const &additional_conditions
+    std::vector<InterpolantCondition<T>> const &additional_conditions
 )
 {
   debugassert(x.size() == y.size(), "x and y must have the same size.");
@@ -217,12 +218,13 @@ void fill(
   size_t const num_rows = A.num_rows();
   size_t const num_cols = A.num_cols();
 
-  std::vector<Condition<T>> conditions = create_sorted_conditions(x, y, additional_conditions);
+  std::vector<InterpolantCondition<T>> conditions =
+      create_sorted_conditions(x, y, additional_conditions);
 
   std::vector<T> nnz(degree + 1, ZERO<T>);
   for (size_t i{0}; i < num_rows; i++)
   {
-    Condition<T> const &condition = conditions.at(i);
+    InterpolantCondition<T> const &condition = conditions.at(i);
 
     size_t const index = nnz_basis(condition.x_value, condition.derivative_order, nnz);
     for (size_t j{0}; j <= degree; j++)
@@ -253,7 +255,7 @@ lsq(size_t const degree,
     std::function<size_t(T, size_t, std::vector<T> &)> nnz_basis,
     views::ArrayView<Iter> const &x,
     views::ArrayView<Iter> const &y,
-    std::vector<Condition<T>> const &additional_conditions)
+    std::vector<InterpolantCondition<T>> const &additional_conditions)
 {
   debugassert(x.size() == y.size(), "x and y must have the same size.");
 

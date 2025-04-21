@@ -4,6 +4,7 @@
 #include "BSplineX/bspline/bspline_factory_clamped.hpp"
 #include "BSplineX/bspline/bspline_factory_open.hpp"
 #include "BSplineX/bspline/bspline_factory_periodic.hpp"
+#include "BSplineX/bspline/bspline_lsq.hpp"
 #include "BSplineX/bspline/bspline_types.hpp"
 
 namespace bsplinex
@@ -34,6 +35,8 @@ using types::PeriodicUniform;
 
 using factory::make_periodic_nonuniform;
 using factory::make_periodic_uniform;
+
+using lsq::InterpolantCondition;
 
 } // namespace bsplinex
 

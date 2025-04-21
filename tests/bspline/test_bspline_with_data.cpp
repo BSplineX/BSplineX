@@ -373,7 +373,7 @@ TEMPLATE_TEST_CASE("BSpline", "[bspline][template][product]", BSPLINE_TEST_TYPES
                                                    .get<std::pair<
                                                        std::vector<std::pair<size_t, real_t>>,
                                                        std::vector<std::pair<size_t, real_t>>>>();
-        std::vector<lsq::Condition<real_t>> additional_conditions{};
+        std::vector<lsq::InterpolantCondition<real_t>> additional_conditions{};
         additional_conditions.reserve(conds_left.size() + conds_right.size());
         for (auto const &[derivative_order, value] : conds_left)
         {
