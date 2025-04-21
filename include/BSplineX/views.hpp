@@ -49,7 +49,7 @@ public:
    */
   ArrayView(Iter begin, Iter end) : _begin{begin}, _end{end}
   {
-    debugassert(end > begin, "Invalid view range.");
+    releaseassert(end > begin, "Invalid view range.");
   }
 
   /**
@@ -99,8 +99,8 @@ public:
    */
   reference at(difference_type index)
   {
-    debugassert(std::distance(this->_begin, this->_end) > index, "Out of bounds.");
-    debugassert(index >= 0, "Negative indices are not supported.");
+    releaseassert(std::distance(this->_begin, this->_end) > index, "Out of bounds.");
+    releaseassert(index >= 0, "Negative indices are not supported.");
 
     return this->operator[](index);
   }

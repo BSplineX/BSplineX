@@ -1,4 +1,5 @@
 #include <array>
+#include <cstddef>
 #include <numeric>
 #include <type_traits>
 #include <vector>
@@ -36,9 +37,10 @@ using namespace bsplinex::views;
 
 TEMPLATE_TEST_CASE("ArrayView", "[ArrayView][template][product]", VIEW_TEST_TYPES)
 {
-  using vec_type   = TestType;
-  using iter       = typename vec_type::iterator;
-  using const_iter = typename vec_type::const_iterator;
+  using vec_type        = TestType;
+  using iter            = typename vec_type::iterator;
+  using const_iter      = typename vec_type::const_iterator;
+  using difference_type = std::ptrdiff_t;
 
   vec_type data;
   if constexpr (is_vector_v<vec_type>)
@@ -62,7 +64,7 @@ TEMPLATE_TEST_CASE("ArrayView", "[ArrayView][template][product]", VIEW_TEST_TYPE
   {
     for (size_t i{0}; i < view.size(); i++)
     {
-      REQUIRE(view[i] == data[i]);
+      REQUIRE(view[i] == data[i]); // NOLINT(cppcoreguidelines-pro-bounds-constant-array-index)
     }
 
     constexpr test_t new_elem{static_cast<test_t>(10)};
@@ -165,22 +167,19 @@ TEMPLATE_TEST_CASE("ArrayView", "[ArrayView][template][product]", VIEW_TEST_TYPE
     REQUIRE(data.front() == new_elem);
   }
 
-#ifdef NDEBUG
   SECTION("Invalid range in constructor")
   {
-    REQUIRE_THROWS_WITH(ArrayView<vec_iter>(data.end(), data.begin()), "Invalid view range.");
+    REQUIRE_THROWS_WITH(ArrayView<iter>(data.end(), data.begin()), "Invalid view range.");
   }
 
   SECTION("Out of bounds access with at()")
   {
-    ArrayView<vec_iter> _view(data.begin(), data.end());
+    ArrayView<iter> _view(data.begin(), data.end());
 
-    using difference_type = vec_iter::difference_type;
     difference_type const too_high{static_cast<difference_type>(data.size() + 10)};
     difference_type const too_low{static_cast<difference_type>(-10)};
 
     REQUIRE_THROWS_WITH(_view.at(too_high), "Out of bounds.");
     REQUIRE_THROWS_WITH(_view.at(too_low), "Negative indices are not supported.");
   }
-#endif
 }
