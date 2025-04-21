@@ -33,9 +33,9 @@ public:
 
   Padder(Data<T, C> const & /*data*/, size_t /*degree*/) {}
 
-  Padder(Padder const & /*other*/) = default;
+  Padder(Padder const &other) = default;
 
-  Padder(Padder && /*other*/) = default;
+  Padder(Padder &&other) = default;
 
   ~Padder() = default;
 
