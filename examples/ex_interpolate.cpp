@@ -16,7 +16,7 @@ int main()
 
   constexpr size_t degree{2};
 
-  auto bspline = bsplinex::factory::open_nonuniform(degree);
+  auto bspline = bsplinex::make_open_nonuniform(degree);
 
   // interpolate the curve to the points
   bspline.interpolate(x_interp, y_interp, {{cond_x, cond_y, cond_d}});

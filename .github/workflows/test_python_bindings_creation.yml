@@ -1,0 +1,40 @@
+name: Test Python Bindings Creation
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+jobs:
+  test:
+    name: Test Python bindings creation on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, macos-13, windows-latest]
+
+    steps:
+      - name: "Setup: checkout Python bindings repo"
+        uses: actions/checkout@v4
+        with:
+          repository: BSplineX/BSplineX-python
+
+      - name: "Setup: checkout repo"
+        uses: actions/checkout@v4
+        with:
+          path: BSplineX
+
+      - name: "Setup: get CMake"
+        uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: latestrc
+
+      - name: "Setup: get Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: "Test: generate Python bindings"
+        run: |
+          pip install . -U
+        shell: bash

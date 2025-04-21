@@ -1,6 +1,7 @@
 # BSplineX
 
-The B-Spline library you have always dreamed of where performance and easy-to-use interfaces live in harmony.
+The B-Spline library you have always dreamed of where performance and
+easy-to-use interfaces live in harmony.
 
 ## Features
 
@@ -16,7 +17,10 @@ This is a non-exhaustive list of the currently supported features.
 
 ### Quick and dirty
 
-`BSplineX` is a header-only library that depends only on `Eigen`, so the quick and dirty way of installing it is by simply copying the `include` directory to your project and make sure to have `Eigen` available however you see fit. Alternatively, you can do things properly and use `CMake`.
+`BSplineX` is a header-only library that depends only on `Eigen`, so the quick
+and dirty way of installing it is by simply copying the `include` directory to
+your project and make sure to have `Eigen` available however you see fit.
+Alternatively, you can do things properly and use `CMake`.
 
 ### CMake
 
@@ -43,7 +47,8 @@ fetchcontent_makeavailable(BSplineX)
 target_link_libraries(your_target PRIVATE BSplineX::BSplineX)
 ```
 
-If you already have `BSplineX` somewhere on your system, you can use `find_pacakge` directly.
+If you already have `BSplineX` somewhere on your system, you can use
+`find_package` directly.
 
 ```cmake
 # Optionally specify a custom path to find content from
@@ -57,7 +62,8 @@ find_package(
 target_link_libraries(your_target PRIVATE BSplineX::BSplineX)
 ```
 
-Since we are nice people, we also show you how to conditionally use `FetchContent` based if you already have the library or not.
+Since we are nice people, we also show you how to conditionally use
+`FetchContent` based if you already have the library or not.
 
 ```cmake
 # Optionally specify a custom path to find content from
@@ -87,7 +93,8 @@ target_link_libraries(your_target PRIVATE BSplineX::BSplineX)
 
 ## Usage
 
-`BSplineX` is extremely easy to use, everything that is complex about B-Splines is hidden behind the curtain. Hereafter some quick examples.
+`BSplineX` is extremely easy to use, everything that is complex about B-Splines
+is hidden behind the curtain. Hereafter some quick examples.
 
 ### Creating a 1D B-Spline
 
@@ -106,7 +113,7 @@ int main()
   constexpr double max_knot{10.0};
   std::vector<double> ctrl_points{1.0, 0.3, 0.6, 0.9, 0.28, 9.32};
 
-  auto bspline = bsplinex::factory::clamped_uniform_constant(
+  auto bspline = bsplinex::make_clamped_uniform_constant(
     degree, min_knot, max_knot, num_knots, ctrl_points
   );
 
@@ -118,19 +125,28 @@ int main()
 }
 ```
 
-If you want to make it periodic or open, just change the template parameter, easy. Want to pass in a non-uniform knot sequence? Piece of cake, just set the `Curve` template parameter to `Curve::NON_UNIFORM` and pass in your knots vector. Boom, done, simple.
+If you want to make it periodic or open, just change the template parameter,
+easy. Want to pass in a non-uniform knot sequence? Piece of cake, just set the
+`Curve` template parameter to `Curve::NON_UNIFORM` and pass in your knots
+vector. Boom, done, simple.
 
-Now I know what you are thinking: "Dude, cool, but how on earth do I know which control points to use?". Fear not, and follow along ;).
+Now I know what you are thinking: "Dude, cool, but how on earth do I know which
+control points to use?". Fear not, and follow along ;).
 
 ### Fitting a 1D B-Spline
 
-In the previous example, the knots are easy to understand: they are you discretisation grid, so you just have to choose how you want to discretise along that dimension. Control points on the other hand are not easily graspable. Fortunately you don't really need to know them a priori, you can just interpolate (coming soon!) or fit some data points. Let's see how, assuming we start from the previous example.
+In the previous example, the knots are easy to understand: they are you
+discretisation grid, so you just have to choose how you want to discretise
+along that dimension. Control points on the other hand are not easily
+graspable. Fortunately you don't really need to know them a priori, you can
+just interpolate (coming soon!) or fit some data points. Let's see how,
+assuming we start from the previous example.
 
 ```cpp
 ...
 
   // Create the B-Spline without specifying the control points
-  auto bspline = bsplinex::factory::clamped_uniform_constant(
+  auto bspline = bsplinex::make_clamped_uniform_constant(
     degree, min_knot, max_knot, num_knots
   );
 
@@ -151,4 +167,9 @@ See the [examples](examples) folder for some more examples on how to use the lib
 
 ## Performance
 
-`BSplineX` is all about performance. In fact, aside from being a cool and useful project, it is our playground to understand modern code optimisation techniques. Our goal is to be as fast as humanly possible (albeit without having to re-write the library by hand in assembly). Hereafter a non-exhaustive quick table with some performance results. If you want to can run the benchmarks on your own PC.
+`BSplineX` is all about performance. In fact, aside from being a cool and
+useful project, it is our playground to understand modern code optimisation
+techniques. Our goal is to be as fast as humanly possible (albeit without
+having to re-write the library by hand in assembly). Hereafter a non-exhaustive
+quick table with some performance results. If you want to can run the
+benchmarks on your own PC.
