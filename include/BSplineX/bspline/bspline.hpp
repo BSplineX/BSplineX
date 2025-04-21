@@ -341,7 +341,8 @@ public:
     else
     {
       static_assert(
-          dependent_false<BoundaryCondition>::value, "Unknown boundary condition, you should never get here!"
+          dependent_false<decltype(BC)>::value,
+          "Unknown boundary condition, you should never get here!"
       );
     }
 
