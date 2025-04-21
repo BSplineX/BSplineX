@@ -55,7 +55,7 @@ private:
 public:
   Padder() = default;
 
-  Padder(Data<T> &data, size_t degree) : pad_right{data.slice(0, degree)} {}
+  Padder(Data<T> const &data, size_t degree) : pad_right{data.slice(0, degree)} {}
 
   Padder(Padder const &other) = default;
 
@@ -70,7 +70,7 @@ public:
   [[nodiscard]] T right(size_t index) const
   {
     debugassert(index < this->pad_right.size(), "Out of bounds");
-    return this->pad_right[index];
+    return this->pad_right.at(index);
   }
 
   [[nodiscard]] size_t size() const { return this->pad_right.size(); }

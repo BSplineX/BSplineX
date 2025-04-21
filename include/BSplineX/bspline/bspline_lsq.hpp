@@ -3,6 +3,7 @@
 
 // Standard includes
 #include <functional>
+#include <iterator>
 #include <vector>
 
 // #ifndef NDEBUG
@@ -172,8 +173,8 @@ struct InterpolantCondition
 
 template <typename T, class Iter>
 std::vector<InterpolantCondition<T>> create_sorted_conditions(
-    views::ArrayView<Iter> const &x,
-    views::ArrayView<Iter> const &y,
+    views::ArrayView<Iter> x,
+    views::ArrayView<Iter> y,
     std::vector<InterpolantCondition<T>> const &additional_conditions
 )
 {
@@ -184,7 +185,7 @@ std::vector<InterpolantCondition<T>> create_sorted_conditions(
 
   for (size_t k{0}; k < x.size(); k++)
   {
-    conditions.emplace_back(x[k], y[k], 0);
+    conditions.emplace_back(x.at(k), y.at(k), 0);
   }
   conditions.insert(conditions.end(), additional_conditions.begin(), additional_conditions.end());
 
@@ -279,9 +280,11 @@ lsq(size_t const degree,
     fill<sparse_lsq, T, iter_type, BC>(A, b, degree, nnz_basis, x, y, additional_conditions);
     Eigen::VectorX<T> res = A.solve(b);
 
+    using difference_type = typename Eigen::VectorX<T>::iterator::difference_type;
+
+    auto const res_size = static_cast<difference_type>(res.size());
     return control_points::ControlPoints<T, BC>{
-        control_points::Data<T>{std::vector<T>{res.data(), res.data() + res.rows() * res.cols()}},
-        degree
+        control_points::Data<T>{std::vector<T>{res.data(), std::next(res.data(), res_size)}}, degree
     };
   }
   else
@@ -292,9 +295,11 @@ lsq(size_t const degree,
     fill<dense_lsq, T, iter_type, BC>(A, b, degree, nnz_basis, x, y, additional_conditions);
     Eigen::VectorX<T> res = A.solve(b);
 
+    using difference_type = typename Eigen::VectorX<T>::iterator::difference_type;
+
+    auto const res_size = static_cast<difference_type>(res.size());
     return control_points::ControlPoints<T, BC>{
-        control_points::Data<T>{std::vector<T>{res.data(), res.data() + res.rows() * res.cols()}},
-        degree
+        control_points::Data<T>{std::vector<T>{res.data(), std::next(res.data(), res_size)}}, degree
     };
   }
 }

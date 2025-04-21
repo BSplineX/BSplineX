@@ -41,7 +41,7 @@ private:
 public:
   ControlPoints() = default;
 
-  ControlPoints(Data<T> data, size_t degree) : atter{data, degree}, degree{degree} {}
+  ControlPoints(Data<T> const &data, size_t degree) : atter{data, degree}, degree{degree} {}
 
   ControlPoints(ControlPoints const &other) = default;
 

@@ -21,7 +21,7 @@ private:
 public:
   Atter() = default;
 
-  Atter(Data<T> data, size_t degree) : data{std::move(data)}, padder{this->data, degree} {}
+  Atter(Data<T> const &data, size_t degree) : data{data}, padder{this->data, degree} {}
 
   Atter(Atter const &other) = default;
 
