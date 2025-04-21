@@ -54,13 +54,13 @@ public:
 
   Extrapolator(Extrapolator const &other) = default;
 
-  Extrapolator(Extrapolator &&other) noexcept = default;
+  Extrapolator(Extrapolator &&other) = default;
 
   ~Extrapolator() = default;
 
   Extrapolator &operator=(Extrapolator const &other) = default;
 
-  Extrapolator &operator=(Extrapolator &&other) noexcept = default;
+  Extrapolator &operator=(Extrapolator &&other) = default;
 
   [[nodiscard]] T extrapolate(T value) const
   {
@@ -90,13 +90,13 @@ public:
 
   Extrapolator(Extrapolator const &other) = default;
 
-  Extrapolator(Extrapolator &&other) noexcept = default;
+  Extrapolator(Extrapolator &&other) = default;
 
   ~Extrapolator() = default;
 
   Extrapolator &operator=(Extrapolator const &other) = default;
 
-  Extrapolator &operator=(Extrapolator &&other) noexcept = default;
+  Extrapolator &operator=(Extrapolator &&other) = default;
 
   [[nodiscard]] T extrapolate(T value) const
   {

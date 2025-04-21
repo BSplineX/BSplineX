@@ -45,13 +45,13 @@ public:
 
   ControlPoints(ControlPoints const &other) = default;
 
-  ControlPoints(ControlPoints &&other) noexcept = default;
+  ControlPoints(ControlPoints &&other) = default;
 
-  ~ControlPoints() noexcept = default;
+  ~ControlPoints() = default;
 
   ControlPoints &operator=(ControlPoints const &other) = default;
 
-  ControlPoints &operator=(ControlPoints &&other) noexcept = default;
+  ControlPoints &operator=(ControlPoints &&other) = default;
 
   [[nodiscard]] T at(size_t index) const { return this->atter.at(index); }
 

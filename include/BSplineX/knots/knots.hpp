@@ -59,13 +59,13 @@ public:
 
   Knots(Knots const &other) = default;
 
-  Knots(Knots &&other) noexcept = default;
+  Knots(Knots &&other) = default;
 
   ~Knots() = default;
 
   Knots &operator=(Knots const &other) = default;
 
-  Knots &operator=(Knots &&other) noexcept = default;
+  Knots &operator=(Knots &&other) = default;
 
   [[nodiscard]] std::pair<size_t, T> find(T value) const
   {
