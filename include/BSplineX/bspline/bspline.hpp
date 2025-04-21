@@ -102,12 +102,12 @@ public:
    *
    * @param other The BSpline to move from.
    */
-  BSpline(BSpline &&other) noexcept = default;
+  BSpline(BSpline &&other) = default;
 
   /**
    * @brief Destructor.
    */
-  ~BSpline() noexcept = default;
+  ~BSpline() = default;
 
   /**
    * @brief Copy assignment operator.
@@ -141,7 +141,7 @@ public:
    * @param other The BSpline to move from.
    * @return A reference to this BSpline.
    */
-  BSpline &operator=(BSpline &&other) noexcept = default;
+  BSpline &operator=(BSpline &&other) = default;
 
   /**
    * @brief Evaluates the BSpline at a given value.

@@ -26,13 +26,13 @@ public:
 
   Data(Data const &other) = default;
 
-  Data(Data &&other) noexcept = default;
+  Data(Data &&other) = default;
 
   ~Data() = default;
 
   Data &operator=(Data const &other) = default;
 
-  Data &operator=(Data &&other) noexcept = default;
+  Data &operator=(Data &&other) = default;
 
   [[nodiscard]] T at(size_t index) const
   {

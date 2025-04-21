@@ -68,7 +68,7 @@ public:
    *
    * @param other The ArrayView to move from.
    */
-  ArrayView(ArrayView &&other) noexcept = default;
+  ArrayView(ArrayView &&other) = default;
 
   /**
    * @brief Copy assignment operator.
@@ -88,7 +88,7 @@ public:
    * @param other The ArrayView to move from.
    * @return A reference to this ArrayView.
    */
-  ArrayView &operator=(ArrayView &&other) noexcept = default;
+  ArrayView &operator=(ArrayView &&other) = default;
 
   /**
    * @brief Access an element at a given index with bounds checking.

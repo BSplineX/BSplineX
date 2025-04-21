@@ -25,13 +25,13 @@ public:
 
   Atter(Atter const &other) = default;
 
-  Atter(Atter &&other) noexcept = default;
+  Atter(Atter &&other) = default;
 
-  ~Atter() noexcept = default;
+  ~Atter() = default;
 
   Atter &operator=(Atter const &other) = default;
 
-  Atter &operator=(Atter &&other) noexcept = default;
+  Atter &operator=(Atter &&other) = default;
 
   [[nodiscard]] T at(size_t index) const
   {

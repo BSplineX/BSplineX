@@ -33,15 +33,15 @@ public:
 
   Padder(Data<T, C> const & /*data*/, size_t /*degree*/) {}
 
-  Padder(Padder const & /*other*/) = default;
+  Padder(Padder const &other) = default;
 
-  Padder(Padder && /*other*/) noexcept = default;
+  Padder(Padder &&other) = default;
 
-  ~Padder() noexcept = default;
+  ~Padder() = default;
 
   Padder &operator=(Padder const &other) = default;
 
-  Padder &operator=(Padder &&other) noexcept = default;
+  Padder &operator=(Padder &&other) = default;
 
   [[nodiscard]] T left(size_t /*index*/) const
   {
@@ -94,13 +94,13 @@ public:
 
   Padder(Padder const &other) = default;
 
-  Padder(Padder &&other) noexcept = default;
+  Padder(Padder &&other) = default;
 
-  ~Padder() noexcept = default;
+  ~Padder() = default;
 
   Padder &operator=(Padder const &other) = default;
 
-  Padder &operator=(Padder &&other) noexcept = default;
+  Padder &operator=(Padder &&other) = default;
 
   [[nodiscard]] T left([[maybe_unused]] size_t index) const
   {
@@ -148,13 +148,13 @@ public:
 
   Padder(Padder const &other) = default;
 
-  Padder(Padder &&other) noexcept = default;
+  Padder(Padder &&other) = default;
 
-  ~Padder() noexcept = default;
+  ~Padder() = default;
 
   Padder &operator=(Padder const &other) = default;
 
-  Padder &operator=(Padder &&other) noexcept = default;
+  Padder &operator=(Padder &&other) = default;
 
   [[nodiscard]] T left(size_t index) const
   {
