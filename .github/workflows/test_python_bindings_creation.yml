@@ -36,7 +36,7 @@ jobs:
         run: |
           cd BSplineX-python
           rm -r BSplineX
-          ln -s ../BSplineX .
+          ln -s .. ./BSplineX
         shell: bash
 
       - name: "Test: generate Python bindings"
