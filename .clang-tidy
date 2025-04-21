@@ -12,7 +12,8 @@ Checks: "*,
   -readability-static-accessed-through-instance,
   -readability-avoid-const-params-in-decls,
   -cppcoreguidelines-non-private-member-variables-in-classes,
-  -misc-non-private-member-variables-in-classes"
+  -misc-non-private-member-variables-in-classes,
+  -boost-use-ranges"
 WarningsAsErrors: ""
 HeaderFilterRegex: "include/.*\\.hpp$"
 FormatStyle: none
