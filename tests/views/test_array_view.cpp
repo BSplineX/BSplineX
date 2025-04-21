@@ -40,7 +40,7 @@ TEMPLATE_TEST_CASE("ArrayView", "[ArrayView][template][product]", VIEW_TEST_TYPE
   using vec_type        = TestType;
   using iter            = typename vec_type::iterator;
   using const_iter      = typename vec_type::const_iterator;
-  using difference_type = std::ptrdiff_t;
+  using difference_type = typename std::iterator_traits<iter>::difference_type;
 
   vec_type data;
   if constexpr (is_vector_v<vec_type>)
