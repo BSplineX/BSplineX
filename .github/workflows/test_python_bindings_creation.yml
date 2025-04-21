@@ -30,6 +30,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: BSplineX/BSplineX-python
+          path: BSplineX-python
 
       - name: "Setup: create symlink to BSplineX"
         run: |
