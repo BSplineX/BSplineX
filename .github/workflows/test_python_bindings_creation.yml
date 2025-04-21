@@ -2,6 +2,7 @@ name: Test Python Bindings Creation
 
 on:
   push:
+    branches: ["main"]
   pull_request:
     branches: ["main"]
 jobs:
