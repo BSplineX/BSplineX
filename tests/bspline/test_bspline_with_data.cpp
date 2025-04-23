@@ -434,14 +434,14 @@ TEMPLATE_TEST_CASE("BSpline", "[bspline][template][product]", BSPLINE_TEST_TYPES
 
       SECTION("Constructors and assignments")
       {
-        auto bspline_base = build_bspline<BSplineType>(
+        auto const bspline_base = build_bspline<BSplineType>(
             {test_data["bspline"]["knots"].get<std::vector<real_t>>()},
             {test_data["bspline"]["ctrl"].get<std::vector<real_t>>()},
             degree
         );
         std::ignore =
             bspline_base.evaluate(domain.first, degree); // force computation of derivatives
-        auto require_equals = [&](BSplineType actual)
+        auto require_equals = [&bspline_base](BSplineType const &actual)
         {
           REQUIRE(actual == bspline_base);
           for (size_t derivative_order{1}; derivative_order <= bspline_base.get_degree();

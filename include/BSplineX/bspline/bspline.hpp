@@ -154,7 +154,7 @@ public:
    * Checks whether the two BSplines have the same degree, knots, and control points
    *
    * @param other The BSpline to compare with.
-   * @return true if the two BSplines are equals, false otherwise
+   * @return true if the two BSplines are equal, false otherwise
    */
   bool operator==(BSpline const &other) const
   {
@@ -606,7 +606,7 @@ private:
   {
     BSpline const *d       = this;
     BSpline const *other_d = &other;
-    for (size_t i{0}; i < degree - 1 && other_d->derivative_ptr; i++)
+    for (size_t i{0}; i < degree - 1 and other_d->derivative_ptr; i++)
     {
       d->copy_derivative(*other_d);
       d       = d->derivative_ptr.get();
