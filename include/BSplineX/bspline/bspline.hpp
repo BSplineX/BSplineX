@@ -606,7 +606,7 @@ private:
   {
     BSpline const *d       = this;
     BSpline const *other_d = &other;
-    for (size_t i{0}; i < degree && other_d->derivative_ptr; i++)
+    for (size_t i{0}; i < degree - 1 && other_d->derivative_ptr; i++)
     {
       d->copy_derivative(*other_d);
       d       = d->derivative_ptr.get();
