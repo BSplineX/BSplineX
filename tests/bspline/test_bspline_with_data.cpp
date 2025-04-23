@@ -4,6 +4,7 @@
 #include <fstream>
 #include <iterator>
 #include <string>
+#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -438,6 +439,8 @@ TEMPLATE_TEST_CASE("BSpline", "[bspline][template][product]", BSPLINE_TEST_TYPES
             {test_data["bspline"]["ctrl"].get<std::vector<real_t>>()},
             degree
         );
+        std::ignore =
+            bspline_base.evaluate(domain.first, degree); // force computation of derivatives
         auto require_equals = [&](BSplineType actual)
         {
           REQUIRE(actual == bspline_base);
