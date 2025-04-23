@@ -432,7 +432,7 @@ TEMPLATE_TEST_CASE("BSpline", "[bspline][template][product]", BSPLINE_TEST_TYPES
         }
       }
 
-      SECTION("Costructors and assignments")
+      SECTION("Constructors and assignments")
       {
         auto bspline_base = build_bspline<BSplineType>(
             {test_data["bspline"]["knots"].get<std::vector<real_t>>()},
@@ -476,7 +476,7 @@ TEMPLATE_TEST_CASE("BSpline", "[bspline][template][product]", BSPLINE_TEST_TYPES
         {
           BSplineType tmp_bspline{bspline};
           BSplineType new_bspline{};
-          new_bspline = std::move(std::move(tmp_bspline));
+          new_bspline = std::move(tmp_bspline);
           require_equals(new_bspline);
         }
       }
