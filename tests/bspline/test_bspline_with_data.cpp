@@ -137,6 +137,7 @@ BSplineType build_bspline(std::vector<real_t> knots, std::vector<real_t> ctrl_pt
     );
   }
 }
+
 } // namespace
 
 TEMPLATE_TEST_CASE("BSpline", "[bspline][template][product]", BSPLINE_TEST_TYPES)
@@ -427,6 +428,53 @@ TEMPLATE_TEST_CASE("BSpline", "[bspline][template][product]", BSPLINE_TEST_TYPES
                 WithinAbsRel(bspline.evaluate(domain.second, derivative_order))
             );
           }
+        }
+      }
+
+      SECTION("Costructors and assignments")
+      {
+        auto bspline_base = build_bspline<BSplineType>(
+            {test_data["bspline"]["knots"].get<std::vector<real_t>>()},
+            {test_data["bspline"]["ctrl"].get<std::vector<real_t>>()},
+            degree
+        );
+        auto require_equals = [&](BSplineType actual)
+        {
+          REQUIRE(actual == bspline_base);
+          for (size_t derivative_order{1}; derivative_order <= bspline_base.get_degree();
+               derivative_order++)
+          {
+            REQUIRE(
+                actual.derivative(derivative_order) == bspline_base.derivative(derivative_order)
+            );
+          }
+        };
+        SECTION("Copy constructor")
+        {
+          BSplineType new_bspline{bspline}; // NOLINT(performance-unnecessary-copy-initialization)
+          require_equals(new_bspline);
+        }
+
+        SECTION("Copy assignment operator")
+        {
+          BSplineType new_bspline{};
+          new_bspline = bspline;
+          require_equals(new_bspline);
+        }
+
+        SECTION("Move constructor")
+        {
+          BSplineType tmp_bspline{bspline};
+          BSplineType new_bspline{std::move(tmp_bspline)};
+          require_equals(new_bspline);
+        }
+
+        SECTION("Move assignment operator")
+        {
+          BSplineType tmp_bspline{bspline};
+          BSplineType new_bspline{};
+          new_bspline = std::move(std::move(tmp_bspline));
+          require_equals(new_bspline);
         }
       }
     }

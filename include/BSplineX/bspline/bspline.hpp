@@ -149,6 +149,21 @@ public:
   BSpline &operator=(BSpline &&other) = default;
 
   /**
+   * @brief Equality operator
+   *
+   * Checks whether the two BSplines have the same degree, knots, and control points
+   *
+   * @param other The BSpline to compare with.
+   * @return true if the two BSplines are equals, false otherwise
+   */
+  bool operator==(BSpline const &other) const
+  {
+    return (this->get_degree() == other.get_degree()) and
+           (this->get_knots() == other.get_knots()) and
+           (this->get_control_points() == other.get_control_points());
+  }
+
+  /**
    * @brief Evaluates the BSpline at a given value.
    *
    * @param value The value to evaluate the BSpline at.
