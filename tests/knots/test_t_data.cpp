@@ -45,13 +45,13 @@ TEST_CASE("knots::Data<double, Curve::UNIFORM> data{data_vec}", "[t_data]")
   SECTION("Non-uniform vector")
   {
     std::vector<double> const data_vec{0.0, 2.5, 5.0, 7.5, 9.0};
-    auto test = [&]() { Data<double, Curve::UNIFORM> _(data_vec); };
+    auto test = [&data_vec]() { Data<double, Curve::UNIFORM> const _(data_vec); };
     REQUIRE_THROWS_AS(test(), std::runtime_error);
   }
   SECTION("Uniform descending vector")
   {
     std::vector<double> const data_vec{10.0, 7.5, 5.0, 2.5, 0.0};
-    auto test = [&]() { Data<double, Curve::UNIFORM> _(data_vec); };
+    auto test = [&data_vec]() { Data<double, Curve::UNIFORM> const _(data_vec); };
     REQUIRE_THROWS_AS(test(), std::runtime_error);
   }
   std::vector<double> const data_vec{0.0, 2.5, 5.0, 7.5, 10.0};
