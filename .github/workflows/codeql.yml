@@ -28,6 +28,8 @@ jobs:
             language: c-cpp
           - os: windows-latest
             language: c-cpp
+          - os: ubuntu-latest
+            language: actions
 
     steps:
       - name: "Setup: checkout repo"
