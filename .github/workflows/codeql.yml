@@ -65,16 +65,16 @@ jobs:
       contents: read
 
     steps:
-      - name: Checkout repository
+      - name: "Setup: checkout repository"
         uses: actions/checkout@v4
 
-      - name: Initialize CodeQL
+      - name: "Setup: initialize CodeQL"
         uses: github/codeql-action/init@v3
         with:
           languages: actions
           build-mode: none
 
-      - name: Perform CodeQL Analysis
+      - name: "Test: perform CodeQL analysis"
         uses: github/codeql-action/analyze@v3
         with:
           category: "/language:actions"
