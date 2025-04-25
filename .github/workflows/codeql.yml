@@ -7,7 +7,7 @@ on:
     branches: ["main"]
 
 jobs:
-  analyze:
+  analyze-code:
     name: Analyze (${{ matrix.os }} - ${{ matrix.language }})
     runs-on: ${{ matrix.os }}
     permissions:
@@ -55,3 +55,26 @@ jobs:
         uses: github/codeql-action/analyze@v3
         with:
           category: "/language:${{matrix.language}}"
+
+  analyze-actions:
+    name: Analyze Actions
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+
+    steps:
+      - name: "Setup: checkout repository"
+        uses: actions/checkout@v4
+
+      - name: "Setup: initialize CodeQL"
+        uses: github/codeql-action/init@v3
+        with:
+          languages: actions
+          build-mode: none
+
+      - name: "Test: perform CodeQL analysis"
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:actions"

@@ -8,7 +8,10 @@ on:
 
 jobs:
   check-version:
+    name: Check VERSION file matches latest tag
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - uses: actions/checkout@v4
