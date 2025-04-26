@@ -1,4 +1,4 @@
-%module BSplineX
+%module _bsplinex_impl
 
 // Injected C++ code
 %{
