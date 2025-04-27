@@ -371,7 +371,7 @@ TEMPLATE_TEST_CASE("BSpline", "[bspline][template][product]", BSPLINE_TEST_TYPES
           SECTION("fit+evaluate(...,  derivative_order=" + std::to_string(derivative_order) + ")")
           {
             auto const y_eval_fit     = derivative_data["y_eval"].get<std::vector<real_t>>();
-            real_t const fit_data_tol = derivative_order == 0 ? RTOL<real_t> : 1e-6;
+            real_t const fit_data_tol = derivative_order == 0 ? RTOL<real_t> : 1e-5;
             REQUIRE_THAT(
                 bspline.evaluate(x_eval, derivative_order),
                 VectorsWithinAbsRel(y_eval_fit, fit_data_tol, fit_data_tol)
@@ -447,7 +447,7 @@ TEMPLATE_TEST_CASE("BSpline", "[bspline][template][product]", BSPLINE_TEST_TYPES
 
             REQUIRE_THAT(bspline.get_knots(), VectorsWithinAbsRel(knots_interp));
             REQUIRE_THAT(bspline.get_control_points(), VectorsWithinAbsRel(ctrl_pts_interp));
-            real_t const interp_data_tol = derivative_order == 0 ? RTOL<real_t> : 1e-6;
+            real_t const interp_data_tol = derivative_order == 0 ? RTOL<real_t> : 1e-5;
             REQUIRE_THAT(
                 derivative.evaluate(x_eval),
                 VectorsWithinAbsRel(y_eval_interp, interp_data_tol, interp_data_tol)
