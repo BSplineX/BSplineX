@@ -173,15 +173,12 @@ TEMPLATE_TEST_CASE("BSpline", "[bspline][template][product]", BSPLINE_TEST_TYPES
       }
       SECTION("evaluate(...)")
       {
-        for (size_t derivative_order{0}; derivative_order <= test_data["derivatives"].size();
-             derivative_order++)
+        auto derivative_data = test_data["bspline"];
+        for (size_t derivative_order{0}; derivative_order <= degree; derivative_order++)
         {
           SECTION("evaluate(..., derivative_order=" + std::to_string(derivative_order) + ")")
           {
-            auto const y_eval = derivative_order == 0
-                                    ? test_data["bspline"]["y_eval"].get<std::vector<real_t>>()
-                                    : test_data["derivatives"][derivative_order - 1]["y_eval"]
-                                          .get<std::vector<real_t>>();
+            auto const y_eval = derivative_data["y_eval"].get<std::vector<real_t>>();
             for (size_t i{0}; i < x_eval.size(); i++)
             {
               REQUIRE_THAT(
@@ -253,6 +250,7 @@ TEMPLATE_TEST_CASE("BSpline", "[bspline][template][product]", BSPLINE_TEST_TYPES
               }
             }
           }
+          derivative_data = derivative_data["derivative"];
         }
         SECTION("evaluate(..., invalid derivative_order)")
         {
@@ -267,17 +265,17 @@ TEMPLATE_TEST_CASE("BSpline", "[bspline][template][product]", BSPLINE_TEST_TYPES
 
       SECTION("derivative(...)")
       {
-        for (size_t derivative_order{1}; derivative_order <= test_data["derivatives"].size();
-             derivative_order++)
+        auto derivative_data = test_data["bspline"]["derivative"];
+        for (size_t derivative_order{1}; derivative_order <= degree; derivative_order++)
         {
           SECTION("derivative(derivative_order=" + std::to_string(derivative_order) + ")")
           {
             BSplineType const derivative = bspline.derivative(derivative_order);
-            auto const derivative_data   = test_data["derivatives"][derivative_order - 1];
             auto const y_eval_d          = derivative_data["y_eval"].get<std::vector<real_t>>();
             REQUIRE(derivative.get_degree() == derivative_data["degree"].get<size_t>());
             REQUIRE_THAT(derivative.evaluate(x_eval), VectorsWithinAbsRel(y_eval_d));
           }
+          derivative_data = derivative_data["derivative"];
         }
         SECTION("derivative(invalid derivative_order)")
         {
@@ -290,9 +288,7 @@ TEMPLATE_TEST_CASE("BSpline", "[bspline][template][product]", BSPLINE_TEST_TYPES
 
       SECTION("nnz_basis(...)")
       {
-        for (size_t derivative_order = 0;
-             derivative_order < test_data["bspline"]["nnz_basis"].size();
-             ++derivative_order)
+        for (size_t derivative_order = 0; derivative_order < degree; ++derivative_order)
         {
           SECTION("nnz_basis(..., derivative_order=" + std::to_string(derivative_order) + ")")
           {
@@ -304,13 +300,13 @@ TEMPLATE_TEST_CASE("BSpline", "[bspline][template][product]", BSPLINE_TEST_TYPES
                 std::back_inserter(x_nnz),
                 [domain](real_t x) { return domain.first <= x and x <= domain.second; }
             );
-            REQUIRE(x_nnz.size() == test_data["bspline"]["nnz_basis"][derivative_order].size());
+            auto const &nnz_basis_data = test_data["bspline"]["nnz_basis"][derivative_order];
+            REQUIRE(x_nnz.size() == nnz_basis_data.size());
 
             for (size_t i = 0; i < x_nnz.size(); ++i)
             {
               auto const [ref_index, ref_nnz_basis] =
-                  test_data["bspline"]["nnz_basis"][derivative_order][i]
-                      .get<std::pair<size_t, std::vector<real_t>>>();
+                  nnz_basis_data[i].get<std::pair<size_t, std::vector<real_t>>>();
               auto const [index, nnz_basis] = bspline.nnz_basis(x_nnz.at(i), derivative_order);
               REQUIRE(index == ref_index);
               REQUIRE_THAT(nnz_basis, VectorsWithinAbsRel(ref_nnz_basis));
