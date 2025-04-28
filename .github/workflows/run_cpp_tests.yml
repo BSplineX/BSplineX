@@ -32,7 +32,6 @@ jobs:
         with:
           repository: BSplineX/BSplineX-test-data
           path: test-data
-          ref: task/get-derivative-after-fit-interpolate
 
       - name: "Compile: build with CMake"
         run: |
