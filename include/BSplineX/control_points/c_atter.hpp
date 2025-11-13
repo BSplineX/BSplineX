@@ -15,13 +15,13 @@ template <typename T, BoundaryCondition BC>
 class Atter
 {
 private:
-  Data<T> data{};
-  Padder<T, BC> padder{};
+  Data<T> m_data{};
+  Padder<T, BC> m_padder{};
 
 public:
   Atter() = default;
 
-  Atter(Data<T> const &data, size_t degree) : data{data}, padder{this->data, degree} {}
+  Atter(Data<T> const &data, size_t degree) : m_data{data}, m_padder{this->m_data, degree} {}
 
   Atter(Atter const &other) = default;
 
@@ -36,37 +36,37 @@ public:
   [[nodiscard]] T at(size_t index) const
   {
     debugassert(index < this->size(), "Out of bounds");
-    if (index < this->data.size())
+    if (index < this->m_data.size())
     {
-      return this->data.at(index);
+      return this->m_data.at(index);
     }
     else
     {
-      return this->padder.right(index - this->data.size());
+      return this->m_padder.right(index - this->m_data.size());
     }
   }
 
-  [[nodiscard]] size_t size() const { return this->data.size() + this->padder.size(); }
+  [[nodiscard]] size_t size() const { return this->m_data.size() + this->m_padder.size(); }
 
   [[nodiscard]] std::vector<T> get_values() const
   {
     std::vector<T> values;
-    values.reserve(data.size() + padder.size());
-    for (size_t i = 0; i < data.size(); i++)
+    values.reserve(m_data.size() + m_padder.size());
+    for (size_t i = 0; i < m_data.size(); i++)
     {
-      values.push_back(data.at(i));
+      values.push_back(m_data.at(i));
     }
-    for (size_t i = 0; i < padder.size(); i++)
+    for (size_t i = 0; i < m_padder.size(); i++)
     {
-      values.push_back(padder.right(i));
+      values.push_back(m_padder.right(i));
     }
     return values;
   }
 
   [[nodiscard]] size_t get_derivative_data_size() const
   {
-    size_t const data_size = this->data.size();
-    return this->padder.size() == 0 ? data_size - 1 : data_size;
+    size_t const data_size = this->m_data.size();
+    return this->m_padder.size() == 0 ? data_size - 1 : data_size;
   }
 };
 

@@ -80,15 +80,15 @@ template <typename T, Curve C>
 class Padder<T, C, BoundaryCondition::CLAMPED>
 {
 private:
-  T pad_left{};
-  T pad_right{};
-  size_t pad_size{0};
+  T m_pad_left{};
+  T m_pad_right{};
+  size_t m_pad_size{0};
 
 public:
   Padder() = default;
 
   Padder(Data<T, C> const &data, size_t degree)
-      : pad_left{data.at(0)}, pad_right{data.at(data.size() - 1)}, pad_size{degree}
+      : m_pad_left{data.at(0)}, m_pad_right{data.at(data.size() - 1)}, m_pad_size{degree}
   {
   }
 
@@ -104,45 +104,45 @@ public:
 
   [[nodiscard]] T left([[maybe_unused]] size_t index) const
   {
-    debugassert(index < this->pad_size, "Out of bounds");
-    return this->pad_left;
+    debugassert(index < this->m_pad_size, "Out of bounds");
+    return this->m_pad_left;
   }
 
   [[nodiscard]] T right([[maybe_unused]] size_t index) const
   {
-    debugassert(index < this->pad_size, "Out of bounds");
-    return this->pad_right;
+    debugassert(index < this->m_pad_size, "Out of bounds");
+    return this->m_pad_right;
   }
 
   [[nodiscard]] size_t size() const { return this->size_left() + this->size_right(); }
 
-  [[nodiscard]] size_t size_left() const { return this->pad_size; }
+  [[nodiscard]] size_t size_left() const { return this->m_pad_size; }
 
-  [[nodiscard]] size_t size_right() const { return this->pad_size; }
+  [[nodiscard]] size_t size_right() const { return this->m_pad_size; }
 
-  void pop_tails() { --this->pad_size; }
+  void pop_tails() { --this->m_pad_size; }
 };
 
 template <typename T, Curve C>
 class Padder<T, C, BoundaryCondition::PERIODIC>
 {
 private:
-  std::vector<T> pad_left{};
-  std::vector<T> pad_right{};
+  std::vector<T> m_pad_left{};
+  std::vector<T> m_pad_right{};
 
 public:
   Padder() = default;
 
   Padder(Data<T, C> const &data, size_t degree)
-      : pad_left{data.slice(data.size() - degree - 1, data.size() - 1)},
-        pad_right{data.slice(1, degree + 1)}
+      : m_pad_left{data.slice(data.size() - degree - 1, data.size() - 1)},
+        m_pad_right{data.slice(1, degree + 1)}
 
   {
     T period = data.at(data.size() - 1) - data.at(0);
     for (size_t i{0}; i < degree; i++)
     {
-      this->pad_left.at(i)  -= period;
-      this->pad_right.at(i) += period;
+      this->m_pad_left.at(i)  -= period;
+      this->m_pad_right.at(i) += period;
     }
   }
 
@@ -158,28 +158,28 @@ public:
 
   [[nodiscard]] T left(size_t index) const
   {
-    debugassert(index < this->pad_left.size(), "Out of bounds");
-    return this->pad_left.at(index);
+    debugassert(index < this->m_pad_left.size(), "Out of bounds");
+    return this->m_pad_left.at(index);
   }
 
   [[nodiscard]] T right(size_t index) const
   {
-    debugassert(index < this->pad_right.size(), "Out of bounds");
-    return this->pad_right.at(index);
+    debugassert(index < this->m_pad_right.size(), "Out of bounds");
+    return this->m_pad_right.at(index);
   }
 
   [[nodiscard]] size_t size() const { return this->size_left() + this->size_right(); }
 
-  [[nodiscard]] size_t size_left() const { return this->pad_left.size(); }
+  [[nodiscard]] size_t size_left() const { return this->m_pad_left.size(); }
 
-  [[nodiscard]] size_t size_right() const { return this->pad_right.size(); }
+  [[nodiscard]] size_t size_right() const { return this->m_pad_right.size(); }
 
   void pop_tails()
   {
-    debugassert(not this->pad_left.empty(), "Cannot pop tails from an empty domain");
-    debugassert(not this->pad_right.empty(), "Cannot pop tails from an empty domain");
-    this->pad_left.erase(this->pad_left.begin());
-    this->pad_right.pop_back();
+    debugassert(not this->m_pad_left.empty(), "Cannot pop tails from an empty domain");
+    debugassert(not this->m_pad_right.empty(), "Cannot pop tails from an empty domain");
+    this->m_pad_left.erase(this->m_pad_left.begin());
+    this->m_pad_right.pop_back();
   }
 };
 

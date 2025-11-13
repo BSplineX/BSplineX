@@ -41,14 +41,14 @@ template <typename T, Curve C, BoundaryCondition BC>
 class Extrapolator<T, C, BC, Extrapolation::CONSTANT>
 {
 private:
-  T value_left{};
-  T value_right{};
+  T m_value_left{};
+  T m_value_right{};
 
 public:
   Extrapolator() = default;
 
   Extrapolator(Atter<T, C, BC> const &atter, size_t degree)
-      : value_left{atter.at(degree)}, value_right{atter.at(atter.size() - degree - 1)}
+      : m_value_left{atter.at(degree)}, m_value_right{atter.at(atter.size() - degree - 1)}
   {
   }
 
@@ -65,9 +65,9 @@ public:
   [[nodiscard]] T extrapolate(T value) const
   {
     debugassert(
-        value < this->value_left or value > this->value_right, "Value not outside of the domain"
+        value < this->m_value_left or value > this->m_value_right, "Value not outside of the domain"
     );
-    return value < this->value_left ? this->value_left : this->value_right;
+    return value < this->m_value_left ? this->m_value_left : this->m_value_right;
   }
 };
 
@@ -75,16 +75,16 @@ template <typename T, Curve C, BoundaryCondition BC>
 class Extrapolator<T, C, BC, Extrapolation::PERIODIC>
 {
 private:
-  T value_left{};
-  T value_right{};
-  T period{};
+  T m_value_left{};
+  T m_value_right{};
+  T m_period{};
 
 public:
   Extrapolator() = default;
 
   Extrapolator(Atter<T, C, BC> const &atter, size_t degree)
-      : value_left{atter.at(degree)}, value_right{atter.at(atter.size() - degree - 1)},
-        period{this->value_right - this->value_left}
+      : m_value_left{atter.at(degree)}, m_value_right{atter.at(atter.size() - degree - 1)},
+        m_period{this->m_value_right - this->m_value_left}
   {
   }
 
@@ -101,17 +101,17 @@ public:
   [[nodiscard]] T extrapolate(T value) const
   {
     debugassert(
-        value < this->value_left or value > this->value_right, "Value not outside of the domain"
+        value < this->m_value_left or value > this->m_value_right, "Value not outside of the domain"
     );
 
-    T wrapped = std::fmod<T>(value - this->value_left, this->period);
+    T wrapped = std::fmod<T>(value - this->m_value_left, this->m_period);
 
     if (wrapped < constants::ZERO<T>)
     {
-      wrapped += this->period;
+      wrapped += this->m_period;
     }
 
-    return wrapped + this->value_left;
+    return wrapped + this->m_value_left;
   }
 };
 

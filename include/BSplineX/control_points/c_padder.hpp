@@ -50,12 +50,12 @@ template <typename T>
 class Padder<T, BoundaryCondition::PERIODIC>
 {
 private:
-  std::vector<T> pad_right{};
+  std::vector<T> m_pad_right{};
 
 public:
   Padder() = default;
 
-  Padder(Data<T> const &data, size_t degree) : pad_right{data.slice(0, degree)} {}
+  Padder(Data<T> const &data, size_t degree) : m_pad_right{data.slice(0, degree)} {}
 
   Padder(Padder const &other) = default;
 
@@ -69,13 +69,13 @@ public:
 
   [[nodiscard]] T right(size_t index) const
   {
-    debugassert(index < this->pad_right.size(), "Out of bounds");
-    return this->pad_right.at(index);
+    debugassert(index < this->m_pad_right.size(), "Out of bounds");
+    return this->m_pad_right.at(index);
   }
 
-  [[nodiscard]] size_t size() const { return this->pad_right.size(); }
+  [[nodiscard]] size_t size() const { return this->m_pad_right.size(); }
 
-  [[nodiscard]] size_t size_right() const { return this->pad_right.size(); }
+  [[nodiscard]] size_t size_right() const { return this->m_pad_right.size(); }
 };
 
 } // namespace bsplinex::control_points

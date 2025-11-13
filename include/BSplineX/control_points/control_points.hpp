@@ -35,13 +35,13 @@ template <typename T, BoundaryCondition BC>
 class ControlPoints
 {
 private:
-  Atter<T, BC> atter{};
-  size_t degree{};
+  Atter<T, BC> m_atter{};
+  size_t m_degree{};
 
 public:
   ControlPoints() = default;
 
-  ControlPoints(Data<T> const &data, size_t degree) : atter{data, degree}, degree{degree} {}
+  ControlPoints(Data<T> const &data, size_t degree) : m_atter{data, degree}, m_degree{degree} {}
 
   ControlPoints(ControlPoints const &other) = default;
 
@@ -53,26 +53,26 @@ public:
 
   ControlPoints &operator=(ControlPoints &&other) = default;
 
-  [[nodiscard]] T at(size_t index) const { return this->atter.at(index); }
+  [[nodiscard]] T at(size_t index) const { return this->m_atter.at(index); }
 
-  [[nodiscard]] size_t size() const { return this->atter.size(); }
+  [[nodiscard]] size_t size() const { return this->m_atter.size(); }
 
   template <Curve C, Extrapolation EXT>
   [[nodiscard]] ControlPoints
   get_derivative_control_points(knots::Knots<T, C, BC, EXT> const &knots) const
   {
-    size_t const d_num_ctrl_pts = this->atter.get_derivative_data_size();
+    size_t const d_num_ctrl_pts = this->m_atter.get_derivative_data_size();
     std::vector<T> d_ctrl_points;
     d_ctrl_points.reserve(d_num_ctrl_pts);
     for (size_t i = 0; i < d_num_ctrl_pts; i++)
     {
       d_ctrl_points.push_back(
-          static_cast<T>(this->degree) / (knots.at(i + this->degree + 1) - knots.at(i + 1)) *
+          static_cast<T>(this->m_degree) / (knots.at(i + this->m_degree + 1) - knots.at(i + 1)) *
           (this->at(i + 1) - this->at(i))
       );
     }
 
-    return ControlPoints(Data<T>{d_ctrl_points}, this->degree - 1);
+    return ControlPoints(Data<T>{d_ctrl_points}, this->m_degree - 1);
   }
 };
 

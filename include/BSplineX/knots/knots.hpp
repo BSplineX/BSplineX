@@ -42,18 +42,19 @@ template <typename T, Curve C, BoundaryCondition BC, Extrapolation EXT>
 class Knots
 {
 private:
-  Atter<T, C, BC> atter{};
-  Extrapolator<T, C, BC, EXT> extrapolator{};
-  T value_left{};
-  T value_right{};
-  size_t degree{};
+  Atter<T, C, BC> m_atter{};
+  Extrapolator<T, C, BC, EXT> m_extrapolator{};
+  T m_value_left{};
+  T m_value_right{};
+  size_t m_degree{};
 
 public:
   Knots() = default;
 
   Knots(Data<T, C> const &data, size_t degree)
-      : atter{data, degree}, extrapolator{this->atter, degree}, value_left{this->atter.at(degree)},
-        value_right{this->atter.at(this->atter.size() - degree - 1)}, degree{degree}
+      : m_atter{data, degree}, m_extrapolator{this->m_atter, degree},
+        m_value_left{this->m_atter.at(degree)},
+        m_value_right{this->m_atter.at(this->m_atter.size() - degree - 1)}, m_degree{degree}
   {
   }
 
@@ -69,32 +70,36 @@ public:
 
   [[nodiscard]] std::pair<size_t, T> find(T value) const
   {
-    if (value < this->value_left or value > this->value_right)
+    if (value < this->m_value_left or value > this->m_value_right)
     {
-      value = this->extrapolator.extrapolate(value);
+      value = this->m_extrapolator.extrapolate(value);
     }
 
     return std::pair<size_t, T>{
-        knots::find<T, C, BC, EXT>(this->atter, this->degree, value), value
+        knots::find<T, C, BC, EXT>(this->m_atter, this->m_degree, value), value
     };
   }
 
-  [[nodiscard]] std::pair<T, T> domain() const { return std::make_pair(value_left, value_right); }
+  [[nodiscard]] std::pair<T, T> domain() const
+  {
+    return std::make_pair(m_value_left, m_value_right);
+  }
 
-  [[nodiscard]] T at(size_t index) const { return this->atter.at(index); }
+  [[nodiscard]] T at(size_t index) const { return this->m_atter.at(index); }
 
-  [[nodiscard]] size_t size() const { return this->atter.size(); }
+  [[nodiscard]] size_t size() const { return this->m_atter.size(); }
 
   [[nodiscard]] Knots get_derivative_knots() const
   {
-    Atter<T, C, BC> d_atter = this->atter;
-    return Knots(d_atter.pop_tails(), this->degree - 1);
+    Atter<T, C, BC> d_atter = this->m_atter;
+    return Knots(d_atter.pop_tails(), this->m_degree - 1);
   }
 
 private:
   Knots(Atter<T, C, BC> const &atter, size_t degree)
-      : atter{atter}, extrapolator{this->atter, degree}, value_left{this->atter.at(degree)},
-        value_right{this->atter.at(this->atter.size() - degree - 1)}, degree{degree}
+      : m_atter{atter}, m_extrapolator{this->m_atter, degree},
+        m_value_left{this->m_atter.at(degree)},
+        m_value_right{this->m_atter.at(this->m_atter.size() - degree - 1)}, m_degree{degree}
   {
   }
 };
