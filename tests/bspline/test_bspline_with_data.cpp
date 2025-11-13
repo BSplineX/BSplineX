@@ -272,7 +272,7 @@ TEMPLATE_TEST_CASE("BSpline", "[bspline][template][product]", BSPLINE_TEST_TYPES
           {
             BSplineType const derivative = bspline.derivative(derivative_order);
             auto const y_eval_d          = derivative_data["y_eval"].get<std::vector<real_t>>();
-            REQUIRE(derivative.get_degree() == derivative_data["degree"].get<size_t>());
+            REQUIRE(derivative.degree() == derivative_data["degree"].get<size_t>());
             REQUIRE_THAT(derivative.evaluate(x_eval), VectorsWithinAbsRel(y_eval_d));
           }
           derivative_data = derivative_data["derivative"];
@@ -356,14 +356,14 @@ TEMPLATE_TEST_CASE("BSpline", "[bspline][template][product]", BSPLINE_TEST_TYPES
         auto const &bspline_data = test_data["bspline_fit"];
 
         auto const knots_fit = bspline_data["knots"].get<std::vector<real_t>>();
-        REQUIRE_THAT(bspline.get_knots(), VectorsWithinAbsRel(knots_fit));
+        REQUIRE_THAT(bspline.knots(), VectorsWithinAbsRel(knots_fit));
         if (BoundaryCondition::PERIODIC == BSplineType::boundary_condition_type)
         {
           SKIP("SciPy currently does not support fitting for periodic BSplines");
         }
 
         auto const ctrl_pts_fit = bspline_data["ctrl"].get<std::vector<real_t>>();
-        REQUIRE_THAT(bspline.get_control_points(), VectorsWithinAbsRel(ctrl_pts_fit));
+        REQUIRE_THAT(bspline.control_points(), VectorsWithinAbsRel(ctrl_pts_fit));
 
         auto derivative_data = bspline_data;
         for (size_t derivative_order = 0; derivative_order <= degree; ++derivative_order)
@@ -445,8 +445,8 @@ TEMPLATE_TEST_CASE("BSpline", "[bspline][template][product]", BSPLINE_TEST_TYPES
                 test_data["bspline_interp"]["ctrl"].get<std::vector<real_t>>();
             auto const y_eval_interp = derivative_data["y_eval"].get<std::vector<real_t>>();
 
-            REQUIRE_THAT(bspline.get_knots(), VectorsWithinAbsRel(knots_interp));
-            REQUIRE_THAT(bspline.get_control_points(), VectorsWithinAbsRel(ctrl_pts_interp));
+            REQUIRE_THAT(bspline.knots(), VectorsWithinAbsRel(knots_interp));
+            REQUIRE_THAT(bspline.control_points(), VectorsWithinAbsRel(ctrl_pts_interp));
             real_t const interp_data_tol = derivative_order == 0 ? RTOL<real_t> : 1e-5;
             REQUIRE_THAT(
                 derivative.evaluate(x_eval),
@@ -479,7 +479,7 @@ TEMPLATE_TEST_CASE("BSpline", "[bspline][template][product]", BSPLINE_TEST_TYPES
         auto require_equals = [&bspline_base](BSplineType const &actual)
         {
           REQUIRE(actual == bspline_base);
-          for (size_t derivative_order{1}; derivative_order <= bspline_base.get_degree();
+          for (size_t derivative_order{1}; derivative_order <= bspline_base.degree();
                derivative_order++)
           {
             REQUIRE(
