@@ -48,11 +48,11 @@ private:
   using vec_iter       = typename std::vector<T>::iterator;
   using vec_view       = typename views::ArrayView<vec_iter>;
 
-  knots::Knots<T, C, BC, EXT> knots{};
-  control_points::ControlPoints<T, BC> control_points{};
-  size_t degree{};
-  std::vector<T> mutable support{};
-  std::unique_ptr<BSpline const> mutable derivative_ptr;
+  knots::Knots<T, C, BC, EXT> m_knots{};
+  control_points::ControlPoints<T, BC> m_control_points{};
+  size_t m_degree{};
+  std::vector<T> mutable m_support{};
+  std::unique_ptr<BSpline const> mutable m_derivative_ptr;
 
   struct ShallowCopyTag
   {
@@ -81,10 +81,10 @@ public:
       control_points::Data<T> const &control_points_data,
       size_t degree
   )
-      : knots{knots_data, degree}, control_points{control_points_data, degree}, degree{degree}
+      : m_knots{knots_data, degree}, m_control_points{control_points_data, degree}, m_degree{degree}
   {
     this->check_sizes();
-    this->support.resize(this->degree + 1);
+    this->m_support.resize(this->m_degree + 1);
   }
 
   /**
@@ -128,11 +128,11 @@ public:
       return *this;
     }
 
-    this->knots          = other.knots;
-    this->control_points = other.control_points;
-    this->degree         = other.degree;
-    this->support        = other.support;
-    this->derivative_ptr = nullptr;
+    this->m_knots          = other.m_knots;
+    this->m_control_points = other.m_control_points;
+    this->m_degree         = other.m_degree;
+    this->m_support        = other.m_support;
+    this->m_derivative_ptr = nullptr;
     deep_copy_derivative(other);
 
     return *this;
@@ -158,9 +158,8 @@ public:
    */
   bool operator==(BSpline const &other) const
   {
-    return (this->get_degree() == other.get_degree()) and
-           (this->get_knots() == other.get_knots()) and
-           (this->get_control_points() == other.get_control_points());
+    return (this->degree() == other.degree()) and (this->knots() == other.knots()) and
+           (this->control_points() == other.control_points());
   }
 
   /**
@@ -178,7 +177,7 @@ public:
       bspline = this->get_derivative(derivative_order);
     }
 
-    auto [index, x_value] = bspline->knots.find(value);
+    auto [index, x_value] = bspline->m_knots.find(value);
     return bspline->deboor(index, x_value);
   }
 
@@ -229,7 +228,7 @@ public:
 
     basis_functions.insert(basis_functions.begin(), index, ZERO<T>);
     basis_functions.insert(
-        basis_functions.end(), this->control_points.size() - index - this->degree - 1, ZERO<T>
+        basis_functions.end(), this->m_control_points.size() - index - this->m_degree - 1, ZERO<T>
     );
 
     return basis_functions;
@@ -245,7 +244,7 @@ public:
    */
   [[nodiscard]] std::pair<size_t, std::vector<T>> nnz_basis(T value, size_t derivative_order = 0)
   {
-    std::vector<T> nnz(this->degree + 1, ZERO<T>);
+    std::vector<T> nnz(this->m_degree + 1, ZERO<T>);
     size_t const index =
         this->template nnz_basis<vec_iter>(value, derivative_order, {nnz.begin(), nnz.end()});
 
@@ -255,7 +254,7 @@ public:
   /**
    * @brief Gives the (inclusive) boundary of the BSpline domain (i.e., [x_min, x_max])
    */
-  [[nodiscard]] std::pair<T, T> domain() const { return this->knots.domain(); }
+  [[nodiscard]] std::pair<T, T> domain() const { return this->m_knots.domain(); }
 
   /**
    * @brief Fits the BSpline to some data.
@@ -267,10 +266,10 @@ public:
   {
     releaseassert(x.size() == y.size(), "x and y must have the same size");
 
-    this->control_points = std::move(
+    this->m_control_points = std::move(
         lsq::lsq<T, vec_const_iter, BC>(
-            this->degree,
-            this->knots.size(),
+            this->m_degree,
+            this->m_knots.size(),
             [this](T value, size_t derivative_order, std::vector<T> &vec) -> size_t
             {
               return this->nnz_basis<vec_iter>(value, derivative_order, {vec.begin(), vec.end()});
@@ -321,12 +320,12 @@ public:
     else
     {
       releaseassert(
-          additional_conditions.size() == degree - 1,
+          additional_conditions.size() == m_degree - 1,
           "There must be exactly degree - 1 additional conditions."
       );
     }
 
-    knots::Knots<T, C, BC, EXT> new_knots{knots::Data<T, C>{x}, degree};
+    knots::Knots<T, C, BC, EXT> new_knots{knots::Data<T, C>{x}, m_degree};
 
     auto const knots_domain = new_knots.domain();
     releaseassert(
@@ -339,7 +338,7 @@ public:
         "Additional conditions must lie inside the knots interval."
     );
 
-    this->knots = std::move(new_knots);
+    this->m_knots = std::move(new_knots);
 
     vec_const_view x_view;
     vec_const_view y_view;
@@ -347,7 +346,7 @@ public:
     {
       using difference_type = typename vec_const_iter::difference_type;
 
-      auto const shift = static_cast<difference_type>(degree);
+      auto const shift = static_cast<difference_type>(m_degree);
 
       x_view = vec_const_view{std::next(x.begin(), shift), std::prev(x.end(), shift)};
       y_view = vec_const_view{std::next(y.begin(), shift), std::prev(y.end(), shift)};
@@ -370,10 +369,10 @@ public:
       );
     }
 
-    this->control_points = std::move(
+    this->m_control_points = std::move(
         lsq::lsq<T, vec_const_iter, BC>(
-            this->degree,
-            this->knots.size(),
+            this->m_degree,
+            this->m_knots.size(),
             [this](T value, size_t derivative_order, std::vector<T> &vec) -> size_t
             {
               return this->template nnz_basis<vec_iter>(
@@ -389,32 +388,32 @@ public:
     this->invalidate_derivative();
   }
 
-  [[nodiscard]] std::vector<T> get_control_points() const
+  [[nodiscard]] std::vector<T> control_points() const
   {
     std::vector<T> control_points_vec;
-    control_points_vec.reserve(this->control_points.size());
+    control_points_vec.reserve(this->m_control_points.size());
     std::generate_n(
         std::back_inserter(control_points_vec),
-        this->control_points.size(),
-        [this, i = 0]() mutable { return this->control_points.at(i++); }
+        this->m_control_points.size(),
+        [this, i = 0]() mutable { return this->m_control_points.at(i++); }
     );
     return control_points_vec;
   }
 
-  [[nodiscard]] std::vector<T> get_knots() const
+  [[nodiscard]] std::vector<T> knots() const
   {
     std::vector<T> knots_vec;
-    knots_vec.reserve(this->knots.size());
+    knots_vec.reserve(this->m_knots.size());
     std::generate_n(
         std::back_inserter(knots_vec),
-        this->knots.size(),
-        [this, i = 0]() mutable { return this->knots.at(i++); }
+        this->m_knots.size(),
+        [this, i = 0]() mutable { return this->m_knots.at(i++); }
     );
 
     return knots_vec;
   }
 
-  [[nodiscard]] size_t get_degree() const { return this->degree; }
+  [[nodiscard]] size_t degree() const { return this->m_degree; }
 
 private:
   BSpline(
@@ -422,10 +421,10 @@ private:
       control_points::ControlPoints<T, BC> const &control_points,
       size_t degree
   )
-      : knots{knots}, control_points{control_points}, degree{degree}
+      : m_knots{knots}, m_control_points{control_points}, m_degree{degree}
   {
     this->check_sizes();
-    this->support.resize(this->degree + 1);
+    this->m_support.resize(this->m_degree + 1);
   }
 
   /**
@@ -436,21 +435,22 @@ private:
    * @param other The BSpline to copy from.
    */
   BSpline(BSpline const &other, ShallowCopyTag /*unused*/) noexcept
-      : knots(other.knots), control_points(other.control_points), degree(other.degree),
-        support(other.support), derivative_ptr(nullptr)
+      : m_knots(other.m_knots), m_control_points(other.m_control_points), m_degree(other.m_degree),
+        m_support(other.m_support), m_derivative_ptr(nullptr)
   {
   }
 
   void check_sizes()
   {
-    if (this->control_points.size() == this->knots.size() - this->degree - 1)
+    if (this->m_control_points.size() == this->m_knots.size() - this->m_degree - 1)
     {
       return;
     }
 
     std::stringstream ss{};
     ss << "Found control_points.size() != knots.size() - degree - 1 ("
-       << this->control_points.size() << " != " << this->knots.size() - this->degree - 1 << "). ";
+       << this->m_control_points.size() << " != " << this->m_knots.size() - this->m_degree - 1
+       << "). ";
 
     // clang-format off
     if constexpr (BC == BoundaryCondition::OPEN)
@@ -480,7 +480,7 @@ private:
   size_t nnz_basis(T value, size_t derivative_order, vec_view nnz) const
   {
     debugassert(
-        nnz.size() == this->degree + 1,
+        nnz.size() == this->m_degree + 1,
         "Unexpected number of basis asked, exactly degree + 1 basis can be asked"
     );
 
@@ -489,100 +489,102 @@ private:
         "Initial basis must be initialised to zero"
     );
 
-    releaseassert(this->degree >= derivative_order, "Asked for derivative_order > degree");
+    releaseassert(this->m_degree >= derivative_order, "Asked for derivative_order > degree");
 
-    auto [index, val] = this->knots.find(value);
+    auto [index, val] = this->m_knots.find(value);
 
     // Compute the basis of degree - derivative_order
     nnz.back() = 1.0;
-    for (size_t d{1}; d <= this->degree - derivative_order; d++)
+    for (size_t d{1}; d <= this->m_degree - derivative_order; d++)
     {
-      size_t const idx{this->degree - d};
-      nnz.at(idx) = (this->knots.at(index + 1) - val) /
-                    (this->knots.at(index + 1) - this->knots.at(index - d + 1)) * nnz.at(idx + 1);
+      size_t const idx{this->m_degree - d};
+      nnz.at(idx) = (this->m_knots.at(index + 1) - val) /
+                    (this->m_knots.at(index + 1) - this->m_knots.at(index - d + 1)) *
+                    nnz.at(idx + 1);
       for (size_t i{index - d + 1}; i < index; ++i)
       {
-        size_t const idx_in{this->degree - index};
+        size_t const idx_in{this->m_degree - index};
 
-        T const den_1{(this->knots.at(i + d) - this->knots.at(i))};
-        T const den_2{(this->knots.at(i + d + 1) - this->knots.at(i + 1))};
-        T const num_1{val - this->knots.at(i)};
-        T const num_2{this->knots.at(i + d + 1) - val};
+        T const den_1{(this->m_knots.at(i + d) - this->m_knots.at(i))};
+        T const den_2{(this->m_knots.at(i + d + 1) - this->m_knots.at(i + 1))};
+        T const num_1{val - this->m_knots.at(i)};
+        T const num_2{this->m_knots.at(i + d + 1) - val};
         T const basis_1{num_1 / den_1 * nnz.at(idx_in + i)};
         T const basis_2{num_2 / den_2 * nnz.at(idx_in + i + 1)};
 
         nnz.at(idx_in + i) = basis_1 + basis_2;
       }
 
-      T const den_1{this->knots.at(index + d) - this->knots.at(index)};
-      T const num_1{val - this->knots.at(index)};
+      T const den_1{this->m_knots.at(index + d) - this->m_knots.at(index)};
+      T const num_1{val - this->m_knots.at(index)};
 
       nnz.back() = num_1 / den_1 * nnz.back();
     }
 
     // Compute the derivatives up to derivative_order
-    for (size_t p{this->degree + 1 - derivative_order}; p <= this->degree; p++)
+    for (size_t p{this->m_degree + 1 - derivative_order}; p <= this->m_degree; p++)
     {
-      for (size_t i{0}; i < this->degree; i++)
+      for (size_t i{0}; i < this->m_degree; i++)
       {
-        size_t const idx{index - this->degree + i};
+        size_t const idx{index - this->m_degree + i};
 
-        T const den_1{this->knots.at(idx + p) - this->knots.at(idx)};
-        T const den_2{this->knots.at(idx + p + 1) - this->knots.at(idx + 1)};
+        T const den_1{this->m_knots.at(idx + p) - this->m_knots.at(idx)};
+        T const den_2{this->m_knots.at(idx + p + 1) - this->m_knots.at(idx + 1)};
         T const base_1 = den_1 ? p / den_1 * (nnz.at(i)) : ZERO<T>;
         T const base_2 = den_2 ? p / den_2 * (nnz.at(i + 1)) : ZERO<T>;
 
         nnz.at(i) = base_1 - base_2;
       }
 
-      T const den_1{this->knots.at(index + p) - this->knots.at(index)};
+      T const den_1{this->m_knots.at(index + p) - this->m_knots.at(index)};
 
       nnz.back() = den_1 ? p / den_1 * nnz.back() : ZERO<T>;
     }
 
-    return index - this->degree;
+    return index - this->m_degree;
   }
 
   T deboor(size_t index, T value) const
   {
-    for (size_t j = 0; j <= this->degree; j++)
+    for (size_t j = 0; j <= this->m_degree; j++)
     {
-      this->support[j] = this->control_points.at(j + index - this->degree);
+      this->m_support[j] = this->m_control_points.at(j + index - this->m_degree);
     }
 
     T alpha = 0;
-    for (size_t r = 1; r <= this->degree; r++)
+    for (size_t r = 1; r <= this->m_degree; r++)
     {
-      for (size_t j = this->degree; j >= r; --j)
+      for (size_t j = this->m_degree; j >= r; --j)
       {
-        alpha = (value - this->knots.at(j + index - this->degree)) /
-                (this->knots.at(j + 1 + index - r) - this->knots.at(j + index - this->degree));
-        this->support[j] = (1.0 - alpha) * this->support[j - 1] + alpha * this->support[j];
+        alpha =
+            (value - this->m_knots.at(j + index - this->m_degree)) /
+            (this->m_knots.at(j + 1 + index - r) - this->m_knots.at(j + index - this->m_degree));
+        this->m_support[j] = (1.0 - alpha) * this->m_support[j - 1] + alpha * this->m_support[j];
       }
     }
 
-    return this->support[this->degree];
+    return this->m_support[this->m_degree];
   }
 
   BSpline const *get_derivative() const
   {
-    if (not this->derivative_ptr)
+    if (not this->m_derivative_ptr)
     {
-      debugassert(this->degree > 0, "Cannot compute derivative of a 0-degree bspline");
-      this->derivative_ptr = std::unique_ptr<BSpline const>(new BSpline(
-          this->knots.get_derivative_knots(),
-          this->control_points.get_derivative_control_points(this->knots),
-          this->degree - 1
+      debugassert(this->m_degree > 0, "Cannot compute derivative of a 0-degree bspline");
+      this->m_derivative_ptr = std::unique_ptr<BSpline const>(new BSpline(
+          this->m_knots.get_derivative_knots(),
+          this->m_control_points.get_derivative_control_points(this->m_knots),
+          this->m_degree - 1
       ));
     }
 
-    return this->derivative_ptr.get();
+    return this->m_derivative_ptr.get();
   }
 
   BSpline const *get_derivative(size_t derivative_order) const
   {
     releaseassert(
-        (0 < derivative_order) and (derivative_order <= this->degree),
+        (0 < derivative_order) and (derivative_order <= this->m_degree),
         "derivative_order must be in [1, degree]"
     );
     BSpline const *d = this;
@@ -594,23 +596,23 @@ private:
     return d;
   }
 
-  void invalidate_derivative() const { this->derivative_ptr = nullptr; }
+  void invalidate_derivative() const { this->m_derivative_ptr = nullptr; }
 
   void copy_derivative(BSpline const &other) const
   {
-    this->derivative_ptr =
-        std::unique_ptr<BSpline const>(new BSpline(*other.derivative_ptr, ShallowCopyTag{}));
+    this->m_derivative_ptr =
+        std::unique_ptr<BSpline const>(new BSpline(*other.m_derivative_ptr, ShallowCopyTag{}));
   }
 
   void deep_copy_derivative(BSpline const &other) const
   {
     BSpline const *d       = this;
     BSpline const *other_d = &other;
-    for (size_t i{0}; i < degree - 1 and other_d->derivative_ptr; i++)
+    for (size_t i{0}; i < m_degree - 1 and other_d->m_derivative_ptr; i++)
     {
       d->copy_derivative(*other_d);
-      d       = d->derivative_ptr.get();
-      other_d = other_d->derivative_ptr.get();
+      d       = d->m_derivative_ptr.get();
+      other_d = other_d->m_derivative_ptr.get();
     }
   }
 };

@@ -18,13 +18,13 @@ template <typename T, Curve C, BoundaryCondition BC>
 class Atter
 {
 private:
-  Data<T, C> data{};
-  Padder<T, C, BC> padder{};
+  Data<T, C> m_data{};
+  Padder<T, C, BC> m_padder{};
 
 public:
   Atter() = default;
 
-  Atter(Data<T, C> const &data, size_t degree) : data{data}, padder{this->data, degree} {}
+  Atter(Data<T, C> const &data, size_t degree) : m_data{data}, m_padder{this->m_data, degree} {}
 
   Atter(Atter const &other) = default;
 
@@ -39,31 +39,31 @@ public:
   [[nodiscard]] T at(size_t index) const
   {
     debugassert(index < this->size(), "Out of bounds");
-    if (index < this->padder.size_left())
+    if (index < this->m_padder.size_left())
     {
-      return this->padder.left(index);
+      return this->m_padder.left(index);
     }
-    else if (index > this->data.size() - 1 + this->padder.size_left())
+    else if (index > this->m_data.size() - 1 + this->m_padder.size_left())
     {
-      return this->padder.right(index - this->data.size() - this->padder.size_left());
+      return this->m_padder.right(index - this->m_data.size() - this->m_padder.size_left());
     }
     else
     {
-      return this->data.at(index - this->padder.size_left());
+      return this->m_data.at(index - this->m_padder.size_left());
     }
   }
 
-  [[nodiscard]] size_t size() const { return this->data.size() + this->padder.size(); }
+  [[nodiscard]] size_t size() const { return this->m_data.size() + this->m_padder.size(); }
 
   Atter &pop_tails()
   {
-    if (this->padder.size() > 0)
+    if (this->m_padder.size() > 0)
     {
-      this->padder.pop_tails();
+      this->m_padder.pop_tails();
     }
     else
     {
-      this->data.pop_tails();
+      this->m_data.pop_tails();
     }
 
     return *this;
@@ -72,8 +72,8 @@ public:
   class iterator
   {
   private:
-    Atter const *atter{nullptr};
-    size_t index{0};
+    Atter const *m_atter{nullptr};
+    size_t m_index{0};
 
   public:
     // iterator traits
@@ -83,7 +83,7 @@ public:
     using reference         = T const &;
     using iterator_category = std::random_access_iterator_tag;
 
-    iterator(Atter<T, C, BC> const *atter, size_t index) : atter{atter}, index{index} {}
+    iterator(Atter<T, C, BC> const *atter, size_t index) : m_atter{atter}, m_index{index} {}
 
     ~iterator() = default;
 
@@ -97,7 +97,7 @@ public:
 
     iterator &operator++()
     {
-      ++(this->index);
+      ++(this->m_index);
       return *this;
     }
 
@@ -110,7 +110,7 @@ public:
 
     iterator &operator--()
     {
-      --(this->index);
+      --(this->m_index);
       return *this;
     }
 
@@ -123,7 +123,7 @@ public:
 
     iterator &operator+=(difference_type n)
     {
-      this->index += n;
+      this->m_index += n;
       return *this;
     }
 
@@ -136,7 +136,7 @@ public:
 
     iterator &operator-=(difference_type n)
     {
-      this->index -= n;
+      this->m_index -= n;
       return *this;
     }
 
@@ -149,20 +149,20 @@ public:
 
     difference_type operator-(iterator const &b) const
     {
-      return static_cast<difference_type>(this->index - b.index);
+      return static_cast<difference_type>(this->m_index - b.m_index);
     }
 
-    bool operator==(iterator const &other) const { return this->index == other.index; }
+    bool operator==(iterator const &other) const { return this->m_index == other.m_index; }
 
     bool operator!=(iterator const &other) const { return !(*this == other); }
 
-    value_type operator*() const { return this->atter->at(this->index); }
+    value_type operator*() const { return this->m_atter->at(this->m_index); }
 
     value_type operator[](difference_type n) const { return *(*this + n); }
 
-    bool operator<(iterator const &b) const { return this->index < b.index; }
+    bool operator<(iterator const &b) const { return this->m_index < b.m_index; }
 
-    bool operator>(iterator const &b) const { return this->index > b.index; }
+    bool operator>(iterator const &b) const { return this->m_index > b.m_index; }
 
     bool operator<=(iterator const &b) const { return !(*this > b); }
 

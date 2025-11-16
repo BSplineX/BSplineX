@@ -30,10 +30,10 @@ template <typename T>
 class Data<T, Curve::UNIFORM>
 {
 private:
-  T begin{};
-  T end{};
-  size_t num_elems{0};
-  T step_size{};
+  T m_begin{};
+  T m_end{};
+  size_t m_num_elems{0};
+  T m_step_size{};
 
 public:
   Data() = default;
@@ -42,10 +42,10 @@ public:
   {
     releaseassert(Data::is_uniform(data), "Data must be uniform with step > 0");
 
-    this->begin     = data.front();
-    this->end       = data.back();
-    this->num_elems = data.size();
-    this->step_size = (this->end - this->begin) / (this->num_elems - 1);
+    this->m_begin     = data.front();
+    this->m_end       = data.back();
+    this->m_num_elems = data.size();
+    this->m_step_size = (this->m_end - this->m_begin) / (this->m_num_elems - 1);
   }
 
   // Specifying the num-elems means the domain will be [begin, end]
@@ -53,10 +53,10 @@ public:
   {
     debugassert(begin < end, "Wrong interval");
 
-    this->begin     = begin;
-    this->end       = end;
-    this->num_elems = num_elems;
-    this->step_size = (end - begin) / (num_elems - 1);
+    this->m_begin     = begin;
+    this->m_end       = end;
+    this->m_num_elems = num_elems;
+    this->m_step_size = (end - begin) / (num_elems - 1);
   }
 
   Data(Data const &other) = default;
@@ -71,16 +71,16 @@ public:
 
   [[nodiscard]] T at(size_t index) const
   {
-    debugassert(index < this->num_elems, "Out of bounds");
-    return std::fma<T>(static_cast<T>(index), this->step_size, this->begin);
+    debugassert(index < this->m_num_elems, "Out of bounds");
+    return std::fma<T>(static_cast<T>(index), this->m_step_size, this->m_begin);
   }
 
-  [[nodiscard]] size_t size() const { return this->num_elems; }
+  [[nodiscard]] size_t size() const { return this->m_num_elems; }
 
   [[nodiscard]] std::vector<T> slice(size_t first, size_t last) const
   {
     debugassert(first <= last, "Invalid range");
-    debugassert(last <= this->num_elems, "Out of bounds");
+    debugassert(last <= this->m_num_elems, "Out of bounds");
 
     std::vector<T> tmp{};
     tmp.reserve(last - first);
@@ -93,10 +93,10 @@ public:
 
   void pop_tails()
   {
-    debugassert(this->num_elems >= 2, "Cannot pop tails from a domain with less than 2 elements");
-    this->begin     += this->step_size;
-    this->end       -= this->step_size;
-    this->num_elems -= 2;
+    debugassert(this->m_num_elems >= 2, "Cannot pop tails from a domain with less than 2 elements");
+    this->m_begin     += this->m_step_size;
+    this->m_end       -= this->m_step_size;
+    this->m_num_elems -= 2;
   }
 
 private:
@@ -132,12 +132,12 @@ template <typename T>
 class Data<T, Curve::NON_UNIFORM>
 {
 private:
-  std::vector<T> raw_data{};
+  std::vector<T> m_raw_data{};
 
 public:
   Data() = default;
 
-  explicit Data(std::vector<T> const &data) : raw_data(data)
+  explicit Data(std::vector<T> const &data) : m_raw_data(data)
   {
     // NOTE: thank the STL for this wonderful backwards built sort check. Think it as if std::less
     // is <= and std::less_equal is <.
@@ -159,32 +159,32 @@ public:
 
   [[nodiscard]] T at(size_t index) const
   {
-    debugassert(index < this->raw_data.size(), "Out of bounds");
-    return this->raw_data[index];
+    debugassert(index < this->m_raw_data.size(), "Out of bounds");
+    return this->m_raw_data[index];
   }
 
-  [[nodiscard]] size_t size() const { return this->raw_data.size(); }
+  [[nodiscard]] size_t size() const { return this->m_raw_data.size(); }
 
   [[nodiscard]] std::vector<T> slice(size_t first, size_t last) const
   {
     debugassert(first <= last, "Invalid range");
-    debugassert(last <= this->raw_data.size(), "Out of bounds");
+    debugassert(last <= this->m_raw_data.size(), "Out of bounds");
 
     using difference_type = typename std::vector<T>::iterator::difference_type;
 
     return std::vector<T>{
-        std::next(this->raw_data.begin(), static_cast<difference_type>(first)),
-        std::next(this->raw_data.begin(), static_cast<difference_type>(last))
+        std::next(this->m_raw_data.begin(), static_cast<difference_type>(first)),
+        std::next(this->m_raw_data.begin(), static_cast<difference_type>(last))
     };
   }
 
   void pop_tails()
   {
     debugassert(
-        this->raw_data.size() >= 2, "Cannot pop tails from a domain with less than 2 elements"
+        this->m_raw_data.size() >= 2, "Cannot pop tails from a domain with less than 2 elements"
     );
-    this->raw_data.pop_back();
-    this->raw_data.erase(this->raw_data.begin());
+    this->m_raw_data.pop_back();
+    this->m_raw_data.erase(this->m_raw_data.begin());
   }
 };
 

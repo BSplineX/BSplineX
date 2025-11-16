@@ -21,8 +21,8 @@ template <class Iter>
 class ArrayView
 {
 private:
-  Iter _begin;
-  Iter _end;
+  Iter m_begin;
+  Iter m_end;
 
   using difference_type = typename std::iterator_traits<Iter>::difference_type;
   using reference       = typename std::iterator_traits<Iter>::reference;
@@ -47,7 +47,7 @@ public:
    * @param end The iterator pointing to the end of the range.
    * @throw in debug mode if end is not greater than begin.
    */
-  ArrayView(Iter begin, Iter end) : _begin{begin}, _end{end}
+  ArrayView(Iter begin, Iter end) : m_begin{begin}, m_end{end}
   {
     releaseassert(end > begin, "Invalid view range.");
   }
@@ -99,7 +99,7 @@ public:
    */
   reference at(difference_type index)
   {
-    releaseassert(std::distance(this->_begin, this->_end) > index, "Out of bounds.");
+    releaseassert(std::distance(this->m_begin, this->m_end) > index, "Out of bounds.");
     releaseassert(index >= 0, "Negative indices are not supported.");
 
     return this->operator[](index);
@@ -111,21 +111,21 @@ public:
    * @param index The index of the element to access.
    * @return A reference to the element at the specified index.
    */
-  reference operator[](difference_type index) { return *std::next(this->_begin, index); }
+  reference operator[](difference_type index) { return *std::next(this->m_begin, index); }
 
   /**
    * @brief Get the first element of the view
    *
    * @return a reference to the first element of the view
    */
-  reference front() { return *(this->_begin); }
+  reference front() { return *(this->m_begin); }
 
   /**
    * @brief Get the last element of the view
    *
    * @return a reference to the last element of the view
    */
-  reference back() { return *std::prev(this->_end, 1); }
+  reference back() { return *std::prev(this->m_end, 1); }
 
   /**
    * @brief Get the number of elements in the view.
@@ -134,7 +134,7 @@ public:
    */
   [[nodiscard]] size_t size() const
   {
-    return static_cast<size_t>(std::distance(this->_begin, this->_end));
+    return static_cast<size_t>(std::distance(this->m_begin, this->m_end));
   }
 
   /**
@@ -142,14 +142,14 @@ public:
    *
    * @return the begin iterator
    */
-  [[nodiscard]] Iter begin() { return this->_begin; }
+  [[nodiscard]] Iter begin() { return this->m_begin; }
 
   /**
    * @brief Get the end iterator
    *
    * @return the end iterator
    */
-  [[nodiscard]] Iter end() { return this->_end; }
+  [[nodiscard]] Iter end() { return this->m_end; }
 };
 
 } // namespace bsplinex::views

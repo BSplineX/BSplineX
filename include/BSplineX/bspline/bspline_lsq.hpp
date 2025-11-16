@@ -71,17 +71,17 @@ private:
   using mat_t = Eigen::MatrixX<T>;
   using vec_t = Eigen::VectorX<T>;
 
-  mat_t A;
+  mat_t m_A;
 
 public:
-  LSQMatrix(size_t num_rows, size_t num_cols) : A{mat_t::Zero(num_rows, num_cols)} {}
+  LSQMatrix(size_t num_rows, size_t num_cols) : m_A{mat_t::Zero(num_rows, num_cols)} {}
 
-  T &operator()(size_t row, size_t col) { return this->A(row, col); }
+  T &operator()(size_t row, size_t col) { return this->m_A(row, col); }
 
   vec_t solve(vec_t const &b)
   {
     Eigen::LeastSquaresConjugateGradient<mat_t> lscg;
-    lscg.compute(this->A);
+    lscg.compute(this->m_A);
     vec_t x = lscg.solve(b);
 
     // #ifndef NDEBUG
@@ -96,13 +96,13 @@ public:
     return x;
   }
 
-  [[nodiscard]] size_t num_rows() const { return this->A.rows(); }
+  [[nodiscard]] size_t num_rows() const { return this->m_A.rows(); }
 
-  [[nodiscard]] size_t num_cols() const { return this->A.cols(); }
+  [[nodiscard]] size_t num_cols() const { return this->m_A.cols(); }
 
   [[nodiscard]] T conditioning_number() const
   {
-    Eigen::JacobiSVD<mat_t> const svd(this->A);
+    Eigen::JacobiSVD<mat_t> const svd(this->m_A);
     T cond = svd.singularValues()(0) / svd.singularValues()(svd.singularValues().size() - 1);
 
     return cond;
@@ -115,22 +115,22 @@ class LSQMatrix<T, Eigen::SparseMatrix<T>>
 private:
   using mat_t = Eigen::SparseMatrix<T>;
   using vec_t = Eigen::VectorX<T>;
-  mat_t A;
+  mat_t m_A;
 
 public:
-  LSQMatrix(size_t num_rows, size_t num_cols, size_t num_nnz) : A(num_rows, num_cols)
+  LSQMatrix(size_t num_rows, size_t num_cols, size_t num_nnz) : m_A(num_rows, num_cols)
   {
-    this->A.reserve(num_nnz);
+    this->m_A.reserve(num_nnz);
   }
 
-  T &operator()(size_t row, size_t col) { return this->A.coeffRef(row, col); }
+  T &operator()(size_t row, size_t col) { return this->m_A.coeffRef(row, col); }
 
   vec_t solve(vec_t const &b)
   {
-    this->A.makeCompressed();
+    this->m_A.makeCompressed();
 
     Eigen::LeastSquaresConjugateGradient<mat_t> lscg;
-    lscg.compute(this->A);
+    lscg.compute(this->m_A);
     vec_t x = lscg.solve(b);
 
     // #ifndef NDEBUG
@@ -145,9 +145,9 @@ public:
     return x;
   }
 
-  [[nodiscard]] size_t num_rows() const { return A.rows(); }
+  [[nodiscard]] size_t num_rows() const { return m_A.rows(); }
 
-  [[nodiscard]] size_t num_cols() const { return A.cols(); }
+  [[nodiscard]] size_t num_cols() const { return m_A.cols(); }
 
   [[nodiscard]] T conditioning_number() const
   {
